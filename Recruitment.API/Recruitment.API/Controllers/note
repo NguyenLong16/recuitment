@@ -1,0 +1,4 @@
+- Nhận request
+- Validate input
+- Trả response
+- Không xử lý business logic

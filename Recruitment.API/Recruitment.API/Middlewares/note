@@ -1,0 +1,6 @@
+- Chạy giữa request và response
+- Dùng cho: 
+    + Global error
+    + Logging
+    + Auth
+    + Rate limit

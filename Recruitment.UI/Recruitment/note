@@ -1,0 +1,22 @@
+- Luồng hoạt động
+Browser
+  ↓
+main.tsx
+  ↓
+<App />
+  ↓
+<AppRoutes />
+  ↓
+<ServiceList />
+  ↓
+dispatch(fetchServices)
+  ↓
+API → Backend
+  ↓
+Redux Store
+  ↓
+Component re-render
+  ↓
+UI hiển thị
+
+

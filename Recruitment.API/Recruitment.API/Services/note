@@ -1,0 +1,4 @@
+- Xử lý business logic
+- Service: 
+    + Không biết Database cụ thể
+    + Không biết HTTP

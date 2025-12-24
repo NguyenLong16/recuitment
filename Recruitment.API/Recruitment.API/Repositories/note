@@ -1,0 +1,5 @@
+- Làm việc trực tiếp với database
+- Repository: 
+    + CRUD
+    + Query
+    + Không xử lý logic nghiệp vụ

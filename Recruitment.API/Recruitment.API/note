@@ -1,0 +1,21 @@
+- Luồn hoạt động: 
+
+Client
+  ↓
+Controller
+  ↓
+Service
+  ↓
+Repository
+  ↓
+DbContext
+  ↓
+Database
+  ↑
+Repository
+  ↑
+Service
+  ↑
+Controller
+  ↑
+Response JSON

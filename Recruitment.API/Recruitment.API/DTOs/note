@@ -1,0 +1,5 @@
+- Dữ liệu đi / về API
+- Tại sao cần DTO: 
+    + Không lộ cấu trúc DB
+    + Validate dễ
+    + Tránh over-posting
