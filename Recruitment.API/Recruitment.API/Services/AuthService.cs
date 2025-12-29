@@ -58,6 +58,8 @@ namespace Recruitment.API.Services
             var user = _mapper.Map<User>(request);
 
             user.passwordHash = BCrypt.Net.BCrypt.HashPassword(request.password);
+            string defaultAvatarUrl = $"https://ui-avatars.com/api/?name={Uri.EscapeDataString(request.fullName)}&background=random&color=fff&size=128";
+            user.AvatarUrl = defaultAvatarUrl;
             await _userRepository.CreateAsync(user);
             return "Đăng ký thành công";
         }

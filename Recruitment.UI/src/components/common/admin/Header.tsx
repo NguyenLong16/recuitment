@@ -1,12 +1,22 @@
 import { Badge, Avatar, Dropdown } from 'antd';
 import { Menu, Bell, User } from 'lucide-react';
 import type { MenuProps } from 'antd';
+import { useAppDispatch } from '../../../hooks/hook';
+import { logout } from '../../../redux/slices/authSlice';
+import { useNavigate } from 'react-router-dom';
 
 interface HeaderProps {
     onMenuClick: () => void;
 }
 
 const Header = ({ onMenuClick }: HeaderProps) => {
+    const dispatch = useAppDispatch()
+    const navigate = useNavigate()
+    const handleLogout = () => {
+        dispatch(logout())
+        navigate('/')
+    }
+
     const userMenuItems: MenuProps['items'] = [
         {
             key: 'profile',
@@ -22,6 +32,7 @@ const Header = ({ onMenuClick }: HeaderProps) => {
         {
             key: 'logout',
             label: 'Đăng xuất',
+            onClick: handleLogout
         },
     ];
 
