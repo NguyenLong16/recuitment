@@ -20,7 +20,9 @@ namespace Recruitment.API.Models
         //hỏi lại
         public decimal? salaryMin { get; set; }
         public decimal? salaryMax { get; set; }
-        public string location { get; set;  }
+        public int locationId { get; set; }
+        [ForeignKey("locationId")]
+        public virtual Location location { get; set; }
         public JobType jobType { get; set; }
         public JobStatus status { get; set; }
         public DateTime deadline { get; set; }

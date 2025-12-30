@@ -24,15 +24,15 @@ builder.Services.AddControllers();
 
 //??ng ký Repository
 builder.Services.AddScoped<IUserRepository, UserRepository>();
-
 //??ng ký Helper
 builder.Services.AddScoped<JwtHelper>();
-
 //??ng ký Service
 builder.Services.AddScoped<IAuthService, AuthService>();
-
 //??ng ký AutoMapper
 builder.Services.AddAutoMapper(typeof(AutoMapperProfile));
+
+builder.Services.AddScoped<IJobRepository, JobRepository>();
+builder.Services.AddScoped<IJobService, JobService>();
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();

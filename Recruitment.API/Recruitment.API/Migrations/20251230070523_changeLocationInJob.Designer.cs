@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Recruitment.API.Data;
 
@@ -11,9 +12,11 @@ using Recruitment.API.Data;
 namespace Recruitment.API.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20251230070523_changeLocationInJob")]
+    partial class changeLocationInJob
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -321,9 +324,6 @@ namespace Recruitment.API.Migrations
                     b.Property<string>("AvatarUrl")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int?>("companyId")
-                        .HasColumnType("int");
-
                     b.Property<DateTime?>("createdDate")
                         .HasColumnType("datetime2");
 
@@ -347,8 +347,6 @@ namespace Recruitment.API.Migrations
                         .HasColumnType("int");
 
                     b.HasKey("id");
-
-                    b.HasIndex("companyId");
 
                     b.HasIndex("roleId");
 
@@ -452,17 +450,11 @@ namespace Recruitment.API.Migrations
 
             modelBuilder.Entity("Recruitment.API.Models.User", b =>
                 {
-                    b.HasOne("Recruitment.API.Models.Company", "company")
-                        .WithMany()
-                        .HasForeignKey("companyId");
-
                     b.HasOne("Recruitment.API.Models.Role", "role")
                         .WithMany("user")
                         .HasForeignKey("roleId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-
-                    b.Navigation("company");
 
                     b.Navigation("role");
                 });

@@ -20,6 +20,10 @@ namespace Recruitment.API.Models
         public int roleId { get; set; }
         [ForeignKey("roleId")]
         public virtual Role role { get; set; }
+        public int? companyId { get; set; } // Dấu ? cho phép null (vì ứng viên không có công ty)
+
+        [ForeignKey("companyId")]
+        public virtual Company company { get; set; }
         public virtual ICollection<Education> educations { get; set; }
         public virtual ICollection<Experience> experiences { get; set; }
 

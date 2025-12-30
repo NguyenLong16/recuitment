@@ -16,6 +16,7 @@ namespace Recruitment.API.Data
         public DbSet<Education> Educations { get; set; }
         public DbSet<Experience> Experiences { get; set; }
         public DbSet<Application> Applications { get; set; }
+        public DbSet<Location> Locations { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);

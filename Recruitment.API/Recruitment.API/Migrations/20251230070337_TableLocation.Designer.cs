@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Recruitment.API.Data;
 
@@ -11,9 +12,11 @@ using Recruitment.API.Data;
 namespace Recruitment.API.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20251230070337_TableLocation")]
+    partial class TableLocation
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -183,6 +186,9 @@ namespace Recruitment.API.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("id"));
 
+                    b.Property<int?>("Locationid")
+                        .HasColumnType("int");
+
                     b.Property<string>("benefit")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -209,8 +215,9 @@ namespace Recruitment.API.Migrations
                     b.Property<int>("jobType")
                         .HasColumnType("int");
 
-                    b.Property<int>("locationId")
-                        .HasColumnType("int");
+                    b.Property<string>("location")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("requirement")
                         .IsRequired()
@@ -232,13 +239,13 @@ namespace Recruitment.API.Migrations
 
                     b.HasKey("id");
 
+                    b.HasIndex("Locationid");
+
                     b.HasIndex("categoryId");
 
                     b.HasIndex("companyId");
 
                     b.HasIndex("employerId");
-
-                    b.HasIndex("locationId");
 
                     b.ToTable("Jobs");
                 });
@@ -321,9 +328,6 @@ namespace Recruitment.API.Migrations
                     b.Property<string>("AvatarUrl")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int?>("companyId")
-                        .HasColumnType("int");
-
                     b.Property<DateTime?>("createdDate")
                         .HasColumnType("datetime2");
 
@@ -347,8 +351,6 @@ namespace Recruitment.API.Migrations
                         .HasColumnType("int");
 
                     b.HasKey("id");
-
-                    b.HasIndex("companyId");
 
                     b.HasIndex("roleId");
 
@@ -398,6 +400,10 @@ namespace Recruitment.API.Migrations
 
             modelBuilder.Entity("Recruitment.API.Models.Job", b =>
                 {
+                    b.HasOne("Recruitment.API.Models.Location", null)
+                        .WithMany("jobs")
+                        .HasForeignKey("Locationid");
+
                     b.HasOne("Recruitment.API.Models.Category", "category")
                         .WithMany("jobs")
                         .HasForeignKey("categoryId")
@@ -416,19 +422,11 @@ namespace Recruitment.API.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("Recruitment.API.Models.Location", "location")
-                        .WithMany("jobs")
-                        .HasForeignKey("locationId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
                     b.Navigation("category");
 
                     b.Navigation("company");
 
                     b.Navigation("employer");
-
-                    b.Navigation("location");
                 });
 
             modelBuilder.Entity("Recruitment.API.Models.JobSkill", b =>
@@ -452,17 +450,11 @@ namespace Recruitment.API.Migrations
 
             modelBuilder.Entity("Recruitment.API.Models.User", b =>
                 {
-                    b.HasOne("Recruitment.API.Models.Company", "company")
-                        .WithMany()
-                        .HasForeignKey("companyId");
-
                     b.HasOne("Recruitment.API.Models.Role", "role")
                         .WithMany("user")
                         .HasForeignKey("roleId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-
-                    b.Navigation("company");
 
                     b.Navigation("role");
                 });

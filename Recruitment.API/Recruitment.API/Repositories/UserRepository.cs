@@ -29,5 +29,12 @@ namespace Recruitment.API.Repositories
             _context.Users.Add(user);
             await _context.SaveChangesAsync();
         }
+
+        public async Task<User> GetByIdAsync(int id)
+        {
+            return await _context.Users
+                .Include(u => u.role)
+                .FirstOrDefaultAsync(u => u.id == id);
+        }
     }
 }
