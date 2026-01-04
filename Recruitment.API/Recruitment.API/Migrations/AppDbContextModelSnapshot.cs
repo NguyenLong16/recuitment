@@ -206,6 +206,9 @@ namespace Recruitment.API.Migrations
                     b.Property<int>("employerId")
                         .HasColumnType("int");
 
+                    b.Property<string>("imageFile")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<int>("jobType")
                         .HasColumnType("int");
 

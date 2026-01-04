@@ -4,10 +4,10 @@
     {
         public enum JobStatus
         {
-            Open = 0,       // Đang tuyển
-            Closed = 1,     // Đã đóng
-            Draft = 2,      // Nháp
-            Hidden = 3      //Tạm ẩn
+            Draft = 0,    // Ẩn (chưa đăng)
+            Active = 1,   // Hiện (hiển thị)
+            Closed = 2,   // Ẩn (đóng thủ công)
+            Expired = 3   // Tự động ẩn khi hết hạn
         }
 
         public enum ApplicationStatus

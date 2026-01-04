@@ -12,7 +12,7 @@ namespace Recruitment.API.Mappings
             CreateMap<RegisterRequest, User>()
                 .ForMember(dest => dest.passwordHash, opt => opt.Ignore());
 
-         
+
             // Job -> JobResponse
             CreateMap<Job, JobResponse>()
                 .ForMember(dest => dest.LocationName, opt => opt.MapFrom(src => src.location.name))
@@ -22,11 +22,25 @@ namespace Recruitment.API.Mappings
                 .ForMember(dest => dest.JobType, opt => opt.MapFrom(src => src.jobType.ToString()))
                 .ForMember(dest => dest.Status, opt => opt.MapFrom(src => src.status.ToString()))
                 .ForMember(dest => dest.SkillNames, opt => opt.MapFrom(src =>
-                    src.jobSkills.Select(js => js.skill.skillName).ToList()));
+                    src.jobSkills.Select(js => js.skill.skillName).ToList()))
+                .ForMember(dest => dest.LocationId, opt => opt.MapFrom(src => src.locationId))  // Thêm ID
+                .ForMember(dest => dest.CategoryId, opt => opt.MapFrom(src => src.categoryId))
+                .ForMember(dest => dest.SkillIds, opt => opt.Ignore()) // Hoặc map từ JobSkills
+                .ForMember(dest => dest.ImageFile, opt => opt.MapFrom(src => src.imageFile)); 
 
             // JobCreateRequest -> Job (if needed)
-            CreateMap<JobCreateRequest, Job>();
-        
+            CreateMap<JobCreateRequest, Job>()
+                .ForMember(dest => dest.imageFile, opt => opt.MapFrom(src => src.ImageFile));
+
+            CreateMap<JobUpdateRequest, Job>(MemberList.None)
+                .ForMember(dest => dest.imageFile, opt => opt.MapFrom(src => src.ImageFile));
+
+            CreateMap<Category, CategoryResponse>();
+
+            CreateMap<Location, LocationResponse>();
+
+            CreateMap<Skill, SkillResponse>();
+
         }
     }
 }

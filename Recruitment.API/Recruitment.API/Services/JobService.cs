@@ -5,6 +5,8 @@ using Recruitment.API.DTOs;
 using Recruitment.API.Models;
 using Recruitment.API.Repositories.Interfaces;
 using Recruitment.API.Services.Interfaces;
+using System.ComponentModel.Design;
+using static Recruitment.API.Data.Enums;
 
 namespace Recruitment.API.Services
 {
@@ -23,28 +25,34 @@ namespace Recruitment.API.Services
 
         public async Task<JobResponse> CreateJobAsync(JobCreateRequest request, int employerId)
         {
-            // Validate category and location exist
-            var category = await _context.Categories.FindAsync(request.CategoryId);
-            var location = await _context.Locations.FindAsync(request.LocationId);
+            if (request.Deadline <= DateTime.Now)
+                throw new Exception("Deadline phải sau thời điểm hiện tại");
 
-            if (category == null || location == null)
-            {
-                throw new Exception("Category or Location not found");
-            }
-
-            // Get employer with company info
             var employer = await _context.Users
                 .Include(u => u.company)
-                .FirstOrDefaultAsync(u => u.id == employerId);
+                .FirstOrDefaultAsync(u => u.id == employerId)
+                ?? throw new Exception("Employer not found");
 
-            if (employer == null)
+            Company company;
+
+            if (employer.companyId.HasValue)
             {
-                throw new Exception("Employer not found");
+                company = await _context.Companies.FindAsync(employer.companyId.Value)
+                    ?? throw new Exception("Company not found");
+
+                if (!string.IsNullOrEmpty(request.CompanyName))
+                    company.companyName = request.CompanyName;
             }
-
-            if (employer.companyId == null)
+            else
             {
-                throw new Exception("Employer does not have a company");
+                company = new Company
+                {
+                    companyName = request.CompanyName ?? "Chưa đặt tên"
+                };
+                _context.Companies.Add(company);
+                await _context.SaveChangesAsync();
+
+                employer.companyId = company.id;
             }
 
             var job = new Job
@@ -59,19 +67,22 @@ namespace Recruitment.API.Services
                 categoryId = request.CategoryId,
                 jobType = request.JobType,
                 deadline = request.Deadline,
-                companyId = employer.companyId.Value,
+                companyId = company.id,
                 employerId = employerId,
-                status = Data.Enums.JobStatus.Open,
-                createdDate = DateTime.Now
+                status = JobStatus.Active,
+                createdDate = DateTime.Now,
+                imageFile = request.ImageFile
             };
 
             await _jobRepository.CreateAsync(job);
 
-            // Add skills
-            if (request.SkillIds != null && request.SkillIds.Any())
+            if (request.SkillIds?.Any() == true)
             {
                 foreach (var skillId in request.SkillIds)
                 {
+                    if (!await _context.Skills.AnyAsync(s => s.id == skillId))
+                        throw new Exception($"Skill {skillId} not found");
+
                     await _jobRepository.AddSkillToJobAsync(job.id, skillId);
                 }
             }
@@ -79,9 +90,10 @@ namespace Recruitment.API.Services
             return await GetJobByIdAsync(job.id);
         }
 
-        public async Task<JobResponse> UpdateJobAsync(JobUpdateRequest request, int employerId)
+
+        public async Task<JobResponse> UpdateJobAsync(int jobId, JobUpdateRequest request, int employerId)
         {
-            var job = await _jobRepository.GetByIdAsync(request.Id);
+            var job = await _jobRepository.GetByIdAsync(jobId);
 
             if (job == null)
             {
@@ -93,28 +105,94 @@ namespace Recruitment.API.Services
                 throw new Exception("You are not authorized to update this job");
             }
 
-            job.title = request.Title;
-            job.description = request.Description;
-            job.requirement = request.Requirement;
-            job.benefit = request.Benefit;
-            job.salaryMin = request.SalaryMin;
-            job.salaryMax = request.SalaryMax;
-            job.locationId = request.LocationId;
-            job.categoryId = request.CategoryId;
-            job.jobType = request.JobType;
-            job.deadline = request.Deadline;
+            // Partial update (giữ nguyên, nhưng mở rộng validation cho Status với expired)
+            if (!string.IsNullOrEmpty(request.Title)) job.title = request.Title;
+            if (!string.IsNullOrEmpty(request.Description)) job.description = request.Description;
+            if (!string.IsNullOrEmpty(request.Requirement)) job.requirement = request.Requirement;
+            if (!string.IsNullOrEmpty(request.Benefit)) job.benefit = request.Benefit;
+            if (request.SalaryMin.HasValue) job.salaryMin = request.SalaryMin.Value;
+            if (request.SalaryMax.HasValue) job.salaryMax = request.SalaryMax.Value;
+
+            // Validate & Update Location/Category nếu có thay đổi (giữ nguyên)
+            if (request.LocationId.HasValue)
+            {
+                var location = await _context.Locations.FindAsync(request.LocationId.Value);
+                if (location == null) throw new Exception("Location not found");
+                job.locationId = request.LocationId.Value;
+            }
+
+            if (request.CategoryId.HasValue)
+            {
+                var category = await _context.Categories.FindAsync(request.CategoryId.Value);
+                if (category == null) throw new Exception("Category not found");
+                job.categoryId = request.CategoryId.Value;
+            }
+
+            if (!string.IsNullOrEmpty(request.CompanyName) && job.company != null)
+            {
+                job.company.companyName = request.CompanyName;
+            }
+
+            // JobType nullable OK (giữ nguyên)
+            if (request.JobType.HasValue) job.jobType = request.JobType.Value;
+
+            // Validate Deadline nếu có thay đổi (giữ nguyên)
+            if (request.Deadline.HasValue)
+            {
+                if (request.Deadline <= DateTime.Now)  // SỬA: <= để tránh = Now
+                    throw new Exception("Deadline phải sau thời điểm hiện tại");
+                job.deadline = request.Deadline.Value;
+            }
+
+            // THÊM MỚI: Validate Status với expired check (mở rộng từ code cũ)
+            if (request.Status.HasValue)
+            {
+                var newStatus = request.Status.Value;
+                if (newStatus == JobStatus.Active)
+                {
+                    // Bắt buộc deadline >= Now (dùng deadline hiện tại nếu không update)
+                    var currentDeadline = request.Deadline ?? job.deadline;
+                    if (currentDeadline < DateTime.Now)
+                    {
+                        throw new Exception("Để hiện job (Active), deadline phải sau thời điểm hiện tại. Vui lòng cập nhật deadline.");
+                    }
+                    // Nếu job Expired và deadline OK, tự động cho phép Active
+                    if (job.status == JobStatus.Expired && currentDeadline >= DateTime.Now)
+                    {
+                        job.status = JobStatus.Active;  // Tự động hiện lại
+                    }
+                    else
+                    {
+                        job.status = newStatus;
+                    }
+                }
+                else
+                {
+                    job.status = newStatus;  // Cho phép set Closed/Draft/Expired
+                }
+            }
+
+            // THÊM MỚI: Auto-set Expired nếu Active và deadline qua (trước khi update)
+            if (job.status == JobStatus.Active && job.deadline < DateTime.Now)
+            {
+                job.status = JobStatus.Expired;
+            }
 
             await _jobRepository.UpdateAsync(job);
 
-            // Update skills
-            if (request.SkillIds != null)
+            // Update skills (giữ nguyên, nhưng chỉ nếu gửi skillIds mới)
+            if (request.SkillIds != null && request.SkillIds.Any())
             {
                 await _jobRepository.RemoveSkillsFromJobAsync(job.id);
                 foreach (var skillId in request.SkillIds)
                 {
+                    var skill = await _context.Skills.FindAsync(skillId);
+                    if (skill == null) throw new Exception($"Skill ID {skillId} not found");
                     await _jobRepository.AddSkillToJobAsync(job.id, skillId);
                 }
             }
+            if (!string.IsNullOrEmpty(request.ImageFile))
+                job.imageFile = request.ImageFile;
 
             return await GetJobByIdAsync(job.id);
         }
@@ -133,6 +211,12 @@ namespace Recruitment.API.Services
                 throw new Exception("You are not authorized to delete this job");
             }
 
+            // THÊM: Vẫn cho xóa nếu Expired (không cản)
+            if (IsExpired(job))
+            {
+                // Optional: Log "Xóa job hết hạn"
+            }
+
             return await _jobRepository.DeleteAsync(id);
         }
 
@@ -145,18 +229,51 @@ namespace Recruitment.API.Services
                 throw new Exception("Job not found");
             }
 
+            // THÊM MỚI: Auto-set Expired nếu Active và deadline qua (cho single job)
+            if (job.status == JobStatus.Active && job.deadline < DateTime.Now)
+            {
+                job.status = JobStatus.Expired;
+                await _jobRepository.UpdateAsync(job);  // Lưu ngay vào DB
+            }
+
             return _mapper.Map<JobResponse>(job);
         }
 
         public async Task<IEnumerable<JobResponse>> GetAllJobsAsync()
         {
             var jobs = await _jobRepository.GetAllAsync();
-            return _mapper.Map<IEnumerable<JobResponse>>(jobs);
+
+            // THÊM MỚI: Auto-expire cho public list (chỉ trả Active không expired)
+            var activeJobsPastDeadline = jobs.Where(j => j.status == JobStatus.Active && j.deadline < DateTime.Now).ToList();
+            foreach (var job in activeJobsPastDeadline)
+            {
+                job.status = JobStatus.Expired;
+            }
+            if (activeJobsPastDeadline.Any())
+            {
+                await _context.SaveChangesAsync();
+            }
+
+            // Filter trả về chỉ Active không expired (cho public)
+            return _mapper.Map<IEnumerable<JobResponse>>(jobs.Where(j => j.status == JobStatus.Active && j.deadline >= DateTime.Now));
         }
 
         public async Task<IEnumerable<JobResponse>> GetJobsByEmployerAsync(int employerId)
         {
             var jobs = await _jobRepository.GetByEmployerIdAsync(employerId);
+
+            // THÊM MỚI: TỰ ĐỘNG KIỂM TRA VÀ SET EXPIRED (cho HR list - họ thấy hết, bao gồm Expired)
+            var activeJobsPastDeadline = jobs.Where(j => j.status == JobStatus.Active && j.deadline < DateTime.Now).ToList();
+            foreach (var job in activeJobsPastDeadline)
+            {
+                job.status = JobStatus.Expired;
+            }
+            if (activeJobsPastDeadline.Any())
+            {
+                await _context.SaveChangesAsync();  // Lưu thay đổi vào DB
+            }
+
+            // Trả về tất cả (HR cần thấy Expired để sửa)
             return _mapper.Map<IEnumerable<JobResponse>>(jobs);
         }
 
@@ -167,20 +284,40 @@ namespace Recruitment.API.Services
             if (job == null) throw new Exception("Job not found");
             if (job.employerId != employerId) throw new Exception("Unauthorized");
 
-            // Logic đảo trạng thái:
-            // Nếu đang Active -> chuyển sang Inactive (Ẩn)
-            // Nếu đang Inactive/Draft -> chuyển sang Active (Hiện)
-            if (job.status == Data.Enums.JobStatus.Open)
+            // THÊM MỚI: VALIDATE - KHÔNG CHO TOGGLE NẾU EXPIRED
+            if (IsExpired(job))
             {
-                job.status = Data.Enums.JobStatus.Closed;
+                throw new Exception("Job đã hết hạn. Vui lòng cập nhật deadline để hiện lại.");
             }
-            else
+
+            // THÊM MỚI: Trước set Active, kiểm tra deadline
+            if (job.status != JobStatus.Active)
             {
-                job.status = Data.Enums.JobStatus.Open;
+                if (job.deadline < DateTime.Now)
+                {
+                    throw new Exception("Deadline đã qua. Vui lòng cập nhật deadline để hiện job.");
+                }
+            }
+
+            // Logic đảo trạng thái (giữ nguyên: Active <-> Closed)
+            if (job.status == JobStatus.Active)
+            {
+                job.status = JobStatus.Closed;
+            }
+            else  // Closed/Draft → Active (với check deadline ở trên)
+            {
+                job.status = JobStatus.Active;
             }
 
             await _jobRepository.UpdateAsync(job);
             return true;
+        }
+
+        // THÊM MỚI: Helper method để kiểm tra expired
+        private bool IsExpired(Job job)
+        {
+            return job.status == JobStatus.Expired ||
+                   (job.status == JobStatus.Active && job.deadline < DateTime.Now);
         }
     }
 }

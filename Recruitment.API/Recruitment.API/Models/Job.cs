@@ -42,6 +42,7 @@ namespace Recruitment.API.Models
         // --- Collections ---
         public virtual ICollection<JobSkill> jobSkills { get; set; }
         public virtual ICollection<Application> applications { get; set; }
+        public string? imageFile{ get; set; }
 
     }
 }

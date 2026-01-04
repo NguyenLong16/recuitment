@@ -175,3 +175,4 @@ F:\WorkSpace\Tuyển Dụng\Recruitment.API\Recruitment.API\obj\Debug\net8.0\ref
 F:\WorkSpace\Tuyển Dụng\Recruitment.API\Recruitment.API\bin\Debug\net8.0\AutoMapper.dll
 F:\WorkSpace\Tuyển Dụng\Recruitment.API\Recruitment.API\bin\Debug\net8.0\AutoMapper.Extensions.Microsoft.DependencyInjection.dll
 F:\WorkSpace\Tuyển Dụng\Recruitment.API\Recruitment.API\bin\Debug\net8.0\BCrypt.Net-Next.dll
+F:\WorkSpace\Tuyển Dụng\Recruitment.API\Recruitment.API\bin\Debug\net8.0\Recruitment.API.staticwebassets.runtime.json

@@ -19,6 +19,9 @@ namespace Recruitment.API.DTOs
 
         public decimal? SalaryMin { get; set; }
         public decimal? SalaryMax { get; set; }
+        [Required]
+        [StringLength(200, ErrorMessage = "Tên công ty không quá 200 ký tự")]
+        public string? CompanyName { get; set; }
 
         public int LocationId { get; set; }
         public int CategoryId { get; set; }
@@ -30,6 +33,7 @@ namespace Recruitment.API.DTOs
         public DateTime Deadline { get; set; }
 
         public List<int> SkillIds { get; set; } = new List<int>();
+        public string? ImageFile { get; set; }
     }
 
     public class JobResponse
@@ -50,37 +54,51 @@ namespace Recruitment.API.DTOs
         public string CompanyName { get; set; }
         public string EmployerName { get; set; }
         public List<string> SkillNames { get; set; }
+        public int LocationId { get; set; }
+        public int CategoryId { get; set; }
+        public int SkillIds { get; set; }
+        public string? ImageFile { get; set; }
     }
 
     public class JobUpdateRequest
     {
-        [Required]
-        public int Id { get; set; }
+        // Các properties cơ bản (nullable cho partial)
+        [StringLength(200, ErrorMessage = "Tiêu đề không quá 200 ký tự")]
+        public string? Title { get; set; }  // THÊM: Phải có để tránh CS1061
+        [StringLength(200, ErrorMessage = "Tên công ty không quá 200 ký tự")]
+        public string? CompanyName { get; set; }
 
-        [Required]
-        [MaxLength(200)]
-        public string Title { get; set; }
+        [StringLength(2000)]
+        public string? Description { get; set; }  // THÊM
 
-        [Required]
-        public string Description { get; set; }
+        [StringLength(2000)]
+        public string? Requirement { get; set; }  // THÊM
 
-        [Required]
-        public string Requirement { get; set; }
+        [StringLength(1000)]
+        public string? Benefit { get; set; }  // THÊM
 
-        public string Benefit { get; set; }
+        [Range(0, 1000000000, ErrorMessage = "Lương tối thiểu phải >= 0")]
+        public decimal? SalaryMin { get; set; }  // THÊM
 
-        public decimal? SalaryMin { get; set; }
-        public decimal? SalaryMax { get; set; }
+        [Range(0, 1000000000, ErrorMessage = "Lương tối đa phải >= 0")]
+        public decimal? SalaryMax { get; set; }  // THÊM
 
-        public int LocationId { get; set; }
-        public int CategoryId { get; set; }
+        [Range(1, int.MaxValue, ErrorMessage = "LocationId phải hợp lệ")]
+        public int? LocationId { get; set; }  // THÊM
 
-        [Required]
-        public JobType JobType { get; set; }
+        [Range(1, int.MaxValue, ErrorMessage = "CategoryId phải hợp lệ")]
+        public int? CategoryId { get; set; }  // THÊM
 
-        [Required]
-        public DateTime Deadline { get; set; }
+        // Enum nullable (gửi null để không update)
+        public JobType? JobType { get; set; }  // THÊM (giả sử JobType là enum)
 
-        public List<int> SkillIds { get; set; } = new List<int>();
+        public JobStatus? Status { get; set; }  // THÊM (tích hợp auto-hide)
+
+        // Deadline nullable
+        public DateTime? Deadline { get; set; }  // THÊM
+
+        // Skills: List nullable, nhưng nếu gửi thì thay thế
+        public List<int>? SkillIds { get; set; } = new();  // THÊM (empty list nếu null)
+        public string? ImageFile { get; set; }
     }
 }

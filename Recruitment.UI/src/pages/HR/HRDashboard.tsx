@@ -1,8 +1,10 @@
 const HRDashboard = () => {
+
+
     return (
         <>
             <div>
-                <h1>đây là hr</h1>
+                <h1 className="font-bold text-2xl">Đây là HR</h1>
             </div>
         </>
     )

@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Recruitment.API.DTOs;
@@ -14,11 +15,13 @@ namespace Recruitment.API.Controllers
     {
         private readonly IJobService _jobService;
         private readonly ILogger<JobController> _logger;
+        private readonly IWebHostEnvironment _webHostEnvironment;
 
-        public JobController(IJobService jobService, ILogger<JobController> logger)
+        public JobController(IJobService jobService, ILogger<JobController> logger, IWebHostEnvironment webHostEnvironment)
         {
             _jobService = jobService;
             _logger = logger;
+            _webHostEnvironment = webHostEnvironment;
         }
 
         /// <summary>
@@ -57,25 +60,26 @@ namespace Recruitment.API.Controllers
         /// <summary>
         /// Cập nhật tin tuyển dụng
         /// </summary>
-        [HttpPut("{id}")]
-        [Authorize(Roles = "Employer,Admin")]
-        [ProducesResponseType(typeof(JobResponse), StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<IActionResult> UpdateJob(int id, [FromBody] JobUpdateRequest request)
+        [HttpPut("{id}")]  // Id từ route
+        [Authorize(Roles = "Employer")]
+        public async Task<IActionResult> UpdateJob(int id, [FromBody] JobUpdateRequest request)  // request không có Id
         {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);  // Trả chi tiết validation errors
+
             try
             {
-                var employerId = GetCurrentUserId();
-                request.Id = id; // Ensure ID matches route
+                var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
+                if (userIdClaim == null) return Unauthorized();
 
-                var job = await _jobService.UpdateJobAsync(request, employerId);
-                return Ok(job);
+                int employerId = int.Parse(userIdClaim.Value);
+                var jobResponse = await _jobService.UpdateJobAsync(id, request, employerId);  // Truyền id
+                return Ok(jobResponse);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error updating job {JobId}", id);
-                return BadRequest(new { message = ex.Message });
+                // THÊM: Trả message rõ ràng
+                return BadRequest(new { Message = ex.Message });
             }
         }
 
@@ -166,6 +170,52 @@ namespace Recruitment.API.Controllers
             catch (Exception ex)
             {
                 return BadRequest(new { message = ex.Message });
+            }
+        }
+
+        [HttpPost("upload-image")]
+        [Authorize(Roles = "Employer, Admin")]
+        public async Task<IActionResult> UploadImage(IFormFile file)
+        {
+            if (file == null || file.Length == 0)
+                return BadRequest("Không có file");
+
+            // Validate type & size
+            var allowedTypes = new[] { "image/jpeg", "image/png", "image/gif" };
+            if (!allowedTypes.Contains(file.ContentType))
+                return BadRequest("Chỉ hỗ trợ JPG, PNG, GIF");
+
+            if (file.Length > 5 * 1024 * 1024)  // 5MB
+                return BadRequest("File quá lớn (max 5MB)");
+
+            try
+            {
+                var env = _webHostEnvironment;  // Inject IWebHostEnvironment
+                var uploadsDir = Path.Combine(env.WebRootPath, "uploads/jobs");
+                if (!Directory.Exists(uploadsDir))
+                    Directory.CreateDirectory(uploadsDir);
+
+                // Tạo subfolder theo tháng/năm (tùy chọn)
+                var now = DateTime.Now;
+                var subDir = Path.Combine(uploadsDir, now.Year.ToString(), now.Month.ToString("D2"));
+                if (!Directory.Exists(subDir))
+                    Directory.CreateDirectory(subDir);
+
+                // Rename file: GUID + extension
+                var fileName = $"{Guid.NewGuid()}{Path.GetExtension(file.FileName)}";
+                var filePath = Path.Combine(subDir, fileName);
+                var relativeUrl = $"/uploads/jobs/{now.Year}/{now.Month:D2}/{fileName}";  // URL trả về
+
+                using (var stream = new FileStream(filePath, FileMode.Create))
+                {
+                    await file.CopyToAsync(stream);
+                }
+
+                return Ok(new { url = relativeUrl, message = "Upload thành công" });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Lỗi upload: {ex.Message}");
             }
         }
 
