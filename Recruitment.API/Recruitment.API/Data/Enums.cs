@@ -21,9 +21,12 @@
 
         public enum JobType
         {
-            OnSite = 0,
-            Remote = 1,
-            Hybrid = 2
+            Draft = 0,  // Nếu cần
+            FullTime = 1,
+            PartTime = 2,
+            Internship = 3,
+            Contract = 4,  // Nếu có Contract, giữ 4
+            Remote = 5
         }
     }
 }

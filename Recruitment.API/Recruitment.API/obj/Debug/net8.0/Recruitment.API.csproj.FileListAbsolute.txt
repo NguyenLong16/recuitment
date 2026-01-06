@@ -176,3 +176,5 @@ F:\WorkSpace\Tuyển Dụng\Recruitment.API\Recruitment.API\bin\Debug\net8.0\Aut
 F:\WorkSpace\Tuyển Dụng\Recruitment.API\Recruitment.API\bin\Debug\net8.0\AutoMapper.Extensions.Microsoft.DependencyInjection.dll
 F:\WorkSpace\Tuyển Dụng\Recruitment.API\Recruitment.API\bin\Debug\net8.0\BCrypt.Net-Next.dll
 F:\WorkSpace\Tuyển Dụng\Recruitment.API\Recruitment.API\bin\Debug\net8.0\Recruitment.API.staticwebassets.runtime.json
+F:\WorkSpace\Tuyển Dụng\Recruitment.API\Recruitment.API\bin\Debug\net8.0\CloudinaryDotNet.dll
+F:\WorkSpace\Tuyển Dụng\Recruitment.API\Recruitment.API\bin\Debug\net8.0\Newtonsoft.Json.dll

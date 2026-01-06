@@ -4,7 +4,7 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using Recruitment.API.Data;
 using Recruitment.API.Helpers;
-using Recruitment.API.Mappings;
+using Recruitment.API.Models;
 using Recruitment.API.Repositories;
 using Recruitment.API.Repositories.Interfaces;
 using Recruitment.API.Services;
@@ -30,6 +30,13 @@ builder.Services.AddScoped<JwtHelper>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 //??ng ký AutoMapper
 builder.Services.AddAutoMapper(typeof(AutoMapperProfile));
+builder.Services.Configure<CloudinarySettings>(builder.Configuration.GetSection("Cloudinary"));
+builder.Services.AddSingleton<CloudinaryDotNet.Cloudinary>(provider =>
+{
+    var config = provider.GetRequiredService<Microsoft.Extensions.Options.IOptions<CloudinarySettings>>().Value;
+    var account = new CloudinaryDotNet.Account(config.CloudName, config.ApiKey, config.ApiSecret);
+    return new CloudinaryDotNet.Cloudinary(account);
+});
 
 builder.Services.AddScoped<IJobRepository, JobRepository>();
 builder.Services.AddScoped<IJobService, JobService>();

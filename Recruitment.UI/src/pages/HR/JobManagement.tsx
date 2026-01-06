@@ -89,14 +89,16 @@ const JobManagement = () => {
         },
         {
             title: 'Ảnh',
-            dataIndex: 'imageFile',
-            key: 'imageFile',
+            dataIndex: 'imageUrl',  // SỬA: Đổi từ 'imageFile' → 'imageUrl'
+            key: 'imageUrl',  // SỬA: Key tương ứng
             width: 80,
-            render: (imageFile: string) => {
-                const API_BASE = 'https://localhost:7016';
+            render: (imageUrl?: string) => {  // SỬA: Parameter → imageUrl?: string (nullable)
                 const PLACEHOLDER = 'https://via.placeholder.com/48x48?text=Job';
-                const imgSrc = imageFile
-                    ? (imageFile.startsWith('http') ? imageFile : `${API_BASE}${imageFile}`)
+                // SỬA: Cloudinary URL là full HTTPS, không cần ghép API_BASE
+                // Nếu imageUrl tồn tại và là HTTP(S), dùng trực tiếp; nếu local relative (fallback), ghép base
+                const API_BASE = 'https://localhost:7016';
+                const imgSrc = imageUrl
+                    ? (imageUrl.startsWith('http') ? imageUrl : `${API_BASE}${imageUrl}`)  // Linh hoạt: Cloudinary hoặc local
                     : PLACEHOLDER;
                 return (
                     <img

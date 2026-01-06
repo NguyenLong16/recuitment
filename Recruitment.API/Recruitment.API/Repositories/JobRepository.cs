@@ -7,6 +7,7 @@ namespace Recruitment.API.Repositories
 {
     public class JobRepository : IJobRepository
     {
+
         private readonly AppDbContext _context;
 
         public JobRepository(AppDbContext context)
@@ -43,6 +44,7 @@ namespace Recruitment.API.Repositories
         {
             return await _context.Jobs
                 .Include(j => j.company)
+                .Include(j => j.employer)
                 .Include(j => j.location)
                 .Include(j => j.category)
                 .Include(j => j.jobSkills)
@@ -76,22 +78,41 @@ namespace Recruitment.API.Repositories
             return true;
         }
 
-        public async Task AddSkillToJobAsync(int jobId, int skillId)
+        // SINGLE: Add one skill (internal use)
+        public async Task AddSkillToJobAsync(int jobId, List<int> skillIds)
         {
-            var jobSkill = new JobSkill
+            if (skillIds == null || !skillIds.Any())
+                return;
+
+            var jobSkills = skillIds.Select(skillId => new JobSkill
             {
                 jobId = jobId,
                 skillId = skillId
-            };
-            _context.JobSkills.Add(jobSkill);
-            await _context.SaveChangesAsync();
+            }).ToList();
+
+            _context.JobSkills.AddRange(jobSkills);
         }
 
         public async Task RemoveSkillsFromJobAsync(int jobId)
         {
-            var skills = await _context.JobSkills.Where(js => js.jobId == jobId).ToListAsync();
+            var skills = _context.JobSkills.Where(js => js.jobId == jobId);
             _context.JobSkills.RemoveRange(skills);
-            await _context.SaveChangesAsync();
+        }
+
+        // BATCH: Add multiple skills (remove old + add new) - FIX: Signature List<int> để match Service call
+        // Recruitment.API.Repositories/JobRepository.cs
+
+        public async Task AddSkillsToJobAsync(int jobId, List<int> skillIds)
+        {
+            // 1. Xóa toàn bộ skill cũ của Job này
+            await RemoveSkillsFromJobAsync(jobId);
+
+            // 2. Nếu danh sách mới rỗng thì dừng lại
+            if (skillIds == null || !skillIds.Any()) return;
+
+            // 3. THAY ĐỔI QUAN TRỌNG: Gọi hàm AddSkillToJobAsync MỘT LẦN DUY NHẤT cho cả danh sách
+            // KHÔNG dùng vòng lặp foreach ở đây nữa.
+            await AddSkillToJobAsync(jobId, skillIds);
         }
     }
 }

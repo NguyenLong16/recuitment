@@ -1,46 +1,43 @@
-﻿using AutoMapper;
+﻿// Recruitment.API.Mappings/AutoMapperProfile.cs
+
+using AutoMapper;
 using Recruitment.API.DTOs;
 using Recruitment.API.Models;
 
-namespace Recruitment.API.Mappings
+public class AutoMapperProfile : Profile
 {
-    //Cấu hình chuyển đổi từ RegisterRequest sang User.
-    public class AutoMapperProfile : Profile
+    public AutoMapperProfile()
     {
-        public AutoMapperProfile()
-        {
-            CreateMap<RegisterRequest, User>()
-                .ForMember(dest => dest.passwordHash, opt => opt.Ignore());
+        CreateMap<RegisterRequest, User>()
+            .ForMember(dest => dest.passwordHash, opt => opt.Ignore());
 
+        // GỘP TẤT CẢ VÀO ĐÂY
+        CreateMap<Job, JobResponse>()
+            .ForMember(dest => dest.LocationName, opt => opt.MapFrom(src => src.location.name))
+            .ForMember(dest => dest.CategoryName, opt => opt.MapFrom(src => src.category.name))
+            .ForMember(dest => dest.CompanyName, opt => opt.MapFrom(src => src.company.companyName))
+            .ForMember(dest => dest.EmployerName, opt => opt.MapFrom(src => src.employer.fullName))
+            .ForMember(dest => dest.JobType, opt => opt.MapFrom(src => src.jobType.ToString()))
+            .ForMember(dest => dest.Status, opt => opt.MapFrom(src => src.status.ToString()))
+            .ForMember(dest => dest.SkillNames, opt => opt.MapFrom(src =>
+                src.jobSkills.Select(js => js.skill.skillName).ToList()))
+            .ForMember(dest => dest.LocationId, opt => opt.MapFrom(src => src.locationId))
+            .ForMember(dest => dest.CategoryId, opt => opt.MapFrom(src => src.categoryId))
+            // SỬA: Lấy danh sách ID kỹ năng thay vì Ignore
+            .ForMember(dest => dest.SkillIds, opt => opt.MapFrom(src =>
+                src.jobSkills.Select(js => js.skillId).ToList()))
+            // THÊM: ImageUrl vào cùng 1 block
+            .ForMember(dest => dest.ImageUrl, opt => opt.MapFrom(src => src.imageUrl));
 
-            // Job -> JobResponse
-            CreateMap<Job, JobResponse>()
-                .ForMember(dest => dest.LocationName, opt => opt.MapFrom(src => src.location.name))
-                .ForMember(dest => dest.CategoryName, opt => opt.MapFrom(src => src.category.name))
-                .ForMember(dest => dest.CompanyName, opt => opt.MapFrom(src => src.company.companyName))
-                .ForMember(dest => dest.EmployerName, opt => opt.MapFrom(src => src.employer.fullName))
-                .ForMember(dest => dest.JobType, opt => opt.MapFrom(src => src.jobType.ToString()))
-                .ForMember(dest => dest.Status, opt => opt.MapFrom(src => src.status.ToString()))
-                .ForMember(dest => dest.SkillNames, opt => opt.MapFrom(src =>
-                    src.jobSkills.Select(js => js.skill.skillName).ToList()))
-                .ForMember(dest => dest.LocationId, opt => opt.MapFrom(src => src.locationId))  // Thêm ID
-                .ForMember(dest => dest.CategoryId, opt => opt.MapFrom(src => src.categoryId))
-                .ForMember(dest => dest.SkillIds, opt => opt.Ignore()) // Hoặc map từ JobSkills
-                .ForMember(dest => dest.ImageFile, opt => opt.MapFrom(src => src.imageFile)); 
+        // Các mapping khác giữ nguyên nhưng bỏ các block trùng lặp
+        CreateMap<JobCreateRequest, Job>()
+            .ForMember(dest => dest.imageUrl, opt => opt.Ignore());
 
-            // JobCreateRequest -> Job (if needed)
-            CreateMap<JobCreateRequest, Job>()
-                .ForMember(dest => dest.imageFile, opt => opt.MapFrom(src => src.ImageFile));
+        CreateMap<JobUpdateRequest, Job>(MemberList.None)
+            .ForMember(dest => dest.imageUrl, opt => opt.Ignore());
 
-            CreateMap<JobUpdateRequest, Job>(MemberList.None)
-                .ForMember(dest => dest.imageFile, opt => opt.MapFrom(src => src.ImageFile));
-
-            CreateMap<Category, CategoryResponse>();
-
-            CreateMap<Location, LocationResponse>();
-
-            CreateMap<Skill, SkillResponse>();
-
-        }
+        CreateMap<Category, CategoryResponse>();
+        CreateMap<Location, LocationResponse>();
+        CreateMap<Skill, SkillResponse>();
     }
 }

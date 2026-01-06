@@ -15,13 +15,11 @@ namespace Recruitment.API.Controllers
     {
         private readonly IJobService _jobService;
         private readonly ILogger<JobController> _logger;
-        private readonly IWebHostEnvironment _webHostEnvironment;
 
-        public JobController(IJobService jobService, ILogger<JobController> logger, IWebHostEnvironment webHostEnvironment)
+        public JobController(IJobService jobService, ILogger<JobController> logger)
         {
             _jobService = jobService;
             _logger = logger;
-            _webHostEnvironment = webHostEnvironment;
         }
 
         /// <summary>
@@ -29,12 +27,15 @@ namespace Recruitment.API.Controllers
         /// </summary>
         [HttpPost]
         [Authorize(Roles = "Employer,Admin")]
-        [ProducesResponseType(typeof(JobCreateRequest), StatusCodes.Status201Created)]
+        [ProducesResponseType(typeof(JobResponse), StatusCodes.Status201Created)]  // Sửa: JobResponse
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
-        public async Task<IActionResult> CreateJob([FromBody] JobCreateRequest request)
+        public async Task<IActionResult> CreateJob([FromForm] JobCreateRequest request)  // THAY: [FromForm] cho multipart
         {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
             try
             {
                 var employerId = GetCurrentUserId();
@@ -44,7 +45,7 @@ namespace Recruitment.API.Controllers
                     return Unauthorized(new { message = "Invalid user" });
                 }
 
-                var job = await _jobService.CreateJobAsync(request, employerId);
+                var job = await _jobService.CreateJobAsync(request, employerId);  // Service handle upload
 
                 _logger.LogInformation("Job {JobId} created by user {UserId}", job.Id, employerId);
 
@@ -60,12 +61,12 @@ namespace Recruitment.API.Controllers
         /// <summary>
         /// Cập nhật tin tuyển dụng
         /// </summary>
-        [HttpPut("{id}")]  // Id từ route
+        [HttpPut("{id}")]
         [Authorize(Roles = "Employer")]
-        public async Task<IActionResult> UpdateJob(int id, [FromBody] JobUpdateRequest request)  // request không có Id
+        public async Task<IActionResult> UpdateJob(int id, [FromForm] JobUpdateRequest request)  // THAY: [FromForm]
         {
             if (!ModelState.IsValid)
-                return BadRequest(ModelState);  // Trả chi tiết validation errors
+                return BadRequest(ModelState);
 
             try
             {
@@ -73,12 +74,14 @@ namespace Recruitment.API.Controllers
                 if (userIdClaim == null) return Unauthorized();
 
                 int employerId = int.Parse(userIdClaim.Value);
-                var jobResponse = await _jobService.UpdateJobAsync(id, request, employerId);  // Truyền id
+                var jobResponse = await _jobService.UpdateJobAsync(id, request, employerId);
+                if (jobResponse == null) return NotFound("Job not found");
+
                 return Ok(jobResponse);
             }
             catch (Exception ex)
             {
-                // THÊM: Trả message rõ ràng
+                _logger.LogError(ex, "Error updating job {JobId}", id);
                 return BadRequest(new { Message = ex.Message });
             }
         }
@@ -170,52 +173,6 @@ namespace Recruitment.API.Controllers
             catch (Exception ex)
             {
                 return BadRequest(new { message = ex.Message });
-            }
-        }
-
-        [HttpPost("upload-image")]
-        [Authorize(Roles = "Employer, Admin")]
-        public async Task<IActionResult> UploadImage(IFormFile file)
-        {
-            if (file == null || file.Length == 0)
-                return BadRequest("Không có file");
-
-            // Validate type & size
-            var allowedTypes = new[] { "image/jpeg", "image/png", "image/gif" };
-            if (!allowedTypes.Contains(file.ContentType))
-                return BadRequest("Chỉ hỗ trợ JPG, PNG, GIF");
-
-            if (file.Length > 5 * 1024 * 1024)  // 5MB
-                return BadRequest("File quá lớn (max 5MB)");
-
-            try
-            {
-                var env = _webHostEnvironment;  // Inject IWebHostEnvironment
-                var uploadsDir = Path.Combine(env.WebRootPath, "uploads/jobs");
-                if (!Directory.Exists(uploadsDir))
-                    Directory.CreateDirectory(uploadsDir);
-
-                // Tạo subfolder theo tháng/năm (tùy chọn)
-                var now = DateTime.Now;
-                var subDir = Path.Combine(uploadsDir, now.Year.ToString(), now.Month.ToString("D2"));
-                if (!Directory.Exists(subDir))
-                    Directory.CreateDirectory(subDir);
-
-                // Rename file: GUID + extension
-                var fileName = $"{Guid.NewGuid()}{Path.GetExtension(file.FileName)}";
-                var filePath = Path.Combine(subDir, fileName);
-                var relativeUrl = $"/uploads/jobs/{now.Year}/{now.Month:D2}/{fileName}";  // URL trả về
-
-                using (var stream = new FileStream(filePath, FileMode.Create))
-                {
-                    await file.CopyToAsync(stream);
-                }
-
-                return Ok(new { url = relativeUrl, message = "Upload thành công" });
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, $"Lỗi upload: {ex.Message}");
             }
         }
 

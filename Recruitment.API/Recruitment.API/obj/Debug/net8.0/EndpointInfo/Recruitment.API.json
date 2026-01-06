@@ -134,19 +134,114 @@
         ],
         "requestBody": {
           "content": {
-            "application/json": {
+            "multipart/form-data": {
               "schema": {
-                "$ref": "#/components/schemas/JobCreateRequest"
-              }
-            },
-            "text/json": {
-              "schema": {
-                "$ref": "#/components/schemas/JobCreateRequest"
-              }
-            },
-            "application/*+json": {
-              "schema": {
-                "$ref": "#/components/schemas/JobCreateRequest"
+                "required": [
+                  "CategoryId",
+                  "CompanyName",
+                  "Deadline",
+                  "Description",
+                  "JobType",
+                  "LocationId",
+                  "Requirement",
+                  "Title"
+                ],
+                "type": "object",
+                "properties": {
+                  "Title": {
+                    "maxLength": 200,
+                    "type": "string"
+                  },
+                  "Description": {
+                    "type": "string"
+                  },
+                  "Requirement": {
+                    "type": "string"
+                  },
+                  "Benefit": {
+                    "type": "string"
+                  },
+                  "SalaryMin": {
+                    "type": "number",
+                    "format": "double"
+                  },
+                  "SalaryMax": {
+                    "type": "number",
+                    "format": "double"
+                  },
+                  "CompanyName": {
+                    "maxLength": 200,
+                    "minLength": 0,
+                    "type": "string"
+                  },
+                  "LocationId": {
+                    "type": "integer",
+                    "format": "int32"
+                  },
+                  "CategoryId": {
+                    "type": "integer",
+                    "format": "int32"
+                  },
+                  "JobType": {
+                    "$ref": "#/components/schemas/JobType"
+                  },
+                  "Deadline": {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  "SkillIds": {
+                    "type": "array",
+                    "items": {
+                      "type": "integer",
+                      "format": "int32"
+                    }
+                  },
+                  "ImageFile": {
+                    "type": "string",
+                    "format": "binary"
+                  }
+                }
+              },
+              "encoding": {
+                "Title": {
+                  "style": "form"
+                },
+                "Description": {
+                  "style": "form"
+                },
+                "Requirement": {
+                  "style": "form"
+                },
+                "Benefit": {
+                  "style": "form"
+                },
+                "SalaryMin": {
+                  "style": "form"
+                },
+                "SalaryMax": {
+                  "style": "form"
+                },
+                "CompanyName": {
+                  "style": "form"
+                },
+                "LocationId": {
+                  "style": "form"
+                },
+                "CategoryId": {
+                  "style": "form"
+                },
+                "JobType": {
+                  "style": "form"
+                },
+                "Deadline": {
+                  "style": "form"
+                },
+                "SkillIds": {
+                  "style": "form"
+                },
+                "ImageFile": {
+                  "style": "form"
+                }
               }
             }
           }
@@ -157,17 +252,17 @@
             "content": {
               "text/plain": {
                 "schema": {
-                  "$ref": "#/components/schemas/JobCreateRequest"
+                  "$ref": "#/components/schemas/JobResponse"
                 }
               },
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/JobCreateRequest"
+                  "$ref": "#/components/schemas/JobResponse"
                 }
               },
               "text/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/JobCreateRequest"
+                  "$ref": "#/components/schemas/JobResponse"
                 }
               }
             }
@@ -289,19 +384,109 @@
         ],
         "requestBody": {
           "content": {
-            "application/json": {
+            "multipart/form-data": {
               "schema": {
-                "$ref": "#/components/schemas/JobUpdateRequest"
-              }
-            },
-            "text/json": {
-              "schema": {
-                "$ref": "#/components/schemas/JobUpdateRequest"
-              }
-            },
-            "application/*+json": {
-              "schema": {
-                "$ref": "#/components/schemas/JobUpdateRequest"
+                "type": "object",
+                "properties": {
+                  "Title": {
+                    "maxLength": 200,
+                    "type": "string"
+                  },
+                  "CompanyName": {
+                    "maxLength": 200,
+                    "type": "string"
+                  },
+                  "Description": {
+                    "type": "string"
+                  },
+                  "Requirement": {
+                    "type": "string"
+                  },
+                  "Benefit": {
+                    "type": "string"
+                  },
+                  "SalaryMin": {
+                    "type": "number",
+                    "format": "double"
+                  },
+                  "SalaryMax": {
+                    "type": "number",
+                    "format": "double"
+                  },
+                  "LocationId": {
+                    "type": "integer",
+                    "format": "int32"
+                  },
+                  "CategoryId": {
+                    "type": "integer",
+                    "format": "int32"
+                  },
+                  "JobType": {
+                    "$ref": "#/components/schemas/JobType"
+                  },
+                  "Status": {
+                    "$ref": "#/components/schemas/JobStatus"
+                  },
+                  "Deadline": {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  "SkillIds": {
+                    "type": "array",
+                    "items": {
+                      "type": "integer",
+                      "format": "int32"
+                    }
+                  },
+                  "ImageFile": {
+                    "type": "string",
+                    "format": "binary"
+                  }
+                }
+              },
+              "encoding": {
+                "Title": {
+                  "style": "form"
+                },
+                "CompanyName": {
+                  "style": "form"
+                },
+                "Description": {
+                  "style": "form"
+                },
+                "Requirement": {
+                  "style": "form"
+                },
+                "Benefit": {
+                  "style": "form"
+                },
+                "SalaryMin": {
+                  "style": "form"
+                },
+                "SalaryMax": {
+                  "style": "form"
+                },
+                "LocationId": {
+                  "style": "form"
+                },
+                "CategoryId": {
+                  "style": "form"
+                },
+                "JobType": {
+                  "style": "form"
+                },
+                "Status": {
+                  "style": "form"
+                },
+                "Deadline": {
+                  "style": "form"
+                },
+                "SkillIds": {
+                  "style": "form"
+                },
+                "ImageFile": {
+                  "style": "form"
+                }
               }
             }
           }
@@ -493,38 +678,6 @@
         }
       }
     },
-    "/api/Job/upload-image": {
-      "post": {
-        "tags": [
-          "Job"
-        ],
-        "requestBody": {
-          "content": {
-            "multipart/form-data": {
-              "schema": {
-                "type": "object",
-                "properties": {
-                  "file": {
-                    "type": "string",
-                    "format": "binary"
-                  }
-                }
-              },
-              "encoding": {
-                "file": {
-                  "style": "form"
-                }
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "OK"
-          }
-        }
-      }
-    },
     "/api/Location": {
       "get": {
         "tags": [
@@ -591,79 +744,6 @@
   },
   "components": {
     "schemas": {
-      "JobCreateRequest": {
-        "required": [
-          "companyName",
-          "deadline",
-          "description",
-          "jobType",
-          "requirement",
-          "title"
-        ],
-        "type": "object",
-        "properties": {
-          "title": {
-            "maxLength": 200,
-            "minLength": 1,
-            "type": "string"
-          },
-          "description": {
-            "minLength": 1,
-            "type": "string"
-          },
-          "requirement": {
-            "minLength": 1,
-            "type": "string"
-          },
-          "benefit": {
-            "type": "string",
-            "nullable": true
-          },
-          "salaryMin": {
-            "type": "number",
-            "format": "double",
-            "nullable": true
-          },
-          "salaryMax": {
-            "type": "number",
-            "format": "double",
-            "nullable": true
-          },
-          "companyName": {
-            "maxLength": 200,
-            "minLength": 0,
-            "type": "string"
-          },
-          "locationId": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "categoryId": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "jobType": {
-            "$ref": "#/components/schemas/JobType"
-          },
-          "deadline": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "skillIds": {
-            "type": "array",
-            "items": {
-              "type": "integer",
-              "format": "int32"
-            },
-            "nullable": true
-          },
-          "imageFile": {
-            "type": "string",
-            "nullable": true
-          }
-        },
-        "additionalProperties": false
-      },
       "JobResponse": {
         "type": "object",
         "properties": {
@@ -745,10 +825,14 @@
             "format": "int32"
           },
           "skillIds": {
-            "type": "integer",
-            "format": "int32"
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "format": "int32"
+            },
+            "nullable": true
           },
-          "imageFile": {
+          "imageUrl": {
             "type": "string",
             "nullable": true
           }
@@ -769,97 +853,13 @@
         "enum": [
           0,
           1,
-          2
+          2,
+          3,
+          4,
+          5
         ],
         "type": "integer",
         "format": "int32"
-      },
-      "JobUpdateRequest": {
-        "type": "object",
-        "properties": {
-          "title": {
-            "maxLength": 200,
-            "minLength": 0,
-            "type": "string",
-            "nullable": true
-          },
-          "companyName": {
-            "maxLength": 200,
-            "minLength": 0,
-            "type": "string",
-            "nullable": true
-          },
-          "description": {
-            "maxLength": 2000,
-            "minLength": 0,
-            "type": "string",
-            "nullable": true
-          },
-          "requirement": {
-            "maxLength": 2000,
-            "minLength": 0,
-            "type": "string",
-            "nullable": true
-          },
-          "benefit": {
-            "maxLength": 1000,
-            "minLength": 0,
-            "type": "string",
-            "nullable": true
-          },
-          "salaryMin": {
-            "maximum": 1000000000,
-            "minimum": 0,
-            "type": "number",
-            "format": "double",
-            "nullable": true
-          },
-          "salaryMax": {
-            "maximum": 1000000000,
-            "minimum": 0,
-            "type": "number",
-            "format": "double",
-            "nullable": true
-          },
-          "locationId": {
-            "maximum": 2147483647,
-            "minimum": 1,
-            "type": "integer",
-            "format": "int32",
-            "nullable": true
-          },
-          "categoryId": {
-            "maximum": 2147483647,
-            "minimum": 1,
-            "type": "integer",
-            "format": "int32",
-            "nullable": true
-          },
-          "jobType": {
-            "$ref": "#/components/schemas/JobType"
-          },
-          "status": {
-            "$ref": "#/components/schemas/JobStatus"
-          },
-          "deadline": {
-            "type": "string",
-            "format": "date-time",
-            "nullable": true
-          },
-          "skillIds": {
-            "type": "array",
-            "items": {
-              "type": "integer",
-              "format": "int32"
-            },
-            "nullable": true
-          },
-          "imageFile": {
-            "type": "string",
-            "nullable": true
-          }
-        },
-        "additionalProperties": false
       },
       "LoginRequest": {
         "type": "object",

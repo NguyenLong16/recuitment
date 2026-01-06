@@ -40,9 +40,9 @@ namespace Recruitment.API.Models
         public virtual User employer { get; set; }
 
         // --- Collections ---
-        public virtual ICollection<JobSkill> jobSkills { get; set; }
+        public virtual ICollection<JobSkill> jobSkills { get; set; } = new List<JobSkill>();
         public virtual ICollection<Application> applications { get; set; }
-        public string? imageFile{ get; set; }
+        public string? imageUrl{ get; set; }
 
     }
 }

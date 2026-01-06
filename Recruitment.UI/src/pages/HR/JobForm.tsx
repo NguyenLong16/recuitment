@@ -6,8 +6,9 @@ import type { UploadFile, UploadProps } from 'antd/es/upload/interface';
 import type { RcFile } from 'antd/es/upload/interface';
 import { useNavigate, useParams } from 'react-router-dom';
 import dayjs from 'dayjs';
-import { JobType, JobResponse, Location, Category, Skill, JobFormValues } from '../../types/job';
+import { JobType, JobResponse, JobFormValues } from '../../types/job';
 import JobService from '../../services/jobService';
+import { useJobMasterData } from '../../hooks/useJobMasterData';
 
 const { Option } = Select;
 
@@ -17,67 +18,25 @@ const JobForm = () => {
     const { id } = useParams<{ id: string }>();
     const isEditMode = !!id;
 
-    // State với proper types
-    const [locations, setLocations] = useState<Location[]>([]);
-    const [categories, setCategories] = useState<Category[]>([]);
-    const [skills, setSkills] = useState<Skill[]>([]);
+    // Sử dụng custom hook cho master data
+    const { locations, categories, skills, loading: masterLoading, error: masterError } = useJobMasterData();
+
+    // State riêng của form
     const [loading, setLoading] = useState(false);
     const [fetchLoading, setFetchLoading] = useState(false);
     const [jobData, setJobData] = useState<JobResponse | null>(null);
     const [mappingWarnings, setMappingWarnings] = useState<string[]>([]);
 
-    // Upload state
+    // Upload state: Lưu file gốc (không upload ngay)
     const [fileList, setFileList] = useState<UploadFile[]>([]);
-    const [uploading, setUploading] = useState(false);
+    const [selectedFile, setSelectedFile] = useState<File | null>(null);
 
-    // useEffect 1: Fetch Master Data
+    // Thêm warning nếu có lỗi fetch master data
     useEffect(() => {
-        const fetchMasterData = async () => {
-            setLoading(true);
-            try {
-                console.log('Fetching master data...');
-
-                const locRes = await JobService.getLocation().catch(err => {
-                    console.error('Location API error:', err);
-                    return { data: [] };
-                });
-                const catRes = await JobService.getCategory().catch(err => {
-                    console.error('Category API error:', err);
-                    return { data: [] };
-                });
-                const skillRes = await JobService.getSkills().catch(err => {
-                    console.error('Skills API error:', err);
-                    return { data: [] };
-                });
-
-                const locs: Location[] = Array.isArray(locRes.data) ? locRes.data : [];
-                const cats: Category[] = Array.isArray(catRes.data) ? catRes.data : [];
-                const sks: Skill[] = Array.isArray(skillRes.data) ? skillRes.data : [];
-
-                setLocations(locs);
-                setCategories(cats);
-                setSkills(sks);
-
-                console.log('Master data loaded:', {
-                    locations: locs.length,
-                    categories: cats.length,
-                    skills: sks.length,
-                });
-
-                if (locs.length === 0 || cats.length === 0 || sks.length === 0) {
-                    message.warning('Dữ liệu danh mục rỗng, kiểm tra API!');
-                }
-            } catch (error) {
-                console.error('Master data error:', error);
-                message.error('Không thể tải dữ liệu danh mục.');
-                setMappingWarnings(prev => [...prev, 'Lỗi tải master data']);
-            } finally {
-                setLoading(false);
-            }
-        };
-
-        fetchMasterData();
-    }, []);
+        if (masterError) {
+            setMappingWarnings(prev => [...prev, masterError]);
+        }
+    }, [masterError]);
 
     // useEffect 2: Fetch Job Detail (edit mode)
     useEffect(() => {
@@ -111,19 +70,19 @@ const JobForm = () => {
 
             console.log('Raw job response:', job);
             setJobData(job);
+            if (job.companyName && job.companyName.trim() === '') {
+                // Fallback: Nếu empty, có thể fetch employer company riêng (nếu API có /User/{id}/company)
+                console.warn('CompanyName empty, check employer companyId');
+                // Optional: Gọi API get employer info nếu cần
+            }
 
-            // Pre-load image nếu có
-            if (job.imageFile) {
-                const API_BASE = 'https://localhost:7016';
-                const imagePreviewUrl = job.imageFile.startsWith('http')
-                    ? job.imageFile
-                    : `${API_BASE}${job.imageFile}`;
-
+            // Pre-load image nếu có (Cloudinary URL đã full HTTPS, không cần base)
+            if (job.imageUrl) {
                 setFileList([{
                     uid: '-1',
                     name: 'Ảnh hiện tại',
                     status: 'done',
-                    url: imagePreviewUrl,
+                    url: job.imageUrl,  // Full URL từ Cloudinary
                 }]);
             }
 
@@ -158,7 +117,7 @@ const JobForm = () => {
                 skillNames.forEach((skillName: string) => {
                     if (!skillName) return;
                     const matchedSkill = skills.find(s =>
-                        normalizeName(s.skillName || s.name) === normalizeName(skillName)
+                        normalizeName(s.skillName) === normalizeName(skillName)
                     );
                     if (matchedSkill) {
                         skillIds.push(matchedSkill.id);
@@ -217,7 +176,7 @@ const JobForm = () => {
             form.setFieldsValue({
                 title: job.title || '',
                 companyName: job.companyName || '',
-                imageFile: job.imageFile || '',
+                imageUrl: job.imageUrl || '',  // THÊM: Set URL cũ (hidden field)
                 description: job.description || '',
                 requirement: job.requirement || '',
                 benefit: job.benefit || '',
@@ -246,77 +205,46 @@ const JobForm = () => {
         }
     };
 
-    // Upload props
+    // Upload props: Sử dụng beforeUpload để validate và lưu file (không upload ngay)
     const uploadProps: UploadProps = {
-        name: 'file',
+        name: 'ImageFile',
         multiple: false,
         listType: 'picture',
         fileList,
-        customRequest: async ({ file, onSuccess, onError, onProgress }) => {
-            const formFile = file as RcFile;
-
+        beforeUpload: (file: RcFile) => {
             // Client validate
-            if (formFile.size > 5 * 1024 * 1024) {
+            if (file.size! > 5 * 1024 * 1024) {
                 message.error('File quá lớn (max 5MB)');
-                onError?.(new Error('Size too large'));
-                return;
+                return false;
             }
             const allowedTypes = ['image/jpeg', 'image/png', 'image/gif'];
-            if (!allowedTypes.includes(formFile.type)) {
+            if (!allowedTypes.includes(file.type)) {
                 message.error('Chỉ hỗ trợ JPG, PNG, GIF');
-                onError?.(new Error('Type not allowed'));
-                return;
+                return false;
             }
-
-            setUploading(true);
-            try {
-                onProgress?.({ percent: 0 });
-
-                const res = await JobService.uploadJobImage(formFile);
-                console.log('Upload response:', res.data);
-
-                // API trả về relative path, cần ghép với base URL 
-                const relativePath = res.data.url;
-                const API_BASE = 'https://localhost:7016'; // Base URL của backend (không có /api)
-                const fullImageUrl = relativePath.startsWith('http')
-                    ? relativePath
-                    : `${API_BASE}${relativePath}`;
-
-                onProgress?.({ percent: 100 });
-                onSuccess?.('ok');
-
-                // Update fileList với full URL để preview
-                const newFileList: UploadFile[] = [{
-                    uid: Date.now().toString(),
-                    name: formFile.name,
-                    status: 'done',
-                    url: fullImageUrl,
-                }];
-                setFileList(newFileList);
-
-                // Set relative path vào form (để gửi lên backend)
-                form.setFieldsValue({ imageFile: relativePath });
-
-                message.success('Upload thành công!');
-                console.log('Image URL:', fullImageUrl);
-            } catch (error: unknown) {
-                onProgress?.({ percent: 0 });
-                onError?.(error as Error);
-                const err = error as { response?: { data?: { message?: string } } };
-                message.error(err.response?.data?.message || 'Upload thất bại');
-            } finally {
-                setUploading(false);
+            // Lưu file gốc để gửi sau
+            setSelectedFile(file as File);
+            return false;  // Không upload ngay (gộp vào submit)
+        },
+        onChange: ({ fileList: newFileList }) => {
+            setFileList(newFileList);
+            if (newFileList.length > 0 && newFileList[0].originFileObj) {
+                setSelectedFile(newFileList[0].originFileObj as File);
+            } else {
+                setSelectedFile(null);
             }
         },
-        onRemove: () => {
+        onRemove: (file) => {
             const confirm = window.confirm('Xóa ảnh này?');
             if (confirm) {
                 setFileList([]);
-                form.setFieldsValue({ imageFile: undefined });
+                setSelectedFile(null);
+                if (isEditMode) {
+                    form.setFieldsValue({ imageUrl: undefined });  // Xóa URL cũ nếu edit
+                }
             }
             return confirm;
         },
-        onChange: ({ fileList: newFileList }) => setFileList(newFileList),
     };
 
     const onFinish = async (values: JobFormValues) => {
@@ -333,23 +261,30 @@ const JobForm = () => {
                 ? values.jobType[0]
                 : (typeof values.jobType === 'number' ? values.jobType : JobType.FullTime);
 
-            // Lấy imageFile trực tiếp từ form để đảm bảo có giá trị
-            const currentImageFile = form.getFieldValue('imageFile');
-            console.log('Current imageFile value:', currentImageFile);
-
-            const payload = {
+            // Build payload object (fields)
+            const payload: any = {
                 ...values,
                 jobType: jobTypeValue,
                 companyName: values.companyName || '',
-                imageFile: currentImageFile || values.imageFile || '', // Đảm bảo gửi imageFile
                 deadline: deadlineValue
-                    ? deadlineValue.format('YYYY-MM-DD')
-                    : dayjs().add(30, 'day').format('YYYY-MM-DD'),
+                    ? dayjs(deadlineValue).toISOString()  // SỬA: Full ISO cho backend
+                    : dayjs().add(30, 'day').toISOString(),
                 salaryMin: values.salaryMin || 0,
                 salaryMax: values.salaryMax || 0,
             };
 
-            console.log('Submit payload:', payload);
+            // THÊM: Add file nếu có (mới chọn hoặc giữ cũ)
+            if (selectedFile) {
+                payload.ImageFile = selectedFile;  // File mới → Backend upload
+            } else if (isEditMode && values.imageUrl) {
+                payload.imageUrl = values.imageUrl;  // Giữ URL cũ nếu không thay
+            } else {
+                payload.imageUrl = null;  // Xóa nếu không có
+            }
+
+            // BỎ: currentImageFile logic cũ (không cần)
+
+            console.log('Submit payload with file:', payload);
 
             if (isEditMode) {
                 await JobService.updateJob(Number(id), payload);
@@ -377,15 +312,16 @@ const JobForm = () => {
                 deadline: dayjs().add(30, 'day'),
             });
             setFileList([]);
+            setSelectedFile(null);
         }
     }, [isEditMode, form]);
 
-    // Spinner chỉ cho fetch job (edit mode)
-    if (isEditMode && fetchLoading) {
+    // Spinner cho fetch job (edit mode) hoặc master data
+    if (masterLoading || (isEditMode && fetchLoading)) {
         return (
             <Card>
                 <div className="flex justify-center py-10">
-                    <Spin size="large" tip="Đang tải thông tin job..." />
+                    <Spin size="large" tip={masterLoading ? "Đang tải dữ liệu danh mục..." : "Đang tải thông tin job..."} />
                 </div>
             </Card>
         );
@@ -412,6 +348,11 @@ const JobForm = () => {
             <Form form={form} layout="vertical" onFinish={onFinish} initialValues={{ jobType: [JobType.FullTime] }}>
                 <Form.Item name="title" label="Tiêu đề công việc" rules={[{ required: true, message: 'Vui lòng nhập tiêu đề' }]}>
                     <Input placeholder="Ví dụ: Senior React Developer" />
+                </Form.Item>
+
+                {/* THÊM: Form.Item cho companyName */}
+                <Form.Item name="companyName" label="Tên công ty" rules={[{ required: true, message: 'Vui lòng nhập tên công ty' }]}>
+                    <Input placeholder="Tên công ty tuyển dụng" />
                 </Form.Item>
 
                 <div className="grid grid-cols-2 gap-4">
@@ -462,8 +403,9 @@ const JobForm = () => {
                         <Select mode="multiple" placeholder="Chọn loại hình công việc" allowClear>
                             <Option value={JobType.FullTime}>Toàn thời gian</Option>
                             <Option value={JobType.PartTime}>Bán thời gian</Option>
-                            <Option value={JobType.Remote}>Làm việc từ xa</Option>
                             <Option value={JobType.Internship}>Thực tập</Option>
+                            <Option value={JobType.Contract}>Hợp đồng</Option>
+                            <Option value={JobType.Remote}>Làm việc từ xa</Option>
                         </Select>
                     </Form.Item>
 
@@ -497,23 +439,24 @@ const JobForm = () => {
                 >
                     <Select mode="multiple" placeholder="Chọn kỹ năng" disabled={skills.length === 0}>
                         {skills.map(s => (
-                            <Option key={s.id} value={s.id}>{s.skillName || s.name || 'Unknown'}</Option>
+                            <Option key={s.id} value={s.id}>{s.skillName || 'Unknown'}</Option>
                         ))}
                     </Select>
                 </Form.Item>
 
-                {/* Upload ảnh */}
-                <Form.Item
-                    name="imageFile"
-                    label="Ảnh minh họa job"
-                    rules={[{ required: false }]}
-                >
+                {/* THÊM: Hidden field cho imageUrl cũ (edit mode) */}
+                <Form.Item name="imageUrl" style={{ display: 'none' }}>
+                    <Input type="hidden" />
+                </Form.Item>
+
+                {/* Upload ảnh: BỎ name="imageFile" (không cần, vì gộp) */}
+                <Form.Item label="Ảnh minh họa job" rules={[{ required: false }]}>
                     <Upload {...uploadProps} showUploadList={{ showPreviewIcon: true, showRemoveIcon: true }}>
-                        <Button icon={<UploadOutlined />} loading={uploading}>
-                            Click hoặc kéo thả ảnh
+                        <Button icon={<UploadOutlined />}>
+                            Click hoặc kéo thả ảnh (upload khi submit)
                         </Button>
-                        <div className="text-gray-500 text-sm mt-1">Hỗ trợ JPG/PNG/GIF, max 5MB</div>
                     </Upload>
+                    <div className="text-gray-500 text-sm mt-1">Hỗ trợ JPG/PNG/GIF, max 5MB. Ảnh sẽ upload khi lưu form.</div>
                 </Form.Item>
 
                 <Form.Item name="description" label="Mô tả công việc" rules={[{ required: true, message: 'Nhập mô tả' }]}>

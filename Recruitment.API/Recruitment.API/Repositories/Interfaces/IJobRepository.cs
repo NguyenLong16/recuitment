@@ -12,7 +12,7 @@ namespace Recruitment.API.Repositories.Interfaces
         Task<Job> CreateAsync(Job job);
         Task<Job> UpdateAsync(Job job);
         Task<bool> DeleteAsync(int id);
-        Task AddSkillToJobAsync(int jobId, int skillId);
+        Task AddSkillToJobAsync(int jobId, List<int> skillIds);
         Task RemoveSkillsFromJobAsync(int jobId);
         
     }

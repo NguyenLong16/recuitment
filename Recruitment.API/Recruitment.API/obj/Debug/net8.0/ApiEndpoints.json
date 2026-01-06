@@ -90,14 +90,74 @@
     "Order": 0,
     "Parameters": [
       {
-        "Name": "request",
-        "Type": "Recruitment.API.DTOs.JobCreateRequest",
-        "IsRequired": true
+        "Name": "Title",
+        "Type": "System.String",
+        "IsRequired": false
+      },
+      {
+        "Name": "Description",
+        "Type": "System.String",
+        "IsRequired": false
+      },
+      {
+        "Name": "Requirement",
+        "Type": "System.String",
+        "IsRequired": false
+      },
+      {
+        "Name": "Benefit",
+        "Type": "System.String",
+        "IsRequired": false
+      },
+      {
+        "Name": "SalaryMin",
+        "Type": "System.Nullable\u00601[[System.Decimal, System.Private.CoreLib, Version=8.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]",
+        "IsRequired": false
+      },
+      {
+        "Name": "SalaryMax",
+        "Type": "System.Nullable\u00601[[System.Decimal, System.Private.CoreLib, Version=8.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]",
+        "IsRequired": false
+      },
+      {
+        "Name": "CompanyName",
+        "Type": "System.String",
+        "IsRequired": false
+      },
+      {
+        "Name": "LocationId",
+        "Type": "System.Int32",
+        "IsRequired": false
+      },
+      {
+        "Name": "CategoryId",
+        "Type": "System.Int32",
+        "IsRequired": false
+      },
+      {
+        "Name": "JobType",
+        "Type": "System.String",
+        "IsRequired": false
+      },
+      {
+        "Name": "Deadline",
+        "Type": "System.DateTime",
+        "IsRequired": false
+      },
+      {
+        "Name": "SkillIds",
+        "Type": "System.Collections.Generic.List\u00601[[System.Int32, System.Private.CoreLib, Version=8.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]",
+        "IsRequired": false
+      },
+      {
+        "Name": "ImageFile",
+        "Type": "Microsoft.AspNetCore.Http.IFormFile",
+        "IsRequired": false
       }
     ],
     "ReturnTypes": [
       {
-        "Type": "Recruitment.API.DTOs.JobCreateRequest",
+        "Type": "Recruitment.API.DTOs.JobResponse",
         "MediaTypes": [
           "text/plain",
           "application/json",
@@ -168,9 +228,74 @@
         "IsRequired": true
       },
       {
-        "Name": "request",
-        "Type": "Recruitment.API.DTOs.JobUpdateRequest",
-        "IsRequired": true
+        "Name": "Title",
+        "Type": "System.String",
+        "IsRequired": false
+      },
+      {
+        "Name": "CompanyName",
+        "Type": "System.String",
+        "IsRequired": false
+      },
+      {
+        "Name": "Description",
+        "Type": "System.String",
+        "IsRequired": false
+      },
+      {
+        "Name": "Requirement",
+        "Type": "System.String",
+        "IsRequired": false
+      },
+      {
+        "Name": "Benefit",
+        "Type": "System.String",
+        "IsRequired": false
+      },
+      {
+        "Name": "SalaryMin",
+        "Type": "System.Nullable\u00601[[System.Decimal, System.Private.CoreLib, Version=8.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]",
+        "IsRequired": false
+      },
+      {
+        "Name": "SalaryMax",
+        "Type": "System.Nullable\u00601[[System.Decimal, System.Private.CoreLib, Version=8.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]",
+        "IsRequired": false
+      },
+      {
+        "Name": "LocationId",
+        "Type": "System.Nullable\u00601[[System.Int32, System.Private.CoreLib, Version=8.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]",
+        "IsRequired": false
+      },
+      {
+        "Name": "CategoryId",
+        "Type": "System.Nullable\u00601[[System.Int32, System.Private.CoreLib, Version=8.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]",
+        "IsRequired": false
+      },
+      {
+        "Name": "JobType",
+        "Type": "System.String",
+        "IsRequired": false
+      },
+      {
+        "Name": "Status",
+        "Type": "System.String",
+        "IsRequired": false
+      },
+      {
+        "Name": "Deadline",
+        "Type": "System.Nullable\u00601[[System.DateTime, System.Private.CoreLib, Version=8.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]",
+        "IsRequired": false
+      },
+      {
+        "Name": "SkillIds",
+        "Type": "System.Collections.Generic.List\u00601[[System.Int32, System.Private.CoreLib, Version=8.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]",
+        "IsRequired": false
+      },
+      {
+        "Name": "ImageFile",
+        "Type": "Microsoft.AspNetCore.Http.IFormFile",
+        "IsRequired": false
       }
     ],
     "ReturnTypes": []
@@ -285,22 +410,6 @@
         "StatusCode": 200
       }
     ]
-  },
-  {
-    "ContainingType": "Recruitment.API.Controllers.JobController",
-    "Method": "UploadImage",
-    "RelativePath": "api/Job/upload-image",
-    "HttpMethod": "POST",
-    "IsController": true,
-    "Order": 0,
-    "Parameters": [
-      {
-        "Name": "file",
-        "Type": "Microsoft.AspNetCore.Http.IFormFile",
-        "IsRequired": false
-      }
-    ],
-    "ReturnTypes": []
   },
   {
     "ContainingType": "Recruitment.API.Controllers.LocationController",

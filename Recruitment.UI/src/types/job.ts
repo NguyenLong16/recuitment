@@ -26,17 +26,11 @@ export interface Category {
     name: string;
 }
 
-export interface Skill {
-    id: number;
-    skillName?: string;
-    name?: string;
-}
-
 export interface JobResponse {
     id: number;
     title: string;
     companyName?: string;
-    imageFile?: string;
+    imageUrl?: string;
     description: string;
     requirement: string;
     benefit: string;
@@ -60,7 +54,7 @@ export interface JobRequest {
     id?: number;
     title: string;
     companyName: string;
-    imageFile?: string;
+    imageUrl?: string;
     description: string;
     requirement: string;
     benefit: string;
@@ -88,7 +82,7 @@ export interface JobState {
 export interface JobFormValues {
     title: string;
     companyName?: string;
-    imageFile?: string;
+    imageUrl?: string;
     description: string;
     requirement: string;
     benefit: string;
