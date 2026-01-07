@@ -39,5 +39,10 @@ public class AutoMapperProfile : Profile
         CreateMap<Category, CategoryResponse>();
         CreateMap<Location, LocationResponse>();
         CreateMap<Skill, SkillResponse>();
+
+        CreateMap<Application, ApplicationResponse>()
+            .ForMember(dest => dest.jobTitle, opt => opt.MapFrom(src => src.job.title))
+            .ForMember(dest => dest.candidateName, opt => opt.MapFrom(src => src.candidate.fullName))
+            .ForMember(dest => dest.status, opt => opt.MapFrom(src => src.status.ToString()));
     }
 }

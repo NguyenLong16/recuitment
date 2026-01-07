@@ -313,7 +313,7 @@ namespace Recruitment.API.Services
                 return _mapper.Map<JobResponse>(job);
             }
 
-            public async Task<IEnumerable<JobResponse>> GetAllJobsAsync()
+            public async Task<IEnumerable<JobResponse>> GetAllJobsAsync(string? searchTerm = null)
             {
                 var jobs = await _jobRepository.GetAllAsync();
 
@@ -328,9 +328,16 @@ namespace Recruitment.API.Services
                     await _context.SaveChangesAsync();
                 }
 
+                var query = jobs.Where(j => j.status == JobStatus.Active && j.deadline >= DateTime.Now);
+                if(!string.IsNullOrWhiteSpace(searchTerm))
+                {
+                    var lowerSearch = searchTerm.ToLower();
+                    query = query.Where(j => j.title.ToLower().Contains(lowerSearch));
+                }
+
                 // Filter trả về chỉ Active không expired (cho public)
-                return _mapper.Map<IEnumerable<JobResponse>>(jobs.Where(j => j.status == JobStatus.Active && j.deadline >= DateTime.Now));
-            }
+                return _mapper.Map<IEnumerable<JobResponse>>(query);
+        }
 
             public async Task<IEnumerable<JobResponse>> GetJobsByEmployerAsync(int employerId)
             {

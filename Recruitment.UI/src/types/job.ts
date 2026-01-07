@@ -15,17 +15,6 @@ export enum JobStatus {
     Expired = 3   // Tự động ẩn khi hết hạn
 }
 
-// Master data types
-export interface Location {
-    id: number;
-    name: string;
-}
-
-export interface Category {
-    id: number;
-    name: string;
-}
-
 export interface JobResponse {
     id: number;
     title: string;

@@ -1,8 +1,15 @@
 import dayjs from "dayjs"
-import { JobRequest } from "../types/job"
 import axiosClient from "./axiosClient"
 
 const JobService = {
+    getPublicJobs: (params?: { categoryId?: number; locationId?: number; title?: string }) => {
+        return axiosClient.get('/Job', { params })
+    },
+
+    getPublicJobDetail: (id: number) => {
+        return axiosClient.get(`/Job/${id}`)
+    },
+
     getMyJobs: () => {
         return axiosClient.get('/Job/my-jobs')
     },

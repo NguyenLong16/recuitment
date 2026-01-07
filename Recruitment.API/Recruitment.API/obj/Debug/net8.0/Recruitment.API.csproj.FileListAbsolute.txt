@@ -165,7 +165,6 @@ F:\WorkSpace\Tuyển Dụng\Recruitment.API\Recruitment.API\obj\Debug\net8.0\sta
 F:\WorkSpace\Tuyển Dụng\Recruitment.API\Recruitment.API\obj\Debug\net8.0\staticwebassets.build.json.cache
 F:\WorkSpace\Tuyển Dụng\Recruitment.API\Recruitment.API\obj\Debug\net8.0\staticwebassets.development.json
 F:\WorkSpace\Tuyển Dụng\Recruitment.API\Recruitment.API\obj\Debug\net8.0\staticwebassets.build.endpoints.json
-F:\WorkSpace\Tuyển Dụng\Recruitment.API\Recruitment.API\obj\Debug\net8.0\staticwebassets.upToDateCheck.txt
 F:\WorkSpace\Tuyển Dụng\Recruitment.API\Recruitment.API\obj\Debug\net8.0\Recruitm.259BB714.Up2Date
 F:\WorkSpace\Tuyển Dụng\Recruitment.API\Recruitment.API\obj\Debug\net8.0\Recruitment.API.dll
 F:\WorkSpace\Tuyển Dụng\Recruitment.API\Recruitment.API\obj\Debug\net8.0\refint\Recruitment.API.dll
@@ -178,3 +177,4 @@ F:\WorkSpace\Tuyển Dụng\Recruitment.API\Recruitment.API\bin\Debug\net8.0\BCr
 F:\WorkSpace\Tuyển Dụng\Recruitment.API\Recruitment.API\bin\Debug\net8.0\Recruitment.API.staticwebassets.runtime.json
 F:\WorkSpace\Tuyển Dụng\Recruitment.API\Recruitment.API\bin\Debug\net8.0\CloudinaryDotNet.dll
 F:\WorkSpace\Tuyển Dụng\Recruitment.API\Recruitment.API\bin\Debug\net8.0\Newtonsoft.Json.dll
+F:\WorkSpace\Tuyển Dụng\Recruitment.API\Recruitment.API\obj\Debug\net8.0\staticwebassets.upToDateCheck.txt

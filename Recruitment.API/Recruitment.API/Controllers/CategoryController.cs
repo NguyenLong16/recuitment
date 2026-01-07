@@ -19,7 +19,7 @@ namespace Recruitment.API.Controllers
         }
 
         [HttpGet]
-        [Authorize(Roles = "User, Employer, Admin")]
+        [Authorize(Roles = "Candidate, Employer, Admin")]
         public async Task<IActionResult> GetAllCategories()
         {
             var cats = await _categoryService.GetAllCategoriesAsync();

@@ -5,6 +5,67 @@
     "version": "v1"
   },
   "paths": {
+    "/api/Application/apply": {
+      "post": {
+        "tags": [
+          "Application"
+        ],
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "required": [
+                  "cvFile",
+                  "jobId"
+                ],
+                "type": "object",
+                "properties": {
+                  "jobId": {
+                    "type": "integer",
+                    "format": "int32"
+                  },
+                  "coverLetter": {
+                    "type": "string"
+                  },
+                  "cvFile": {
+                    "type": "string",
+                    "format": "binary"
+                  }
+                }
+              },
+              "encoding": {
+                "jobId": {
+                  "style": "form"
+                },
+                "coverLetter": {
+                  "style": "form"
+                },
+                "cvFile": {
+                  "style": "form"
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/Application/my-history": {
+      "get": {
+        "tags": [
+          "Application"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
     "/api/Auth/register": {
       "post": {
         "tags": [
@@ -332,6 +393,15 @@
       "get": {
         "tags": [
           "Job"
+        ],
+        "parameters": [
+          {
+            "name": "title",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
         ],
         "responses": {
           "200": {

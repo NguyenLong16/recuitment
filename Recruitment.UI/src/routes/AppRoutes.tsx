@@ -14,6 +14,8 @@ import HomePage from "../pages/client/HomePage";
 import JobManagement from "../pages/HR/JobManagement";
 import JobForm from "../pages/HR/JobForm";
 import { useAppSelector } from "../hooks/hook";
+import JobDetailPage from "../pages/client/JobDetailPage";
+import ApplicationHistoryPage from "../pages/client/ApplicationHistoryPage";
 
 // Component để redirect dựa trên role của user
 const RoleBasedRedirect = () => {
@@ -58,7 +60,8 @@ const AppRoutes = () => {
                 {/* <Route path="/jobs/:id" element={<JobDetail />} /> */}
                 {/* Nếu user cần đăng nhập mới xem được hồ sơ cá nhân */}
                 <Route element={<ProtectedRoute allowedRoles={[Role.Candidate]} />}>
-                    {/* Thêm các route cá nhân của ứng viên tại đây */}
+                    <Route path="/job/:id" element={<JobDetailPage />} />
+                    <Route path="/my-applications" element={<ApplicationHistoryPage />} />
                 </Route>
             </Route>
 

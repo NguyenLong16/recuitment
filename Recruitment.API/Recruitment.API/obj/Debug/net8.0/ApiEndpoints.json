@@ -1,5 +1,41 @@
 [
   {
+    "ContainingType": "Recruitment.API.Controllers.ApplicationController",
+    "Method": "Apply",
+    "RelativePath": "api/Application/apply",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "jobId",
+        "Type": "System.Int32",
+        "IsRequired": false
+      },
+      {
+        "Name": "coverLetter",
+        "Type": "System.String",
+        "IsRequired": false
+      },
+      {
+        "Name": "cvFile",
+        "Type": "Microsoft.AspNetCore.Http.IFormFile",
+        "IsRequired": false
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "Recruitment.API.Controllers.ApplicationController",
+    "Method": "GetHistoryMyApplications",
+    "RelativePath": "api/Application/my-history",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [],
+    "ReturnTypes": []
+  },
+  {
     "ContainingType": "Recruitment.API.Controllers.AuthController",
     "Method": "Login",
     "RelativePath": "api/Auth/login",
@@ -201,7 +237,13 @@
     "HttpMethod": "GET",
     "IsController": true,
     "Order": 0,
-    "Parameters": [],
+    "Parameters": [
+      {
+        "Name": "title",
+        "Type": "System.String",
+        "IsRequired": false
+      }
+    ],
     "ReturnTypes": [
       {
         "Type": "System.Collections.Generic.IEnumerable\u00601[[Recruitment.API.DTOs.JobResponse, Recruitment.API, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]",

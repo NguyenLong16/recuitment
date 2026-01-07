@@ -183,6 +183,7 @@ const JobManagement = () => {
             title: 'Trạng thái',
             dataIndex: 'status',
             key: 'status',
+            fixed: 'right' as const,
             width: 180,
             render: (status: string, record: JobResponse) => {
                 const { text, color, icon } = getStatusTag(status);
@@ -220,6 +221,7 @@ const JobManagement = () => {
             title: 'Hành động',
             key: 'action',
             width: 200,
+            fixed: 'right' as const,
             render: (_: any, record: JobResponse) => (
                 <Space size="middle">
                     <Button
@@ -249,14 +251,6 @@ const JobManagement = () => {
         <div className="p-6 bg-white rounded-lg shadow-md">
             <div className="flex justify-between items-center mb-4">
                 <h2 className="text-2xl font-bold">Quản lý tin tuyển dụng</h2>
-                <Button
-                    type="primary"
-                    icon={<PlusOutlined />}
-                    onClick={() => navigate('/hr/post-job')}  // SỬA: Thêm '/' để absolute path
-                    size="large"
-                >
-                    Đăng tin tuyển dụng
-                </Button>
             </div>
             <Table
                 columns={columns}

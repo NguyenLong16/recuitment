@@ -21,9 +21,9 @@ const Header = () => {
 
     //Menu dành cho Candidate
     const jobsMenuItems: MenuProps['items'] = [
-        { key: '1', label: 'Tìm việc làm' },
+        { key: '1', label: 'Tìm việc làm', onClick: () => navigate('/') },
         { key: '2', label: 'Việc làm đã lưu' },
-        { key: '3', label: 'Việc làm đã ứng tuyển' },
+        { key: '3', label: 'Việc làm đã ứng tuyển', onClick: () => navigate('/my-applications') },
     ];
 
     const cvMenuItems: MenuProps['items'] = [

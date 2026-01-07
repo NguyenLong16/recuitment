@@ -1,9 +1,10 @@
 // src/hooks/useJobMasterData.ts
 import { useState, useEffect, useCallback } from 'react';
 import { message } from 'antd';
-import { Location, Category } from '../types/job';
 import { Skill } from '../types/skill';
 import JobService from '../services/jobService';
+import { Category } from '../types/category';
+import { Location } from '../types/Location';
 
 export interface UseJobMasterDataResult {
     locations: Location[];

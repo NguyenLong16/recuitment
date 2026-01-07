@@ -50,6 +50,9 @@ builder.Services.AddScoped<ILocationService, LocationService>();
 builder.Services.AddScoped<ISkillRepository, SkillRepository>();
 builder.Services.AddScoped<ISkillService, SkillService>();
 
+builder.Services.AddScoped<IApplicationService, ApplicationService>();
+
+
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(option =>
@@ -125,11 +128,9 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
-app.UseStaticFiles(); // B?t bu?c dòng này m?i xem ???c ?nh
-
 app.UseCors("AllowReactApp");
 
-app.UseAuthentication(); // <--- DÒNG M?I: Ph?i ??t TR??C UseAuthorization
+app.UseAuthentication();
 
 app.UseAuthorization();
 

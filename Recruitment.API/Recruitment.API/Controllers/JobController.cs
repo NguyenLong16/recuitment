@@ -141,9 +141,9 @@ namespace Recruitment.API.Controllers
         [HttpGet]
         [AllowAnonymous]
         [ProducesResponseType(typeof(IEnumerable<JobResponse>), StatusCodes.Status200OK)]
-        public async Task<IActionResult> GetAllJobs()
+        public async Task<IActionResult> GetAllJobs([FromQuery] string? title)
         {
-            var jobs = await _jobService.GetAllJobsAsync();
+            var jobs = await _jobService.GetAllJobsAsync(title);
             return Ok(jobs);
         }
 
