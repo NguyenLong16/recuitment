@@ -19,7 +19,6 @@ namespace Recruitment.API.Controllers
         }
 
         [HttpGet]
-        [Authorize(Roles = "Candidate, Employer, Admin")]
         public async Task<IActionResult> GetAllLocations()
         {
             var locations = await _locationService.GetAllLocationAsync();

@@ -1,4 +1,4 @@
-using Microsoft.AspNetCore.Authentication.JwtBearer;
+﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
@@ -22,13 +22,13 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 
 builder.Services.AddControllers();
 
-//??ng k� Repository
+//??ng ký Repository
 builder.Services.AddScoped<IUserRepository, UserRepository>();
-//??ng k� Helper
+//??ng ký Helper
 builder.Services.AddScoped<JwtHelper>();
-//??ng k� Service
+//??ng ký Service
 builder.Services.AddScoped<IAuthService, AuthService>();
-//??ng k� AutoMapper
+//??ng ký AutoMapper
 builder.Services.AddAutoMapper(typeof(AutoMapperProfile));
 builder.Services.Configure<CloudinarySettings>(builder.Configuration.GetSection("Cloudinary"));
 builder.Services.AddSingleton<CloudinaryDotNet.Cloudinary>(provider =>
@@ -59,18 +59,18 @@ builder.Services.AddSwaggerGen(option =>
 {
     option.SwaggerDoc("v1", new OpenApiInfo { Title = "JobPortal API", Version = "v1" });
 
-    // 1. ??nh ngh?a Security Scheme (C?u h�nh Bearer Token)
+    // 1. Định nghĩa Security Scheme (C?u hình Bearer Token)
     option.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
     {
         In = ParameterLocation.Header,
-        Description = "Vui l�ng nh?p token v�o � b�n d??i: Bearer {token}",
+        Description = "Vui lòng nhập token vào ô bên dưới: Bearer {token}",
         Name = "Authorization",
         Type = SecuritySchemeType.Http,
         BearerFormat = "JWT",
         Scheme = "Bearer"
     });
 
-    // 2. Y�u c?u b?o m?t (�p d?ng cho to�n b? API)
+    // 2. Yêu cầu bảo mật (Áp dụng cho toàn bộ API)
     option.AddSecurityRequirement(new OpenApiSecurityRequirement
     {
         {

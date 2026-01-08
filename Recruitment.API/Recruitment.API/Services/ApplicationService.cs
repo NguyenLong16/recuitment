@@ -54,6 +54,20 @@ namespace Recruitment.API.Services
             await _context.SaveChangesAsync();
             return await GetApplicationByIdAsync(application.id);
         }
+
+        public async Task<IEnumerable<ApplicationResponse>> GetAllApplicationsForEmployerAsync(int employerId)
+        {
+            var applications = await _context.Applications
+                .Include(a => a.candidate) // Để lấy thông tin người ứng tuyển
+                .Include(a => a.job)       // Để lấy thông tin công việc (tiêu đề, v.v.)
+                .Where(a => a.job.employerId == employerId)
+                .OrderByDescending(a => a.appliedDate) // Đơn mới nhất lên đầu
+                .ToListAsync();
+
+            // Mapping sang JobResponse (đã bao gồm xử lý SkillNames và JobTitle trong AutoMapper)
+            return _mapper.Map<IEnumerable<ApplicationResponse>>(applications);
+        }
+
         public async Task<ApplicationResponse> GetApplicationByIdAsync(int applicationId)
         {
             var application = await _context.Applications
@@ -67,16 +81,56 @@ namespace Recruitment.API.Services
             return _mapper.Map<ApplicationResponse>(application);
         }
 
+        public async Task<IEnumerable<ApplicationResponse>> GetApplicationJobIdAsync(int jobId, int employerId)
+        {
+            var job = await _context.Jobs.FindAsync(jobId);
+            if(job == null)
+            {
+                throw new Exception("Công việc không tồn tại");
+            }
+            if(job.employerId != employerId)
+            {
+                throw new Exception("Bạn không có quyền xem ứng viên của công việc này");
+            }
+
+            var applications = await _context.Applications
+                .Include(a => a.candidate)
+                .Include(a => a.job)
+                .Where(a => a.jobId == jobId)
+                .OrderByDescending(a => a.appliedDate)
+                .ToListAsync();
+
+            return _mapper.Map<IEnumerable<ApplicationResponse>>(applications);
+        }
+
         public async Task<IEnumerable<ApplicationResponse>> GetApplicationsByCandidateAsync(int candidateId)
         {
             var applications = await _context.Applications
-                .Include(a => a.job)          // Để lấy JobTitle
+                .Include(a => a.job)
                 .Include(a => a.candidate)    // Để lấy CandidateName
                 .Where(a => a.candidateId == candidateId)
                 .OrderByDescending(a => a.appliedDate) // Đơn mới nhất lên đầu
                 .ToListAsync();
 
             return _mapper.Map<IEnumerable<ApplicationResponse>>(applications);
+        }
+
+        public async Task<ApplicationResponse> UpdateApplicationStatusAsync(int applicationId, ApplicationStatus newStatus, int employerId)
+        {
+            var application = await _context.Applications
+                .Include(a => a.job)
+                .Include(a => a.candidate)
+                .FirstOrDefaultAsync(a => a.id == applicationId)
+                ?? throw new Exception("Không tìm thấy đơn ứng tuyển");
+
+            if (application.job.employerId != employerId)
+                throw new Exception("Bạn không có quyền thao tác trên đơn ứng tuyển này");
+
+            application.status = newStatus;
+
+            _context.Applications.Update(application);
+            await _context.SaveChangesAsync();
+            return _mapper.Map<ApplicationResponse>(application);
         }
 
         private async Task<string> UploadCvAsync(IFormFile file)
@@ -87,7 +141,8 @@ namespace Recruitment.API.Services
             var uploadParams = new RawUploadParams // Dùng Raw cho file PDF/Doc
             {
                 File = new FileDescription(file.FileName, stream),
-                Folder = "resumes"
+                Folder = "resumes",
+                AccessMode = "public"
             };
 
             var result = await _cloudinary.UploadAsync(uploadParams);

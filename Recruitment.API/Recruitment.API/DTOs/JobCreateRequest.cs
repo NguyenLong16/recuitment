@@ -93,4 +93,5 @@ namespace Recruitment.API.DTOs
         // THÊM: File upload (optional, nếu có thì thay thế)
         public IFormFile? ImageFile { get; set; }
     }
+    
 }
