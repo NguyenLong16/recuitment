@@ -1,7 +1,7 @@
 // src/pages/HR/JobForm.tsx
 import React, { useEffect, useState } from 'react';
-import { Form, Input, Button, Select, DatePicker, InputNumber, message, Card, Spin, Alert, Upload } from 'antd';
-import { UploadOutlined } from '@ant-design/icons';
+import { Form, Input, Button, Select, DatePicker, InputNumber, message, Card, Spin, Alert, Upload, Popconfirm } from 'antd';
+import { UploadOutlined, DeleteOutlined } from '@ant-design/icons';
 import type { UploadFile, UploadProps } from 'antd/es/upload/interface';
 import type { RcFile } from 'antd/es/upload/interface';
 import { useNavigate, useParams } from 'react-router-dom';
@@ -30,6 +30,7 @@ const JobForm = () => {
     // Upload state: Lưu file gốc (không upload ngay)
     const [fileList, setFileList] = useState<UploadFile[]>([]);
     const [selectedFile, setSelectedFile] = useState<File | null>(null);
+    const [showRemoveConfirm, setShowRemoveConfirm] = useState(false);
 
     // Thêm warning nếu có lỗi fetch master data
     useEffect(() => {
@@ -234,16 +235,26 @@ const JobForm = () => {
                 setSelectedFile(null);
             }
         },
-        onRemove: (file) => {
-            const confirm = window.confirm('Xóa ảnh này?');
-            if (confirm) {
-                setFileList([]);
-                setSelectedFile(null);
-                if (isEditMode) {
-                    form.setFieldsValue({ imageUrl: undefined });  // Xóa URL cũ nếu edit
-                }
-            }
-            return confirm;
+        onRemove: () => false, // Disable default remove, will use custom Popconfirm
+        showUploadList: {
+            showPreviewIcon: true,
+            showRemoveIcon: true,
+            removeIcon: (
+                <Popconfirm
+                    title="Bạn có chắc chắn muốn xóa ảnh này không?"
+                    onConfirm={() => {
+                        setFileList([]);
+                        setSelectedFile(null);
+                        if (isEditMode) {
+                            form.setFieldsValue({ imageUrl: undefined });
+                        }
+                    }}
+                    okText="Xóa"
+                    cancelText="Hủy"
+                >
+                    <DeleteOutlined style={{ color: 'red' }} />
+                </Popconfirm>
+            ),
         },
     };
 
@@ -451,7 +462,7 @@ const JobForm = () => {
 
                 {/* Upload ảnh: BỎ name="imageFile" (không cần, vì gộp) */}
                 <Form.Item label="Ảnh minh họa job" rules={[{ required: false }]}>
-                    <Upload {...uploadProps} showUploadList={{ showPreviewIcon: true, showRemoveIcon: true }}>
+                    <Upload {...uploadProps}>
                         <Button icon={<UploadOutlined />}>
                             Click hoặc kéo thả ảnh (upload khi submit)
                         </Button>

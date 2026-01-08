@@ -13,9 +13,12 @@ import LoginPage from "../pages/auth/LoginPage";
 import HomePage from "../pages/client/HomePage";
 import JobManagement from "../pages/HR/JobManagement";
 import JobForm from "../pages/HR/JobForm";
+import ApplicationManagement from "../pages/HR/ApplicationManagement";
+import AllApplicationsManagement from "../pages/HR/AllApplicationsManagement";
 import { useAppSelector } from "../hooks/hook";
 import JobDetailPage from "../pages/client/JobDetailPage";
 import ApplicationHistoryPage from "../pages/client/ApplicationHistoryPage";
+import Banner from "../components/common/Clients/Banner";
 
 // Component để redirect dựa trên role của user
 const RoleBasedRedirect = () => {
@@ -81,6 +84,8 @@ const AppRoutes = () => {
                     <Route path="/hr/dashboard" element={<HRDashboard />} />
                     {/* <Route path="/hr/post-job" element={<PostJob />} /> */}
                     <Route path="/hr/jobs-management" element={<JobManagement />} />
+                    <Route path="/hr/applications/:jobId" element={<ApplicationManagement />} />
+                    <Route path="/hr/candidate-management" element={<AllApplicationsManagement />} />
                     <Route path="/hr/post-job" element={<JobForm />} />
                     <Route path="/hr/edit-job/:id" element={<JobForm />} />
                 </Route>

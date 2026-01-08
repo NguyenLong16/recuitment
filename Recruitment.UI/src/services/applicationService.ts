@@ -1,4 +1,4 @@
-import { ApplyJobRequest } from "../types/application"
+import { ApplicationStatus, ApplyJobRequest } from "../types/application"
 import axiosClient from "./axiosClient";
 
 const ApplicationService = {
@@ -26,6 +26,22 @@ const ApplicationService = {
 
     getPublicJobs: async (params?: { categoryId?: number; locationId?: number; keyword?: string }) => {
         const response = await axiosClient.get('/Job', { params });
+        return response.data;
+    },
+
+    getApplicationsByJob: async (jobId: number) => {
+        const response = await axiosClient.get(`/Application/job/${jobId}`);
+        return response.data;
+    },
+
+    updateApplicationStatus: async (id: number, status: ApplicationStatus) => {
+        const response = await axiosClient.patch(`/Application/${id}/status`, status);
+        return response.data;
+    },
+
+    // Lấy tất cả ứng viên đã ứng tuyển tất cả job của HR
+    getAllApplicationsForHR: async () => {
+        const response = await axiosClient.get('/Application/all-my-applications');
         return response.data;
     }
 }

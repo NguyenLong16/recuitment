@@ -36,8 +36,8 @@ export const deleteJob = createAsyncThunk(
     'jobs/deleteJob',
     async (id: number, { rejectWithValue }) => {
         try {
-            const response = await JobService.deleteJob(id)
-            return response.data
+            await JobService.deleteJob(id)
+            return id  // Trả về ID để cập nhật state (filter job đã xóa)
         } catch (error: any) {
             return rejectWithValue(error.message)
         }

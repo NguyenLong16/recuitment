@@ -4,7 +4,7 @@ import { useEffect } from "react";
 import { fetchMyJobs, toggleJobStatus, deleteJob } from "../../redux/slices/jobSlice";
 import { Button, message, Popconfirm, Space, Switch, Table, Tag } from "antd";
 import dayjs from "dayjs";
-import { DeleteOutlined, EditOutlined, ExclamationCircleOutlined, PlusOutlined } from "@ant-design/icons";
+import { DeleteOutlined, EditOutlined, ExclamationCircleOutlined, PlusOutlined, TeamOutlined } from "@ant-design/icons";
 import { JobResponse } from "../../types/job";
 
 const JobManagement = () => {
@@ -207,7 +207,7 @@ const JobManagement = () => {
                         ) : (
                             // THÊM: Nếu Expired, show message thay Switch
                             <div className="text-xs text-gray-600 italic">
-                                Không thể toggle (hết hạn)
+                                (hết hạn)
                             </div>
                         )}
                         <Tag color={color} className="font-medium">
@@ -220,10 +220,18 @@ const JobManagement = () => {
         {
             title: 'Hành động',
             key: 'action',
-            width: 200,
+            width: 280,
             fixed: 'right' as const,
             render: (_: any, record: JobResponse) => (
-                <Space size="middle">
+                <Space size="small">
+                    <Button
+                        type="default"
+                        icon={<TeamOutlined />}
+                        onClick={() => navigate(`/hr/applications/${record.id}`)}
+                        size="small"
+                    >
+                        Ứng viên
+                    </Button>
                     <Button
                         type="primary"
                         icon={<EditOutlined />}

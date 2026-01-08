@@ -18,6 +18,12 @@ const ApplicationHistoryPage = () => {
                 const response = await ApplicationService.getMyApplicationHistory();
                 // API might return data directly or nested in .data
                 const data = response.data || response || [];
+                console.log('=== API Response ===', response);
+                console.log('=== Data ===', data);
+                if (Array.isArray(data) && data.length > 0) {
+                    console.log('=== First item keys ===', Object.keys(data[0]));
+                    console.log('=== First item ===', data[0]);
+                }
                 setApplications(Array.isArray(data) ? data : []);
             } catch (error) {
                 console.error('Error fetching application history:', error);
@@ -29,13 +35,14 @@ const ApplicationHistoryPage = () => {
         fetchHistory();
     }, []);
 
-    // Status color mapping
+    // Status color mapping - khớp với ApplicationStatus enum backend
     const getStatusTag = (status: string) => {
         const map: Record<string, { color: string; text: string }> = {
-            Pending: { color: 'processing', text: 'Đang chờ' },
-            Reviewed: { color: 'warning', text: 'Đã xem' },
-            Accepted: { color: 'success', text: 'Được nhận' },
-            Rejected: { color: 'error', text: 'Từ chối' },
+            Submitted: { color: 'blue', text: 'Đã nộp' },
+            Viewed: { color: 'cyan', text: 'Đã xem' },
+            Interview: { color: 'orange', text: 'Phỏng vấn' },
+            Rejected: { color: 'red', text: 'Từ chối' },
+            Accepted: { color: 'green', text: 'Trúng tuyển' },
         };
         return map[status] || { color: 'default', text: status };
     };
@@ -54,11 +61,6 @@ const ApplicationHistoryPage = () => {
             render: (text: string, record: ApplicationResponseHistory) => (
                 <a onClick={() => navigate(`/job/${record.jobId}`)}>{text}</a>
             ),
-        },
-        {
-            title: 'Công ty',
-            dataIndex: 'companyName',
-            key: 'companyName',
         },
         {
             title: 'Ngày nộp',
@@ -107,7 +109,7 @@ const ApplicationHistoryPage = () => {
                             description="Bạn chưa ứng tuyển vị trí nào"
                             image={Empty.PRESENTED_IMAGE_SIMPLE}
                         >
-                            <Button type="primary" onClick={() => navigate('/jobs')}>
+                            <Button type="primary" onClick={() => navigate('/')}>
                                 Tìm việc ngay
                             </Button>
                         </Empty>
