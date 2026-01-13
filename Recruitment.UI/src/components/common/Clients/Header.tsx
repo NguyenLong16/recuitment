@@ -6,6 +6,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useAppDispatch, useAppSelector } from '../../../hooks/hook';
 import { logout } from '../../../redux/slices/authSlice';
 import { Role } from '../../../types/auth';
+import NotificationDropdown from './NotificationDropdown';
 
 const Header = () => {
     const [activeMenu, setActiveMenu] = useState<string>('');
@@ -175,11 +176,7 @@ const Header = () => {
                             <div className="hidden lg:flex items-center space-x-4">
                                 {user && (
                                     <div className='flex items-center space-x-6'>
-                                        <Badge count={5} size="small">
-                                            <button className="text-gray-600 hover:text-emerald-600 transition-colors p-2 rounded-lg hover:bg-gray-50">
-                                                <Bell size={20} />
-                                            </button>
-                                        </Badge>
+                                        <NotificationDropdown />
 
                                         <Badge count={3} size="small">
                                             <button className="text-gray-600 hover:text-emerald-600 transition-colors p-2 rounded-lg hover:bg-gray-50">

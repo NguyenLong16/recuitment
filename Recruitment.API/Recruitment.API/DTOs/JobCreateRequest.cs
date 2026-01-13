@@ -93,5 +93,16 @@ namespace Recruitment.API.DTOs
         // THÊM: File upload (optional, nếu có thì thay thế)
         public IFormFile? ImageFile { get; set; }
     }
-    
+
+    public class JobFilterRequest
+    {
+        public string? searchTerm { get; set; }
+        public string? companyName { get; set; }
+        public string? employerName { get; set; }
+        public decimal? minSalary { get; set; } // Lương tối thiểu
+        public decimal? maxSalary { get; set; }
+        public int? locationId { get; set; }
+        public int? categoryId { get; set; }
+        public List<int>? skillId { get; set; }
+    }
 }

@@ -313,31 +313,24 @@ namespace Recruitment.API.Services
                 return _mapper.Map<JobResponse>(job);
             }
 
-            public async Task<IEnumerable<JobResponse>> GetAllJobsAsync(string? searchTerm = null)
+            public async Task<IEnumerable<JobResponse>> GetAllJobsAsync(JobFilterRequest filters)
             {
-                var jobs = await _jobRepository.GetAllAsync();
+                var jobsToExpire = await _context.Jobs
+                    .Where(j => j.status == JobStatus.Active && j.deadline < DateTime.Now)
+                    .ToListAsync();
 
-                // Auto-expire cho public list (chỉ trả Active không expired)
-                var activeJobsPastDeadline = jobs.Where(j => j.status == JobStatus.Active && j.deadline < DateTime.Now).ToList();
-                foreach (var job in activeJobsPastDeadline)
+                if (jobsToExpire.Any())
                 {
-                    job.status = JobStatus.Expired;
-                }
-                if (activeJobsPastDeadline.Any())
-                {
+                    foreach (var job in jobsToExpire) job.status = JobStatus.Expired;
                     await _context.SaveChangesAsync();
                 }
 
-                var query = jobs.Where(j => j.status == JobStatus.Active && j.deadline >= DateTime.Now);
-                if(!string.IsNullOrWhiteSpace(searchTerm))
-                {
-                    var lowerSearch = searchTerm.ToLower();
-                    query = query.Where(j => j.title.ToLower().Contains(lowerSearch));
-                }
+            // 2. Gọi Repository để thực hiện lọc dưới Database
+                var filteredJobs = await _jobRepository.GetAllAsync(filters);
 
-                // Filter trả về chỉ Active không expired (cho public)
-                return _mapper.Map<IEnumerable<JobResponse>>(query);
-        }
+                // 3. Map sang DTO trả về cho FE
+                return _mapper.Map<IEnumerable<JobResponse>>(filteredJobs);
+            }
 
             public async Task<IEnumerable<JobResponse>> GetJobsByEmployerAsync(int employerId)
             {

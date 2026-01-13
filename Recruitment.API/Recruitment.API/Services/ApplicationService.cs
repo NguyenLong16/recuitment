@@ -128,9 +128,33 @@ namespace Recruitment.API.Services
 
             application.status = newStatus;
 
-            _context.Applications.Update(application);
+            string statusText = GetStatusVietnamese(newStatus);
+            var notification = new Notification
+            {
+                userId = application.candidateId,
+                applicationId = application.id,
+                title = "Cập nhật trạng thái hồ sơ",
+                content = $"Hồ sơ ứng tuyển vị trí \"{application.job.title}\" đã được cập nhật sang trạng thái: {statusText}",
+                createDate = DateTime.Now,
+                isRead = false,
+            };
+
+            _context.Notifications.Add(notification);
             await _context.SaveChangesAsync();
             return _mapper.Map<ApplicationResponse>(application);
+        }
+
+        private string GetStatusVietnamese(ApplicationStatus status)
+        {
+            return status switch
+            {
+                ApplicationStatus.Submitted => "Đã nộp",
+                ApplicationStatus.Viewed => "Đang xem hồ sơ",
+                ApplicationStatus.Interview => "Mời phỏng vấn",
+                ApplicationStatus.Rejected => "Từ chối",
+                ApplicationStatus.Accepted => "Trúng tuyển",
+                _ => status.ToString()
+            };
         }
 
         private async Task<string> UploadCvAsync(IFormFile file)

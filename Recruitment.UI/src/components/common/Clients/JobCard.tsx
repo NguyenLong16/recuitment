@@ -2,7 +2,7 @@ import { Card, Space, Tag, Typography } from "antd";
 import { JobCardProps } from "../../../types/application";
 import { useNavigate } from "react-router-dom";
 import dayjs from "dayjs";
-import { ClockCircleOutlined, DollarOutlined, EnvironmentOutlined, FireOutlined, HeartOutlined } from '@ant-design/icons';
+import { ClockCircleOutlined, DollarOutlined, EnvironmentOutlined, FireOutlined, HeartOutlined, UserOutlined } from '@ant-design/icons';
 
 const { Text, Title } = Typography;
 
@@ -171,11 +171,24 @@ const JobCard = ({ job }: JobCardProps) => {
                         >
                             <EnvironmentOutlined /> {job.locationName}
                         </Tag>
+                        {job.categoryName && (
+                            <Tag
+                                style={{
+                                    background: '#fff7e6',
+                                    color: '#fa8c16',
+                                    border: 'none',
+                                    borderRadius: 4,
+                                    fontSize: 12
+                                }}
+                            >
+                                {job.categoryName}
+                            </Tag>
+                        )}
                     </Space>
                 </div>
             </div>
 
-            {/* Footer: Deadline & Save button */}
+            {/* Footer: HR name, Deadline & Save button */}
             <div style={{
                 display: 'flex',
                 justifyContent: 'space-between',
@@ -184,10 +197,18 @@ const JobCard = ({ job }: JobCardProps) => {
                 paddingTop: 12,
                 borderTop: '1px solid #f0f0f0'
             }}>
-                <Text type="secondary" style={{ fontSize: 12 }}>
-                    <ClockCircleOutlined style={{ marginRight: 4 }} />
-                    Còn {dayjs(job.deadline).diff(dayjs(), 'day')} ngày
-                </Text>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+                    {job.employerName && (
+                        <Text type="secondary" style={{ fontSize: 12 }}>
+                            <UserOutlined style={{ marginRight: 4 }} />
+                            {job.employerName}
+                        </Text>
+                    )}
+                    <Text type="secondary" style={{ fontSize: 12 }}>
+                        <ClockCircleOutlined style={{ marginRight: 4 }} />
+                        Còn {dayjs(job.deadline).diff(dayjs(), 'day')} ngày
+                    </Text>
+                </div>
                 <div
                     onClick={(e) => {
                         e.stopPropagation();

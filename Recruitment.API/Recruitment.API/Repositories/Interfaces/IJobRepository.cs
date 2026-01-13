@@ -1,4 +1,5 @@
 ﻿
+using Recruitment.API.DTOs;
 using Recruitment.API.Models;
 
 namespace Recruitment.API.Repositories.Interfaces
@@ -7,7 +8,7 @@ namespace Recruitment.API.Repositories.Interfaces
     {
        
         Task<Job> GetByIdAsync(int id);
-        Task<IEnumerable<Job>> GetAllAsync();
+        Task<IEnumerable<Job>> GetAllAsync(JobFilterRequest filters);
         Task<IEnumerable<Job>> GetByEmployerIdAsync(int employerId);
         Task<Job> CreateAsync(Job job);
         Task<Job> UpdateAsync(Job job);

@@ -1,9 +1,33 @@
 import dayjs from "dayjs"
 import axiosClient from "./axiosClient"
+import { JobFilterRequest, JobResponse } from "../types/job";
+
+const buildQueryParams = (filters: JobFilterRequest): string => {
+    const param = new URLSearchParams()
+    if (filters.searchTerm) param.append('searchTerm', filters.searchTerm)
+    if (filters.companyName) param.append('companyName', filters.companyName)
+    if (filters.employerName) param.append('employerName', filters.employerName)
+    if (filters.minSalary !== undefined) param.append('minSalary', filters.minSalary.toString())
+    if (filters.maxSalary !== undefined) param.append('maxSalary', filters.maxSalary.toString())
+    if (filters.locationId !== undefined) param.append('locationId', filters.locationId.toString())
+    if (filters.categoryId !== undefined) param.append('categoryId', filters.categoryId.toString())
+    if (filters.skillId && filters.skillId.length > 0) {
+        filters.skillId.forEach(id => param.append('skillId', id.toString()));
+    }
+    return param.toString()
+}
 
 const JobService = {
     getPublicJobs: (params?: { categoryId?: number; locationId?: number; title?: string }) => {
         return axiosClient.get('/Job', { params })
+    },
+
+    getJobWithFilter: async (filters: JobFilterRequest): Promise<JobResponse[]> => {
+        const queryString = buildQueryParams(filters);
+        const url = queryString ? `/Job?${queryString}` : '/Job';
+
+        const response = await axiosClient.get(url);
+        return response.data;
     },
 
     getPublicJobDetail: (id: number) => {

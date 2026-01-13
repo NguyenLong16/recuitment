@@ -35,7 +35,7 @@ const ApplicationService = {
     },
 
     updateApplicationStatus: async (id: number, status: ApplicationStatus) => {
-        const response = await axiosClient.patch(`/Application/${id}/status`, status);
+        const response = await axiosClient.patch(`/Application/${id}/status`, { Status: status });
         return response.data;
     },
 

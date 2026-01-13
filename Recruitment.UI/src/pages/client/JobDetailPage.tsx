@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 import JobService from "../../services/jobService";
 import ApplicationService from "../../services/applicationService";
 import dayjs from "dayjs";
-import { ArrowLeftOutlined, ClockCircleOutlined, DollarOutlined, EnvironmentOutlined, UploadOutlined } from "@ant-design/icons"
+import { ArrowLeftOutlined, ClockCircleOutlined, DollarOutlined, EnvironmentOutlined, UploadOutlined, UserOutlined } from "@ant-design/icons"
 
 const { Title, Text, Paragraph } = Typography;
 const { TextArea } = Input;
@@ -199,6 +199,16 @@ const JobDetailPage = () => {
                                     <br />
                                     <Text strong>{dayjs(job.createdDate).format('DD/MM/YYYY')}</Text>
                                 </div>
+                                {job.employerName && (
+                                    <>
+                                        <Divider style={{ margin: '8px 0' }} />
+                                        <div>
+                                            <Text type="secondary"><UserOutlined /> Người đăng:</Text>
+                                            <br />
+                                            <Text strong>{job.employerName}</Text>
+                                        </div>
+                                    </>
+                                )}
                             </Space>
                         </Card>
                     </Col>

@@ -22,21 +22,26 @@ const Banner = () => {
     ];
 
     return (
-        <div className="w-full max-w-7xl mx-auto">
+        <div
+            className="w-full max-w-7xl mx-auto"
+            style={{ height: '500px', overflow: 'hidden' }}
+        >
             <Carousel
                 autoplay
                 autoplaySpeed={3000}
                 effect="fade"
                 dots={true}
                 dotPosition="bottom"
+                style={{ height: '500px' }}
             >
                 {images.map((image, index) => (
-                    <div key={index} className="relative">
+                    <div key={index} className="relative" tabIndex={-1}>
                         <div className="h-[500px] w-full overflow-hidden">
                             <img
                                 src={image.url}
                                 alt={image.title}
                                 className="w-full h-full object-cover"
+                                draggable={false}
                             />
                             <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent flex items-end">
                                 <div className="p-8 text-white">
@@ -53,3 +58,4 @@ const Banner = () => {
 };
 
 export default Banner;
+

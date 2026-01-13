@@ -19,6 +19,7 @@ export interface JobResponse {
     id: number;
     title: string;
     companyName?: string;
+    employerName?: string; // Tên HR đăng bài
     imageUrl?: string;
     description: string;
     requirement: string;
@@ -82,4 +83,15 @@ export interface JobFormValues {
     jobType: number[];
     deadline: any; // dayjs object
     skillIds: number[];
+}
+
+export interface JobFilterRequest {
+    searchTerm?: string;
+    companyName?: string;
+    employerName?: string;
+    minSalary?: number;
+    maxSalary?: number;
+    locationId?: number;
+    categoryId?: number;
+    skillId?: number[];
 }
