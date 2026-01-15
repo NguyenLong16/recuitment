@@ -20,6 +20,13 @@ const NotificationDropdown = () => {
 
     useEffect(() => {
         dispatch(fetchNotification());
+
+        // Polling: tự động refresh thông báo mỗi 30 giây
+        const interval = setInterval(() => {
+            dispatch(fetchNotification());
+        }, 30000); // 30 giây
+
+        return () => clearInterval(interval);
     }, [dispatch]);
 
     useEffect(() => {

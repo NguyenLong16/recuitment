@@ -61,5 +61,24 @@ namespace Recruitment.API.Controllers
             await _context.SaveChangesAsync();
             return NoContent();
         }
+
+        [HttpPatch("read-all")]
+        public async Task<IActionResult> MarkAllAsRead()
+        {
+            var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value!);
+
+            // Tìm tất cả thông báo chưa đọc của user này
+            var unreadNotifications = await _context.Notifications
+                .Where(n => n.userId == userId && !n.isRead)
+                .ToListAsync();
+
+            foreach (var notif in unreadNotifications)
+            {
+                notif.isRead = true;
+            }
+
+            await _context.SaveChangesAsync();
+            return NoContent();
+        }
     }
 }

@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Dropdown, Badge } from 'antd';
 import type { MenuProps } from 'antd';
-import { ChevronDown, Bell, MessageCircle, User, LogOut, BarChart, Users, Briefcase } from 'lucide-react';
+import { ChevronDown, MessageCircle, User, LogOut, BarChart, Users, Briefcase } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAppDispatch, useAppSelector } from '../../../hooks/hook';
 import { logout } from '../../../redux/slices/authSlice';

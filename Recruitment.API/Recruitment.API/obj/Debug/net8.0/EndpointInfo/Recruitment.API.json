@@ -964,6 +964,18 @@
         }
       }
     },
+    "/api/Notification/read-all": {
+      "patch": {
+        "tags": [
+          "Notification"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
     "/api/Profile/me": {
       "get": {
         "tags": [

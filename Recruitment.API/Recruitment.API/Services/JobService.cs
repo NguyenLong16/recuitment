@@ -7,7 +7,9 @@ using Recruitment.API.DTOs;
 using Recruitment.API.Models;
 using Recruitment.API.Repositories.Interfaces;
 using Recruitment.API.Services.Interfaces;
+using System;
 using System.ComponentModel.Design;
+using System.Threading;
 using static Recruitment.API.Data.Enums;
 
 namespace Recruitment.API.Services
@@ -16,16 +18,18 @@ namespace Recruitment.API.Services
     public class JobService : IJobService
         {
             private readonly IJobRepository _jobRepository;
+            private readonly INotificationRepository _notificationRepository;
             private readonly IMapper _mapper;
             private readonly AppDbContext _context;
             private readonly CloudinaryDotNet.Cloudinary _cloudinary;
 
-            public JobService(IJobRepository jobRepository, IMapper mapper, AppDbContext context, CloudinaryDotNet.Cloudinary cloudinary)
+            public JobService(IJobRepository jobRepository, IMapper mapper, AppDbContext context, CloudinaryDotNet.Cloudinary cloudinary, INotificationRepository notificationRepository)
             {
                 _jobRepository = jobRepository;
                 _mapper = mapper;
                 _context = context;
                 _cloudinary = cloudinary;
+                _notificationRepository = notificationRepository;
             }
 
             private async Task<string?> UploadImageToCloudinary(IFormFile? file)
@@ -142,6 +146,33 @@ namespace Recruitment.API.Services
                 }
             }
             await _jobRepository.CreateAsync(job);
+
+            try
+            {
+                var followers = await _context.Follows
+                    .Where(f => f.employerId == employerId)
+                    .ToListAsync();
+                if(followers.Any())
+                {
+                    foreach(var follower in followers)
+                    {
+                        var notifications = new Notification
+                        {
+                            userId = follower.id,
+                            title = "Nhà tuyển dụng bạn theo dõi đã đăng tin mới",
+                            content = $"{employer.fullName} vừa đăng tuyển vị trí: {job.title}",
+                            isRead = false,
+                            createDate = DateTime.Now,
+                            applicationId = null
+                        };
+
+                        await _notificationRepository.CreateAsync(notifications);
+                    }
+                }
+            } catch (Exception ex)
+            {
+                Console.WriteLine($"Lỗi gửi thông báo: {ex.Message}");
+            }
 
             return await GetJobByIdAsync(job.id);
             }

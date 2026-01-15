@@ -2,8 +2,11 @@ import { useCallback, useEffect, useState } from "react"
 import { UserProfileResponse } from "../types/profile"
 import ProfileService from "../services/profileService"
 import { message } from "antd"
+import { useAppDispatch } from "./hook"
+import { fetchNotification } from "../redux/slices/notificationSlice"
 
 const useProfile = (userId: number) => {
+    const dispatch = useAppDispatch()
     const [profile, setProfile] = useState<UserProfileResponse | null>(null)
     const [loading, setLoading] = useState(false)
     const [error, setError] = useState<string | null>(null)
@@ -39,6 +42,8 @@ const useProfile = (userId: number) => {
             await ProfileService.followHR(profile.id)
             setProfile(prev => prev ? { ...prev, isFollowing: true, followerCount: prev.followerCount + 1 } : null)
             message.success('Bạn đã theo dõi nhà tuyển dụng này!')
+            // Refresh notifications để HR thấy thông báo mới
+            dispatch(fetchNotification())
         } catch (error: any) {
             message.error(error?.response?.data?.message || 'Lỗi không thể theo dõi');
         } finally {
@@ -53,6 +58,8 @@ const useProfile = (userId: number) => {
             await ProfileService.unfollowHR(profile.id)
             setProfile(prev => prev ? { ...prev, isFollowing: false, followerCount: prev.followerCount - 1 } : null);
             message.success('Bạn đã bỏ theo dõi nhà tuyển dụng này!')
+            // Refresh notifications để HR thấy thông báo unfollow
+            dispatch(fetchNotification())
         } catch (error: any) {
             message.error(error?.response?.data?.message || 'Lỗi không thể bỏ theo dõi')
         } finally {

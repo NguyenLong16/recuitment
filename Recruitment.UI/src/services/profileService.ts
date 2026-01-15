@@ -32,12 +32,6 @@ const ProfileService = {
         if (data.coverFile) formData.append('CoverFile', data.coverFile);
         if (data.cvFile) formData.append('CvFile', data.cvFile);
 
-        // DEBUG: Log để kiểm tra dữ liệu gửi lên
-        console.log('📤 Update Profile Request:');
-        console.log('- Avatar:', data.avatarFile?.name || 'null');
-        console.log('- Cover:', data.coverFile?.name || 'null');
-        console.log('- CV:', data.cvFile?.name || 'null');
-
         // Log tất cả entries trong FormData
         for (const [key, value] of formData.entries()) {
             console.log(`  FormData[${key}]:`, value instanceof File ? `File(${value.name})` : value);

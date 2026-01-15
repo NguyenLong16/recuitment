@@ -61,8 +61,8 @@ public class AutoMapperProfile : Profile
             .ForMember(dest => dest.defaultCvUrl, opt => opt.Ignore())
             .ForAllMembers(opts => opts.Condition((src, dest, srcMember) => srcMember != null));
 
-        CreateMap<Education, EducationDto>(); 
-        CreateMap<Experience, ExperienceDTO>(); 
+        CreateMap<Education, EducationDto>();
+        CreateMap<Experience, ExperienceDTO>();
         CreateMap<Company, CompanyResponse>();
-    }
+        }
 }

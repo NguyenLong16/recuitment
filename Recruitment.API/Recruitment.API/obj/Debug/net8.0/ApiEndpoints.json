@@ -589,6 +589,16 @@
   },
   {
     "ContainingType": "Recruitment.API.Controllers.NotificationController",
+    "Method": "MarkAllAsRead",
+    "RelativePath": "api/Notification/read-all",
+    "HttpMethod": "PATCH",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "Recruitment.API.Controllers.NotificationController",
     "Method": "GetUnreadCount",
     "RelativePath": "api/Notification/unread-count",
     "HttpMethod": "GET",

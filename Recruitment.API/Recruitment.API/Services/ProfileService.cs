@@ -13,14 +13,16 @@ namespace Recruitment.API.Services
     {
         private readonly IUserRepository _userRepository;
         private readonly IProfileRepository _profileRepository;
+        private readonly INotificationRepository _notificationRepository;
         private readonly Cloudinary _cloudinary;
         private readonly IMapper _mapper;
-        public ProfileService(IUserRepository userRepository, Cloudinary cloudinary, IMapper mapper, IProfileRepository profileRepository   )
+        public ProfileService(IUserRepository userRepository, Cloudinary cloudinary, IMapper mapper, IProfileRepository profileRepository, INotificationRepository notificationRepository   )
         {
             _userRepository = userRepository;
             _cloudinary = cloudinary;
             _mapper = mapper;
             _profileRepository = profileRepository;
+            _notificationRepository = notificationRepository;
         }
 
         public async Task<UserProfileResponse> GetProfileAsync(int userId, int? currentViewerId = null)
@@ -99,6 +101,29 @@ namespace Recruitment.API.Services
             };
 
             await _profileRepository.AddFollowAsync(follow);
+
+            try
+            {
+                // Lấy tên ứng viên (người nhấn follow)
+                var follower = await _userRepository.GetByIdAsync(followerId);
+
+                var notification = new Notification
+                {
+                    userId = employerId, // Người nhận là HR
+                    title = "Bạn có người theo dõi mới",
+                    content = $"{follower?.fullName} đã bắt đầu theo dõi bạn.",
+                    isRead = false,
+                    createDate = DateTime.Now,
+                    applicationId = null // Không liên quan đến đơn ứng tuyển
+                };
+
+                await _notificationRepository.CreateAsync(notification);
+            }
+            catch (Exception ex)
+            {
+                // Chỉ log lỗi, không chặn luồng follow chính
+                Console.WriteLine($"Lỗi gửi thông báo Follow: {ex.Message}");
+            }
         }
 
         public async Task UnfollowHRAsync(int followerId, int employerId)
@@ -108,6 +133,30 @@ namespace Recruitment.API.Services
                 throw new Exception("Bạn chưa theo dõi người này");
 
             await _profileRepository.RemoveFollowAsync(followRecord);
+
+            try
+            {
+                // Lấy thông tin người bỏ theo dõi
+                var follower = await _userRepository.GetByIdAsync(followerId);
+
+                var notification = new Notification
+                {
+                    userId = employerId, // Người nhận là HR
+                    title = "Thông báo thay đổi lượt theo dõi",
+                    content = $"{follower?.fullName} đã ngừng theo dõi trang cá nhân của bạn.",
+                    isRead = false,
+                    createDate = DateTime.Now,
+                    applicationId = null
+                };
+
+                // Lưu thông báo vào bảng Notifications
+                await _notificationRepository.CreateAsync(notification);
+            }
+            catch (Exception ex)
+            {
+                // Log lỗi để không làm treo luồng Unfollow chính
+                Console.WriteLine($"Lỗi gửi thông báo Unfollow: {ex.Message}");
+            }
         }
 
         private async Task<string> UploadMediaAsync(IFormFile file, string folder, bool isImage)
