@@ -15,7 +15,8 @@ namespace Recruitment.API.Repositories
 
         public async Task<User> GetByEmailAsync(string email)
         {
-            return await _context.Users.Include(u => u.role)
+            return await _context.Users
+                .Include(u => u.role)
                 .FirstOrDefaultAsync(u => u.email == email);
         }
 
@@ -34,7 +35,16 @@ namespace Recruitment.API.Repositories
         {
             return await _context.Users
                 .Include(u => u.role)
+                .Include(u => u.company)
+                .Include(u => u.educations)
+                .Include(u => u.experiences)
                 .FirstOrDefaultAsync(u => u.id == id);
+        }
+
+        public async Task UpdateAsync(User user)
+        {
+            _context.Users.Update(user);
+            await _context.SaveChangesAsync();
         }
     }
 }

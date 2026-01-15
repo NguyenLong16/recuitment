@@ -18,6 +18,7 @@ namespace Recruitment.API.Data
         public DbSet<Application> Applications { get; set; }
         public DbSet<Location> Locations { get; set; }
         public DbSet<Notification> Notifications { get; set; }
+        public DbSet<Follow> Follows { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
@@ -61,6 +62,24 @@ namespace Recruitment.API.Data
                 .WithMany(u => u.applications)
                 .HasForeignKey(a => a.candidateId)
                 .OnDelete(DeleteBehavior.Cascade); // Xóa ứng viên thì xóa luôn hồ sơ ứng tuyển của họ
+
+            // Cấu hình khóa chính phức hợp cho Follow
+            modelBuilder.Entity<Follow>()
+                .HasKey(f => new { f.id, f.employerId });
+
+            // Cấu hình quan hệ Follower -> User
+            modelBuilder.Entity<Follow>()
+                .HasOne(f => f.follower)
+                .WithMany(u => u.following)
+                .HasForeignKey(f => f.id)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            // Cấu hình quan hệ Employer -> User
+            modelBuilder.Entity<Follow>()
+                .HasOne(f => f.employer)
+                .WithMany(u => u.followers)
+                .HasForeignKey(f => f.employerId)
+                .OnDelete(DeleteBehavior.Restrict);
         }
     }
 }

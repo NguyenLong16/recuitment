@@ -44,5 +44,25 @@ public class AutoMapperProfile : Profile
             .ForMember(dest => dest.jobTitle, opt => opt.MapFrom(src => src.job.title))
             .ForMember(dest => dest.candidateName, opt => opt.MapFrom(src => src.candidate.fullName))
             .ForMember(dest => dest.status, opt => opt.MapFrom(src => src.status.ToString()));
+
+        CreateMap<User, UserProfileResponse>()
+            .ForMember(dest => dest.roleName, opt => opt.MapFrom(src => src.role.roleName))
+            .ForMember(dest => dest.FollowerCount, opt => opt.MapFrom(src => src.followers.Count))
+            // Sửa lỗi lệch tên và Casing
+            .ForMember(dest => dest.professionalTitle, opt => opt.MapFrom(src => src.professionalTitle))
+            .ForMember(dest => dest.DefaultCvUrl, opt => opt.MapFrom(src => src.defaultCvUrl))
+            .ForMember(dest => dest.WebsiteUrl, opt => opt.MapFrom(src => src.websiteUrl))
+            .ForMember(dest => dest.LinkedInUrl, opt => opt.MapFrom(src => src.linkedInUrl))
+            .ForMember(dest => dest.GitHubUrl, opt => opt.MapFrom(src => src.githubUrl));
+
+        CreateMap<ProfileUpdateRequest, User>()
+            .ForMember(dest => dest.AvatarUrl, opt => opt.Ignore())
+            .ForMember(dest => dest.coverImageUrl, opt => opt.Ignore())
+            .ForMember(dest => dest.defaultCvUrl, opt => opt.Ignore())
+            .ForAllMembers(opts => opts.Condition((src, dest, srcMember) => srcMember != null));
+
+        CreateMap<Education, EducationDto>(); 
+        CreateMap<Experience, ExperienceDTO>(); 
+        CreateMap<Company, CompanyResponse>();
     }
 }

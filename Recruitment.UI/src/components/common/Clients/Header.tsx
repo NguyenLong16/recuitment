@@ -65,7 +65,7 @@ const Header = () => {
 
     //Chung
     const userMenuItems: MenuProps['items'] = [
-        { key: '1', label: 'Thông tin cá nhân' },
+        { key: '1', label: <Link to={isHR ? "/hr/my-profile" : "/my-profile"}>Thông tin cá nhân</Link> },
         { key: '2', label: 'Cài đặt tài khoản' },
         {
             key: '3',

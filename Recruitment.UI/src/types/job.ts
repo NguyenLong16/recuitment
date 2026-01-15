@@ -20,6 +20,7 @@ export interface JobResponse {
     title: string;
     companyName?: string;
     employerName?: string; // Tên HR đăng bài
+    employerId?: number;
     imageUrl?: string;
     description: string;
     requirement: string;

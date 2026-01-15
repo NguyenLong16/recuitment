@@ -52,6 +52,9 @@ builder.Services.AddScoped<ISkillService, SkillService>();
 
 builder.Services.AddScoped<IApplicationService, ApplicationService>();
 
+builder.Services.AddScoped<IProfileRepository, ProfileRepository>();
+builder.Services.AddScoped<IProfileService, ProfileService>();
+
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();

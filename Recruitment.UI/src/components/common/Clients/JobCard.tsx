@@ -1,6 +1,6 @@
 import { Card, Space, Tag, Typography } from "antd";
 import { JobCardProps } from "../../../types/application";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import dayjs from "dayjs";
 import { ClockCircleOutlined, DollarOutlined, EnvironmentOutlined, FireOutlined, HeartOutlined, UserOutlined } from '@ant-design/icons';
 
@@ -199,10 +199,16 @@ const JobCard = ({ job }: JobCardProps) => {
             }}>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
                     {job.employerName && (
-                        <Text type="secondary" style={{ fontSize: 12 }}>
-                            <UserOutlined style={{ marginRight: 4 }} />
-                            {job.employerName}
-                        </Text>
+                        <Link
+                            to={`/profile/${job.employerId}`}
+                            onClick={(e) => e.stopPropagation()}
+                            style={{ display: 'block' }}
+                        >
+                            <Text type="secondary" style={{ fontSize: 12, cursor: 'pointer' }} className="hover:text-[#00B14F]">
+                                <UserOutlined style={{ marginRight: 4 }} />
+                                {job.employerName}
+                            </Text>
+                        </Link>
                     )}
                     <Text type="secondary" style={{ fontSize: 12 }}>
                         <ClockCircleOutlined style={{ marginRight: 4 }} />

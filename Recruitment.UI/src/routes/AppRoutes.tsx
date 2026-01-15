@@ -18,7 +18,8 @@ import AllApplicationsManagement from "../pages/HR/AllApplicationsManagement";
 import { useAppSelector } from "../hooks/hook";
 import JobDetailPage from "../pages/client/JobDetailPage";
 import ApplicationHistoryPage from "../pages/client/ApplicationHistoryPage";
-import Banner from "../components/common/Clients/Banner";
+import HRProfilePage from "../pages/HR/HRProfilePage";
+import MyProfilePage from "../pages/client/MyProfilePage";
 
 // Component để redirect dựa trên role của user
 const RoleBasedRedirect = () => {
@@ -65,6 +66,8 @@ const AppRoutes = () => {
                 <Route element={<ProtectedRoute allowedRoles={[Role.Candidate]} />}>
                     <Route path="/job/:id" element={<JobDetailPage />} />
                     <Route path="/my-applications" element={<ApplicationHistoryPage />} />
+                    <Route path="/profile/:id" element={<HRProfilePage />} />
+                    <Route path="/my-profile" element={<MyProfilePage />} />
                 </Route>
             </Route>
 
@@ -88,6 +91,7 @@ const AppRoutes = () => {
                     <Route path="/hr/candidate-management" element={<AllApplicationsManagement />} />
                     <Route path="/hr/post-job" element={<JobForm />} />
                     <Route path="/hr/edit-job/:id" element={<JobForm />} />
+                    <Route path="/hr/my-profile" element={<MyProfilePage />} />
                 </Route>
             </Route>
 

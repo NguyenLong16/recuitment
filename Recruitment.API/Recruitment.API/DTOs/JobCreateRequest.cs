@@ -58,6 +58,7 @@ namespace Recruitment.API.DTOs
         public DateTime CreatedDate { get; set; }
         public string CompanyName { get; set; } = string.Empty;
         public string EmployerName { get; set; } = string.Empty;
+        public string EmployerId { get; set; }
         public List<string> SkillNames { get; set; } = new List<string>();
         public int LocationId { get; set; }
         public int CategoryId { get; set; }
