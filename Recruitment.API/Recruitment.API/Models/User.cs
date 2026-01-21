@@ -12,7 +12,7 @@ namespace Recruitment.API.Models
         public string fullName { get; set; }
         [Required]
         public string email { get; set; }
-        public string address { get; set; }
+        public string? address { get; set; }
         [Required]
         public string passwordHash { get; set; }
         public string? phoneNumber { get; set; }

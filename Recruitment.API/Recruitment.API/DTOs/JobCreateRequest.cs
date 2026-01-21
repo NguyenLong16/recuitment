@@ -64,6 +64,10 @@ namespace Recruitment.API.DTOs
         public int CategoryId { get; set; }
         public List<int> SkillIds { get; set; } = new();
         public string? ImageUrl { get; set; }  // THAY: ImageUrl (Cloudinary URL)
+        public double AverageRating { get; set; }
+        public int TotalReviews { get; set; }
+        public int TotalComments { get; set; }
+        public bool IsSaved { get; set; } // Nếu có user đang đăng nhập
     }
 
     public class JobUpdateRequest

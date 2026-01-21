@@ -64,5 +64,18 @@ public class AutoMapperProfile : Profile
         CreateMap<Education, EducationDto>();
         CreateMap<Experience, ExperienceDTO>();
         CreateMap<Company, CompanyResponse>();
-        }
+
+        CreateMap<Comment, CommentResponse>()
+            .ForMember(dest => dest.UserName, opt => opt.MapFrom(src => src.user.fullName))
+            .ForMember(dest => dest.UserAvatar, opt => opt.MapFrom(src => src.user.AvatarUrl));
+
+        CreateMap<Review, ReviewResponse>()
+            .ForMember(dest => dest.UserName, opt => opt.MapFrom(src => src.user.fullName))
+            .ForMember(dest => dest.UserAvatar, opt => opt.MapFrom(src => src.user.AvatarUrl));
+
+        CreateMap<SavedJob, SavedJobResponse>()
+            .ForMember(dest => dest.JobTitle, opt => opt.MapFrom(src => src.job.title))
+            .ForMember(dest => dest.CompanyName, opt => opt.MapFrom(src => src.job.company.companyName))
+            .ForMember(dest => dest.ImageUrl, opt => opt.MapFrom(src => src.job.imageUrl));
+    }
 }

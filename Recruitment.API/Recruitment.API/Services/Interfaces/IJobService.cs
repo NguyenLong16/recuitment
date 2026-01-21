@@ -7,7 +7,7 @@ namespace Recruitment.API.Services.Interfaces
         Task<JobResponse> CreateJobAsync(JobCreateRequest request, int employerId);
         Task<JobResponse> UpdateJobAsync(int jobId, JobUpdateRequest request, int employerId);
         Task<bool> DeleteJobAsync(int id, int employerId);
-        Task<JobResponse> GetJobByIdAsync(int id);
+        Task<JobResponse> GetJobByIdAsync(int id, int? currentUserId = null);
         Task<IEnumerable<JobResponse>> GetAllJobsAsync(JobFilterRequest filters);
         Task<IEnumerable<JobResponse>> GetJobsByEmployerAsync(int employerId);
         Task<bool> ToggleJobStatusAsync(int id, int employerId);

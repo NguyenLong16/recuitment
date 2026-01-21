@@ -57,7 +57,7 @@ namespace Recruitment.API.Services
             user.linkedInUrl = request.LinkedInUrl;
             user.githubUrl = request.GitHubUrl;
 
-            if(request.AvatarFile != null)
+            if (request.AvatarFile != null)
             {
                 user.AvatarUrl = await UploadMediaAsync(request.AvatarFile, "avatar", true);
             }
@@ -73,7 +73,12 @@ namespace Recruitment.API.Services
             }
 
             await _userRepository.UpdateAsync(user);
-            return _mapper.Map<UserProfileResponse>(user);
+
+            var response = _mapper.Map<UserProfileResponse>(user);
+            response.DefaultCvUrl = user.defaultCvUrl;
+
+            return response;
+
         }
 
         public async Task FollowHRAsync(int followerId, int employerId)

@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using Azure;
 using CloudinaryDotNet;
 using CloudinaryDotNet.Actions;
 using Microsoft.EntityFrameworkCore;
@@ -16,20 +17,26 @@ namespace Recruitment.API.Services
 {
     
     public class JobService : IJobService
-        {
-            private readonly IJobRepository _jobRepository;
-            private readonly INotificationRepository _notificationRepository;
-            private readonly IMapper _mapper;
-            private readonly AppDbContext _context;
-            private readonly CloudinaryDotNet.Cloudinary _cloudinary;
+    {
+        private readonly IJobRepository _jobRepository;
+        private readonly INotificationRepository _notificationRepository;
+        private readonly IMapper _mapper;
+        private readonly CloudinaryDotNet.Cloudinary _cloudinary;
+        private readonly IReviewRepository _reviewRepository;
+        private readonly ICommentRepository _commentRepository;
+        private readonly ISavedJobRepository _savedJobRepository;
+        private readonly AppDbContext _context;
 
-            public JobService(IJobRepository jobRepository, IMapper mapper, AppDbContext context, CloudinaryDotNet.Cloudinary cloudinary, INotificationRepository notificationRepository)
+        public JobService(IJobRepository jobRepository,AppDbContext context, IMapper mapper, CloudinaryDotNet.Cloudinary cloudinary, INotificationRepository notificationRepository, IReviewRepository reviewRepository, ICommentRepository commentRepository, ISavedJobRepository savedJobRepository)
             {
                 _jobRepository = jobRepository;
                 _mapper = mapper;
-                _context = context;
                 _cloudinary = cloudinary;
                 _notificationRepository = notificationRepository;
+                _reviewRepository = reviewRepository;
+                _commentRepository = commentRepository;
+                _savedJobRepository = savedJobRepository;
+                _context = context;
             }
 
             private async Task<string?> UploadImageToCloudinary(IFormFile? file)
@@ -325,26 +332,42 @@ namespace Recruitment.API.Services
                 return await _jobRepository.DeleteAsync(id);
             }
 
-            public async Task<JobResponse> GetJobByIdAsync(int id)
+        public async Task<JobResponse> GetJobByIdAsync(int id, int? currentUserId = null)
+        {
+            var job = await _jobRepository.GetByIdAsync(id)
+                ?? throw new Exception("Job not found");
+
+            // Auto-expire
+            if (job.status == JobStatus.Active && job.deadline < DateTime.Now)
             {
-                var job = await _jobRepository.GetByIdAsync(id);
-
-                if (job == null)
-                {
-                    throw new Exception("Job not found");
-                }
-
-                // Auto-set Expired nếu Active và deadline qua (cho single job)
-                if (job.status == JobStatus.Active && job.deadline < DateTime.Now)
-                {
-                    job.status = JobStatus.Expired;
-                    await _jobRepository.UpdateAsync(job);  // Lưu ngay vào DB
-                }
-
-                return _mapper.Map<JobResponse>(job);
+                job.status = JobStatus.Expired;
+                await _jobRepository.UpdateAsync(job);
             }
 
-            public async Task<IEnumerable<JobResponse>> GetAllJobsAsync(JobFilterRequest filters)
+            var response = _mapper.Map<JobResponse>(job);
+
+            // ⭐ Rating
+            var ratings = await _reviewRepository.GetRatingsByJobIdAsync(id);
+            response.AverageRating = ratings.Any()
+                ? Math.Round(ratings.Average(), 1)
+                : 0;
+            response.TotalReviews = ratings.Count;
+
+            // ⭐ Comment count
+            response.TotalComments = await _commentRepository.CountByJobIdAsync(id);
+
+            // ⭐ Saved status
+            if (currentUserId.HasValue)
+            {
+                response.IsSaved = await _savedJobRepository
+                    .IsSavedAsync(currentUserId.Value, id);
+            }
+
+            return response;
+        }
+
+
+        public async Task<IEnumerable<JobResponse>> GetAllJobsAsync(JobFilterRequest filters)
             {
                 var jobsToExpire = await _context.Jobs
                     .Where(j => j.status == JobStatus.Active && j.deadline < DateTime.Now)

@@ -19,6 +19,9 @@ namespace Recruitment.API.Data
         public DbSet<Location> Locations { get; set; }
         public DbSet<Notification> Notifications { get; set; }
         public DbSet<Follow> Follows { get; set; }
+        public DbSet<SavedJob> SavedJobs { get; set; }
+        public DbSet<Comment> Comments { get; set; }
+        public DbSet<Review> Reviews { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
@@ -79,6 +82,30 @@ namespace Recruitment.API.Data
                 .HasOne(f => f.employer)
                 .WithMany(u => u.followers)
                 .HasForeignKey(f => f.employerId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            // Cấu hình SavedJob (Composite Key)
+            modelBuilder.Entity<SavedJob>()
+                .HasKey(sj => new { sj.userId, sj.jobId });
+
+            modelBuilder.Entity<SavedJob>()
+                .HasOne(sj => sj.job)
+                .WithMany()
+                .HasForeignKey(sj => sj.jobId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            //  Cấu hình Comment & Review
+            // Dùng Restrict để tránh lỗi Multiple Cascade Paths khi xóa User/Job
+            modelBuilder.Entity<Comment>()
+                .HasOne(c => c.job)
+                .WithMany()
+                .HasForeignKey(c => c.jobId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<Review>()
+                .HasOne(r => r.job)
+                .WithMany()
+                .HasForeignKey(r => r.jobId)
                 .OnDelete(DeleteBehavior.Restrict);
         }
     }

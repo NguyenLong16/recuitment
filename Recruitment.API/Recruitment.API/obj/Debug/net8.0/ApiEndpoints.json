@@ -125,6 +125,43 @@
     "ReturnTypes": []
   },
   {
+    "ContainingType": "Recruitment.API.Controllers.CommentController",
+    "Method": "GetJobComments",
+    "RelativePath": "api/Comment/job/{jobId}",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "jobId",
+        "Type": "System.Int32",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "Recruitment.API.Controllers.CommentController",
+    "Method": "PostComment",
+    "RelativePath": "api/Comment/job/{jobId}",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "jobId",
+        "Type": "System.Int32",
+        "IsRequired": true
+      },
+      {
+        "Name": "request",
+        "Type": "Recruitment.API.DTOs.CommentCreateRequest",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
     "ContainingType": "Recruitment.API.Controllers.DebugController",
     "Method": "PublicCheck",
     "RelativePath": "api/Debug/1-public",
@@ -743,6 +780,43 @@
         "Name": "CvFile",
         "Type": "Microsoft.AspNetCore.Http.IFormFile",
         "IsRequired": false
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "Recruitment.API.Controllers.ReviewController",
+    "Method": "PostReview",
+    "RelativePath": "api/Review/job/{jobId}",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "jobId",
+        "Type": "System.Int32",
+        "IsRequired": true
+      },
+      {
+        "Name": "request",
+        "Type": "Recruitment.API.DTOs.ReviewCreateRequest",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "Recruitment.API.Controllers.SavedJobController",
+    "Method": "ToggleSaveJob",
+    "RelativePath": "api/SavedJob/{jobId}",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "jobId",
+        "Type": "System.Int32",
+        "IsRequired": true
       }
     ],
     "ReturnTypes": []
