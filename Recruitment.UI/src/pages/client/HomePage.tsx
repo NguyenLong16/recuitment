@@ -155,24 +155,6 @@ const HomePage = () => {
                     )}
                 </div>
 
-                {/* Call to Action Section */}
-                {/* <div className="bg-gradient-to-r from-[#00B14F]/5 via-white to-[#00B14F]/5 py-16 mt-12">
-                    <div className="max-w-4xl mx-auto text-center px-4">
-                        <Title level={2} className="!mb-4">
-                            Không tìm thấy công việc phù hợp?
-                        </Title>
-                        <Text className="text-gray-600 text-lg block mb-6">
-                            Đăng ký nhận thông báo việc làm mới phù hợp với bạn
-                        </Text>
-                        <Button
-                            type="primary"
-                            size="large"
-                            className="!bg-[#00B14F] hover:!bg-[#00a347] border-0 !h-12 !px-10 !rounded-lg !text-base !font-medium shadow-lg hover:shadow-xl transition-all"
-                        >
-                            Đăng ký ngay
-                        </Button>
-                    </div>
-                </div> */}
             </div>
         </>
     )

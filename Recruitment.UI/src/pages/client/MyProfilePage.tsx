@@ -112,13 +112,7 @@ const MyProfilePage = () => {
     };
 
 
-    // Handle CV upload
-    const handleCvChange: UploadProps["onChange"] = ({ file }) => {
-        const originFile = file.originFileObj as File;
-        if (originFile) {
-            setCvFile(originFile);
-        }
-    };
+
     if (loading) {
         return (
             <div className="min-h-screen bg-gray-50 py-8">
@@ -705,10 +699,14 @@ const MyProfilePage = () => {
                             <Title level={5}>📄 CV</Title>
                             <Form.Item label="Tải lên CV mới">
                                 <Upload
-                                    beforeUpload={() => false}
-                                    onChange={handleCvChange}
+                                    beforeUpload={(file) => {
+                                        setCvFile(file);
+                                        return false; // Prevent auto upload
+                                    }}
                                     maxCount={1}
                                     accept=".pdf,.doc,.docx"
+                                    fileList={cvFile ? [{ uid: '-1', name: cvFile.name, status: 'done' }] : []}
+                                    onRemove={() => setCvFile(null)}
                                 >
                                     <Button icon={<UploadOutlined />}>
                                         Chọn file CV (PDF, DOC)

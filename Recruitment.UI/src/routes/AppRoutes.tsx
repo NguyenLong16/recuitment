@@ -63,10 +63,11 @@ const AppRoutes = () => {
                 {/* MainLayout chứa Navbar công khai, Footer... */}
                 <Route element={<MainLayout />}>
                     <Route path="/" element={<RoleBasedRedirect />} />
-                    {/* <Route path="/jobs/:id" element={<JobDetail />} /> */}
-                    {/* Nếu user cần đăng nhập mới xem được hồ sơ cá nhân */}
+                    {/* PUBLIC: Xem chi tiết job không cần đăng nhập */}
+                    <Route path="/job/:id" element={<JobDetailPage />} />
+
+                    {/* PROTECTED: Các route cần đăng nhập */}
                     <Route element={<ProtectedRoute allowedRoles={[Role.Candidate]} />}>
-                        <Route path="/job/:id" element={<JobDetailPage />} />
                         <Route path="/my-applications" element={<ApplicationHistoryPage />} />
                         <Route path="/profile/:id" element={<HRProfilePage />} />
                         <Route path="/my-profile" element={<MyProfilePage />} />

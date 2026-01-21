@@ -38,6 +38,10 @@ export interface JobResponse {
     locationId?: number;
     categoryId?: number;
     skillIds?: number[];
+    averageRating: number;
+    totalReviews: number;
+    totalComments: number;
+    isSaved: boolean;  // Nếu có user đang đăng nhập
 }
 
 // Dùng cho Form tạo/sửa

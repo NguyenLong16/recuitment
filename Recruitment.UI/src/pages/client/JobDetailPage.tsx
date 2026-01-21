@@ -6,6 +6,8 @@ import JobService from "../../services/jobService";
 import ApplicationService from "../../services/applicationService";
 import dayjs from "dayjs";
 import { ArrowLeftOutlined, ClockCircleOutlined, DollarOutlined, EnvironmentOutlined, UploadOutlined, UserOutlined } from "@ant-design/icons"
+import CommentSection from "../../components/common/Clients/CommentSection";
+import RatingSection from "../../components/common/Clients/RatingSection";
 
 const { Title, Text, Paragraph } = Typography;
 const { TextArea } = Input;
@@ -168,6 +170,10 @@ const JobDetailPage = () => {
                                 {job.benefit}
                             </Paragraph>
                         </Card>
+                        <CommentSection
+                            jobId={Number(id)}
+                            totalComments={job.totalComments || 0}
+                        />
                     </Col>
                     <Col xs={24} md={8}>
                         <Card title="Thông tin chung" style={{ borderRadius: 12 }}>
@@ -211,6 +217,20 @@ const JobDetailPage = () => {
                                 )}
                             </Space>
                         </Card>
+                        {/* Rating Section */}
+                        <RatingSection
+                            jobId={Number(id)}
+                            averageRating={job.averageRating || 0}
+                            totalReviews={job.totalReviews || 0}
+                            onRatingSubmitted={() => {
+                                // Reload job data to get updated rating
+                                const fetchJob = async () => {
+                                    const response = await JobService.getPublicJobDetail(Number(id));
+                                    setJob(response.data);
+                                };
+                                fetchJob();
+                            }}
+                        />
                     </Col>
                 </Row>
                 {/* Apply Modal */}
