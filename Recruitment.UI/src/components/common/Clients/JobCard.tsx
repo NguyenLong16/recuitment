@@ -61,7 +61,7 @@ const JobCard = ({ job }: JobCardProps) => {
     return (
         <div
             onClick={() => handleNavigate(`/job/${job.id}`)}
-            className="relative h-full rounded-xl border-none shadow-sm bg-white p-4 cursor-pointer transition-all duration-300 ease-in-out hover:shadow-lg hover:border-[#00B14F] hover:-translate-y-0.5 overflow-hidden"
+            className="relative h-full rounded-xl border-none shadow-[0_4px_20px_rgba(0,0,0,0.1)] bg-white p-4 cursor-pointer transition-all duration-300 ease-in-out hover:shadow-[0_8px_30px_rgba(0,0,0,0.18)] hover:border-[#00B14F] hover:-translate-y-0.5 overflow-hidden"
         >
             {(isHot || isNew) && (
                 <div className="absolute top-3 right-3 z-10">

@@ -18,5 +18,12 @@ namespace Recruitment.API.Models
         public int jobId { get; set; }
         [ForeignKey("jobId")]
         public virtual Job job { get; set; }
+        public int? ParentId { get; set; } // Cho phép null (nếu là bình luận gốc)
+
+        [ForeignKey("ParentId")]
+        public virtual Comment Parent { get; set; }
+
+        // Danh sách các câu trả lời con
+        public virtual ICollection<Comment> Replies { get; set; }
     }
 }

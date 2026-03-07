@@ -1,4 +1,5 @@
 ﻿using Recruitment.API.DTOs;
+using Recruitment.API.Models;
 
 namespace Recruitment.API.Services.Interfaces
 {

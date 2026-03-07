@@ -30,13 +30,40 @@ namespace Recruitment.API.Services
 
             var userComment = await _userRepository.GetByIdAsync(userId);
 
-            var comment = new Comment { userId = userId, jobId = jobId, content = request.Content, createdDate = DateTime.Now };
+            var comment = new Comment { 
+                userId = userId,
+                jobId = jobId,
+                content = request.Content,
+                createdDate = DateTime.Now,
+                ParentId = request.ParentId
+            };
             await _repo.AddAsync(comment);
 
-            if(job.employerId != userId)
+            // 4. LOGIC THÔNG BÁO (Nâng cao)
+            if (request.ParentId.HasValue)
             {
-                await _notificationRepository.CreateNotificationAsync(
-                    job.employerId, "Có đánh giá mới", $"{userComment?.fullName} đã đánh giá vào bài: {job.title}");
+                // A. Trường hợp trả lời bình luận: Thông báo cho người đã viết bình luận gốc
+                var parentComment = await _repo.GetByIdAsync(request.ParentId.Value); // Bạn cần viết thêm hàm này trong Repo
+                if (parentComment != null && parentComment.userId != userId)
+                {
+                    await _notificationRepository.CreateNotificationAsync(
+                        parentComment.userId,
+                        "Có phản hồi mới",
+                        $"{userComment?.fullName} đã trả lời bình luận của bạn trong bài: {job.title}"
+                    );
+                }
+            }
+            else
+            {
+                // B. Trường hợp bình luận gốc: Thông báo cho HR (như cũ)
+                if (job.employerId != userId)
+                {
+                    await _notificationRepository.CreateNotificationAsync(
+                        job.employerId,
+                        "Có bình luận mới",
+                        $"{userComment?.fullName} đã bình luận vào bài: {job.title}"
+                    );
+                }
             }
 
             return _mapper.Map<CommentResponse>(comment);

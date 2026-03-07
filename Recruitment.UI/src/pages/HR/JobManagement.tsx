@@ -4,7 +4,7 @@ import { useEffect } from "react";
 import { fetchMyJobs, toggleJobStatus, deleteJob } from "../../redux/slices/jobSlice";
 import { Button, message, Popconfirm, Space, Switch, Table, Tag } from "antd";
 import dayjs from "dayjs";
-import { DeleteOutlined, EditOutlined, ExclamationCircleOutlined, PlusOutlined, TeamOutlined } from "@ant-design/icons";
+import { DeleteOutlined, EditOutlined, ExclamationCircleOutlined, EyeOutlined, PlusOutlined, TeamOutlined } from "@ant-design/icons";
 import { JobResponse } from "../../types/job";
 
 const JobManagement = () => {
@@ -223,7 +223,16 @@ const JobManagement = () => {
             width: 280,
             fixed: 'right' as const,
             render: (_: any, record: JobResponse) => (
-                <Space size="small">
+                <Space size="small" wrap>
+                    <Button
+                        type="default"
+                        icon={<EyeOutlined />}
+                        onClick={() => navigate(`/hr/job-detail/${record.id}`)}
+                        size="small"
+                        style={{ borderColor: '#00B14F', color: '#00B14F' }}
+                    >
+                        Xem chi tiết
+                    </Button>
                     <Button
                         type="default"
                         icon={<TeamOutlined />}

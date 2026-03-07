@@ -22,9 +22,6 @@ namespace Recruitment.API.DTOs
 
         [Required]
         [StringLength(200, ErrorMessage = "Tên công ty không quá 200 ký tự")]
-        public string? CompanyName { get; set; }
-
-        [Required]
         public int LocationId { get; set; }
         [Required]
         public int CategoryId { get; set; }
@@ -75,9 +72,6 @@ namespace Recruitment.API.DTOs
         // Các properties cơ bản (nullable cho partial)
         [MaxLength(200)]
         public string? Title { get; set; }
-
-        [MaxLength(200)]
-        public string? CompanyName { get; set; }
 
         public string? Description { get; set; }
         public string? Requirement { get; set; }

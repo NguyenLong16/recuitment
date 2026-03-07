@@ -24,6 +24,10 @@
         public List<JobResponse>? PostedJobs { get; set; }
         public int FollowerCount { get; set; }
         public bool IsFollowing { get; set; } // Trạng thái người xem có đang follow người này không
+        public int? CompanyId { get; set; } // Nếu chọn công ty có sẵn
+        public string? NewCompanyName { get; set; } // Nếu tạo công ty mới
+        public string? CompanyWebsite { get; set; } // Link site công ty (như bạn yêu cầu)
+        public string? CompanyAddress { get; set; }
     }
 
     public class ProfileUpdateRequest
@@ -43,6 +47,11 @@
         public IFormFile? AvatarFile { get; set; }
         public IFormFile? CoverFile { get; set; }
         public IFormFile? CvFile { get; set; }
+
+        public int? CompanyId { get; set; }           // ID công ty nếu chọn từ danh sách có sẵn
+        public string? NewCompanyName { get; set; }   // Tên công ty nếu muốn tạo mới
+        public string? CompanyWebsite { get; set; }   // Link website công ty
+        public string? CompanyAddress { get; set; }
     }
 
     public class UserSummaryResponse // DTO rút gọn cho danh sách

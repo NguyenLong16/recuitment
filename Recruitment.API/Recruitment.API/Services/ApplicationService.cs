@@ -6,6 +6,7 @@ using Recruitment.API.Data;
 using Recruitment.API.DTOs;
 using Recruitment.API.Models;
 using Recruitment.API.Services.Interfaces;
+using System.Globalization;
 using static Recruitment.API.Data.Enums;
 
 namespace Recruitment.API.Services
@@ -113,6 +114,59 @@ namespace Recruitment.API.Services
                 .ToListAsync();
 
             return _mapper.Map<IEnumerable<ApplicationResponse>>(applications);
+        }
+
+        public async Task<IEnumerable<ApplicationStatsResponse>> GetApplicationStatisticsAsync(int employerId, string period)
+        {
+            var applications = await GetAllApplicationsForEmployerAsync(employerId);
+
+            // 2. Khai báo biến đúng kiểu DTO (ApplicationResponse)
+            IEnumerable<IGrouping<string, ApplicationResponse>> groupedData;
+
+            switch (period.ToLower())
+            {
+                case "year":
+                    groupedData = applications
+                        // Lưu ý: Kiểm tra trong DTO ApplicationResponse trường ngày tên là AppliedDate hay CreatedDate
+                        .GroupBy(a => a.appliedDate.Year.ToString())
+                        .OrderBy(g => g.Key);
+                    break;
+
+                case "week":
+                    groupedData = applications
+                        .GroupBy(a =>
+                        {
+                            var culture = CultureInfo.CurrentCulture;
+                            // Lưu ý: Kiểm tra tên trường AppliedDate trong DTO
+                            var weekNum = culture.Calendar.GetWeekOfYear(a.appliedDate, CalendarWeekRule.FirstFourDayWeek, DayOfWeek.Monday);
+                            return $"Tuần {weekNum}/{a.appliedDate.Year}";
+                        })
+                        .OrderBy(g => g.Key);
+                    break;
+
+                case "month":
+                default:
+                    groupedData = applications
+                        // Lưu ý: Kiểm tra tên trường AppliedDate trong DTO
+                        .GroupBy(a => a.appliedDate.ToString("MM/yyyy"))
+                        .OrderBy(g => DateTime.ParseExact(g.Key, "MM/yyyy", CultureInfo.InvariantCulture));
+                    break;
+            }
+
+            // 3. Tính toán (QUAN TRỌNG: So sánh Status bằng String)
+            var result = groupedData.Select(g => new ApplicationStatsResponse
+            {
+                Label = g.Key,
+                Total = g.Count(),
+
+                // Vì DTO trả về Status là string, ta phải so sánh với .ToString() của Enum
+                Submitted = g.Count(a => a.status.ToString() == ApplicationStatus.Submitted.ToString()),
+                Interview = g.Count(a => a.status.ToString() == ApplicationStatus.Interview.ToString()),
+                Hired = g.Count(a => a.status.ToString() == ApplicationStatus.Accepted.ToString()),
+                Rejected = g.Count(a => a.status.ToString() == ApplicationStatus.Rejected.ToString())
+            });
+
+            return result;
         }
 
         public async Task<ApplicationResponse> UpdateApplicationStatusAsync(int applicationId, ApplicationStatus newStatus, int employerId)

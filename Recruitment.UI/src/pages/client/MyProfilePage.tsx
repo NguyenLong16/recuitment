@@ -41,7 +41,7 @@ const { Title, Text, Paragraph } = Typography;
 const { TextArea } = Input;
 const PRIMARY_COLOR = "#00B14F";
 const MyProfilePage = () => {
-    const { profile, loading, updating, updateProfile, refetch } = useMyProfile();
+    const { profile, loading, updating, updateProfile, watchFollowerOfHR, refetch } = useMyProfile();
     const { user } = useAppSelector((state) => state.auth);
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
     const [form] = Form.useForm();
@@ -53,6 +53,12 @@ const MyProfilePage = () => {
     const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
     const [coverPreview, setCoverPreview] = useState<string | null>(null);
     const isCandidate = user?.role === Role.Candidate;
+
+    const [modal, setModal] = useState<boolean>(false)
+
+    const handleWatchFollowers = () => {
+
+    }
     // Helper function to build image URL
     const buildImageUrl = (url?: string) => {
         if (!url) return undefined;

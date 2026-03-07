@@ -51,6 +51,7 @@ builder.Services.AddScoped<ISkillRepository, SkillRepository>();
 builder.Services.AddScoped<ISkillService, SkillService>();
 
 builder.Services.AddScoped<IApplicationService, ApplicationService>();
+builder.Services.AddScoped<IApplicationRepository, ApplicationRepository>();
 
 builder.Services.AddScoped<IProfileRepository, ProfileRepository>();
 builder.Services.AddScoped<IProfileService, ProfileService>();

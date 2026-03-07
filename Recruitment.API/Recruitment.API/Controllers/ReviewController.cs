@@ -33,5 +33,20 @@ namespace Recruitment.API.Controllers
 
             return Ok(result);
         }
+
+        [HttpGet("job/{jobId}")]
+        [AllowAnonymous] // Cho phép xem đánh giá mà không cần đăng nhập
+        public async Task<IActionResult> GetJobReviews(int jobId, [FromQuery] int? rating)
+        {
+            try
+            {
+                var result = await _reviewService.GetJobReviewsAsync(jobId, rating);
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return NotFound(new { message = ex.Message });
+            }
+        }
     }
 }

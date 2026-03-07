@@ -28,4 +28,14 @@ namespace Recruitment.API.DTOs
     {
         public ApplicationStatus Status { get; set; }
     }
+
+    public class ApplicationStatsResponse
+    {
+        public string Label { get; set; } // Nhãn hiển thị (VD: "Tháng 1/2026", "Tuần 42")
+        public int Total { get; set; }    // Tổng số hồ sơ
+        public int Submitted { get; set; } // Số lượng Đã nộp
+        public int Interview { get; set; } // Số lượng Phỏng vấn
+        public int Hired { get; set; }     // Số lượng Trúng tuyển
+        public int Rejected { get; set; }  // Số lượng Từ chối
+    }
 }

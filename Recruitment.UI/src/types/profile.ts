@@ -74,3 +74,10 @@ export interface UpdateProfileRequest {
     coverFile?: File;
     cvFile?: File;
 }
+
+export interface WatchFollowerOfHR {
+    id: number;
+    fullName: string;
+    avatarUrl: string;
+    professionalTitle: string;
+} 

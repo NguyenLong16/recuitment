@@ -83,6 +83,22 @@
     "ReturnTypes": []
   },
   {
+    "ContainingType": "Recruitment.API.Controllers.ApplicationController",
+    "Method": "GetStats",
+    "RelativePath": "api/Application/stats",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "period",
+        "Type": "System.String",
+        "IsRequired": false
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
     "ContainingType": "Recruitment.API.Controllers.AuthController",
     "Method": "Login",
     "RelativePath": "api/Auth/login",
@@ -240,11 +256,6 @@
         "IsRequired": false
       },
       {
-        "Name": "CompanyName",
-        "Type": "System.String",
-        "IsRequired": false
-      },
-      {
         "Name": "LocationId",
         "Type": "System.Int32",
         "IsRequired": false
@@ -390,11 +401,6 @@
       },
       {
         "Name": "Title",
-        "Type": "System.String",
-        "IsRequired": false
-      },
-      {
-        "Name": "CompanyName",
         "Type": "System.String",
         "IsRequired": false
       },
@@ -780,6 +786,26 @@
         "Name": "CvFile",
         "Type": "Microsoft.AspNetCore.Http.IFormFile",
         "IsRequired": false
+      },
+      {
+        "Name": "CompanyId",
+        "Type": "System.Nullable\u00601[[System.Int32, System.Private.CoreLib, Version=8.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]",
+        "IsRequired": false
+      },
+      {
+        "Name": "NewCompanyName",
+        "Type": "System.String",
+        "IsRequired": false
+      },
+      {
+        "Name": "CompanyWebsite",
+        "Type": "System.String",
+        "IsRequired": false
+      },
+      {
+        "Name": "CompanyAddress",
+        "Type": "System.String",
+        "IsRequired": false
       }
     ],
     "ReturnTypes": []
@@ -801,6 +827,27 @@
         "Name": "request",
         "Type": "Recruitment.API.DTOs.ReviewCreateRequest",
         "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "Recruitment.API.Controllers.ReviewController",
+    "Method": "GetJobReviews",
+    "RelativePath": "api/Review/job/{jobId}",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "jobId",
+        "Type": "System.Int32",
+        "IsRequired": true
+      },
+      {
+        "Name": "rating",
+        "Type": "System.Nullable\u00601[[System.Int32, System.Private.CoreLib, Version=8.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]",
+        "IsRequired": false
       }
     ],
     "ReturnTypes": []

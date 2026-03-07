@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from "react"
-import { UpdateProfileRequest, UserProfileResponse } from "../types/profile"
+import { UpdateProfileRequest, UserProfileResponse, WatchFollowerOfHR } from "../types/profile"
 import ProfileService from "../services/profileService"
 import { message } from "antd"
 const useMyProfile = () => {
@@ -36,13 +36,19 @@ const useMyProfile = () => {
             setUpdating(false)
         }
     }
+
+    const watchFollowerOfHR = async (id: number): Promise<WatchFollowerOfHR> => {
+        const response = await ProfileService.watchFollowerOfHR(id);
+        return response.data
+    }
     return {
         profile,
         loading,
         updating,
         error,
         updateProfile,
-        refetch: fetchProfile
+        refetch: fetchProfile,
+        watchFollowerOfHR
     }
 }
 export default useMyProfile

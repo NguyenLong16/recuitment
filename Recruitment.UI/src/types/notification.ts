@@ -5,6 +5,8 @@ export interface Notification {
     content: string;
     isRead: boolean;
     createDate: string;
+    notificationType?: string;   // "follow" | "unfollow" | "comment" | "review"
+    referenceId?: number;        // userId (follow/unfollow) hoặc jobId (comment/review)
 }
 
 export interface NotificationState {

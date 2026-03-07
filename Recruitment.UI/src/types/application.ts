@@ -43,3 +43,12 @@ export interface ApplicationForHR {
     resumeUrl: string;
     coverLetter?: string;
 }
+
+export interface ApplicationStatsResponse {
+    label: string;      // Nhãn hiển thị (VD: "01/2026", "Tuần 42")
+    total: number;      // Tổng số hồ sơ
+    submitted: number;  // Đã nộp
+    interview: number;  // Phỏng vấn
+    hired: number;      // Trúng tuyển
+    rejected: number;   // Từ chối
+}

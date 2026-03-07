@@ -43,6 +43,12 @@ const ApplicationService = {
     getAllApplicationsForHR: async () => {
         const response = await axiosClient.get('/Application/all-my-applications');
         return response.data;
+    },
+
+    // Thống kê hồ sơ ứng tuyển cho HR
+    getStats: async (period: string = 'month') => {
+        const response = await axiosClient.get('/Application/stats', { params: { period } });
+        return response.data;
     }
 }
 

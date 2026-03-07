@@ -17,19 +17,36 @@ namespace Recruitment.API.Repositories
             return review;
         }
 
-        public async Task<IEnumerable<Review>> GetByJobIdAsync(int jobId)
-        {
-            return await _context.Reviews
-                .Include(r => r.user)
-                .Where(r => r.jobId == jobId)
-                .ToListAsync();
-        }
 
         public async Task<List<int>> GetRatingsByJobIdAsync(int jobId)
         {
             return await _context.Reviews
                 .Where(r => r.jobId == jobId)
                 .Select(r => r.rating)
+                .ToListAsync();
+        }
+
+        public async Task<IEnumerable<Review>> GetByJobIdAsync(int jobId, int? starRating = null)
+        {
+            var query = _context.Reviews
+                .Include(r => r.user) // Include User để lấy tên và avatar
+                .Where(r => r.jobId == jobId);
+
+            if (starRating.HasValue)
+            {
+                query = query.Where(r => r.rating == starRating.Value);
+            }
+
+            return await query
+                .OrderByDescending(r => r.createdDate)
+                .ToListAsync();
+        }
+
+        // Lấy tất cả review của job để Service tự tính toán thống kê
+        public async Task<List<Review>> GetAllForJobAsync(int jobId)
+        {
+            return await _context.Reviews
+                .Where(r => r.jobId == jobId)
                 .ToListAsync();
         }
 

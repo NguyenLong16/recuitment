@@ -53,6 +53,7 @@ public class AutoMapperProfile : Profile
             .ForMember(dest => dest.DefaultCvUrl, opt => opt.MapFrom(src => src.defaultCvUrl))
             .ForMember(dest => dest.WebsiteUrl, opt => opt.MapFrom(src => src.websiteUrl))
             .ForMember(dest => dest.LinkedInUrl, opt => opt.MapFrom(src => src.linkedInUrl))
+            .ForMember(dest => dest.Company, opt => opt.MapFrom(src => src.company))
             .ForMember(dest => dest.GitHubUrl, opt => opt.MapFrom(src => src.githubUrl));
 
         CreateMap<ProfileUpdateRequest, User>()
@@ -67,11 +68,15 @@ public class AutoMapperProfile : Profile
 
         CreateMap<Comment, CommentResponse>()
             .ForMember(dest => dest.UserName, opt => opt.MapFrom(src => src.user.fullName))
-            .ForMember(dest => dest.UserAvatar, opt => opt.MapFrom(src => src.user.AvatarUrl));
+            .ForMember(dest => dest.UserAvatar, opt => opt.MapFrom(src => src.user.AvatarUrl))
+            .ForMember(dest => dest.Replies, opt => opt.MapFrom(src => src.Replies));
 
         CreateMap<Review, ReviewResponse>()
             .ForMember(dest => dest.UserName, opt => opt.MapFrom(src => src.user.fullName))
-            .ForMember(dest => dest.UserAvatar, opt => opt.MapFrom(src => src.user.AvatarUrl));
+            .ForMember(dest => dest.UserAvatar, opt => opt.MapFrom(src => src.user.AvatarUrl))
+            .ForMember(dest => dest.CreatedDate, opt => opt.MapFrom(src => src.createdDate))
+            .ForMember(dest => dest.Rating, opt => opt.MapFrom(src => src.rating))
+            .ForMember(dest => dest.Comment, opt => opt.MapFrom(src => src.comment));
 
         CreateMap<SavedJob, SavedJobResponse>()
             .ForMember(dest => dest.JobTitle, opt => opt.MapFrom(src => src.job.title))

@@ -1,5 +1,6 @@
 import { useEffect, useState, useRef } from 'react';
-import { Bell, Check, Trash2, X } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { Bell, Check, Trash2, X, ExternalLink } from 'lucide-react';
 import dayjs from 'dayjs';
 import relativeTime from 'dayjs/plugin/relativeTime';
 import 'dayjs/locale/vi';
@@ -10,13 +11,40 @@ import { Notification } from '../../../types/notification';
 dayjs.extend(relativeTime);
 dayjs.locale('vi');
 
+/**
+ * Xác định loại thông báo dựa vào notificationType hoặc fallback bằng title/content
+ */
+const getNotificationType = (notif: Notification): 'follow' | 'comment' | 'review' | 'unknown' => {
+    const type = notif.notificationType?.toLowerCase();
+    if (type === 'follow' || type === 'unfollow') return 'follow';
+    if (type === 'comment') return 'comment';
+    if (type === 'review') return 'review';
+
+    // Fallback: phân tích từ title/content nếu backend chưa gửi notificationType
+    const text = `${notif.title} ${notif.content}`.toLowerCase();
+    if (text.includes('theo dõi') || text.includes('follow') || text.includes('hủy theo dõi') || text.includes('unfollow')) {
+        return 'follow';
+    }
+    if (text.includes('bình luận') || text.includes('comment')) {
+        return 'comment';
+    }
+    if (text.includes('đánh giá') || text.includes('review')) {
+        return 'review';
+    }
+    return 'unknown';
+};
+
 const NotificationDropdown = () => {
     const dispatch = useAppDispatch();
+    const navigate = useNavigate();
     const { notifications, unreadCount, loading } = useAppSelector(state => state.notifications);
+    const { user } = useAppSelector(state => state.auth);
     const [open, setOpen] = useState(false);
     const [selectedNotif, setSelectedNotif] = useState<Notification | null>(null);
     const [detailModalOpen, setDetailModalOpen] = useState(false);
     const dropdownRef = useRef<HTMLDivElement>(null);
+
+    const isHR = user?.role === 'Employer';
 
     useEffect(() => {
         dispatch(fetchNotification());
@@ -45,18 +73,67 @@ const NotificationDropdown = () => {
         };
     }, [open]);
 
+    /**
+     * Điều hướng dựa trên loại thông báo:
+     * - follow/unfollow → trang profile người dùng
+     * - comment/review → trang chi tiết bài đăng (job detail)
+     */
+    const navigateByNotificationType = (notif: Notification) => {
+        const type = getNotificationType(notif);
+        // Ưu tiên referenceId, fallback sang userId
+        const targetId = notif.referenceId || notif.userId;
+
+        if (type === 'follow') {
+            if (isHR) {
+                navigate(`/hr/profile/${targetId}`);
+            } else {
+                navigate(`/profile/${targetId}`);
+            }
+        } else if (type === 'comment' || type === 'review') {
+            if (isHR) {
+                navigate(`/hr/job-detail/${targetId}`);
+            } else {
+                navigate(`/job/${targetId}`);
+            }
+        }
+    };
+
     const handleNotificationClick = async (notif: Notification) => {
         if (!notif.isRead) {
             await dispatch(markNotificationAsRead(notif.id));
         }
+        // Luôn mở modal chi tiết
         setSelectedNotif(notif);
         setDetailModalOpen(true);
         setOpen(false);
     };
 
+    const handleNavigateFromModal = () => {
+        if (!selectedNotif) return;
+        setDetailModalOpen(false);
+        navigateByNotificationType(selectedNotif);
+    };
+
     const handleDelete = async (e: React.MouseEvent, id: number) => {
         e.stopPropagation();
         await dispatch(deleteNotification(id));
+    };
+
+    /**
+     * Icon cho badge loại thông báo
+     */
+    const getTypeLabel = (notif: Notification) => {
+        const type = getNotificationType(notif);
+        switch (type) {
+            case 'follow':
+                return <span className="inline-flex items-center px-1.5 py-0.5 text-[10px] font-medium rounded bg-green-100 text-green-700">👤 Theo dõi</span>;
+            case 'comment':
+                return <span className="inline-flex items-center px-1.5 py-0.5 text-[10px] font-medium rounded bg-blue-100 text-blue-700">💬 Bình luận</span>;
+            case 'review':
+                return <span className="inline-flex items-center px-1.5 py-0.5 text-[10px] font-medium rounded bg-purple-100 text-purple-700">⭐ Đánh giá</span>;
+            default:
+                return null;
+        }
     };
 
     return (
@@ -108,45 +185,61 @@ const NotificationDropdown = () => {
                                 </div>
                             ) : (
                                 <div className="divide-y divide-gray-100">
-                                    {notifications.map((item) => (
-                                        <div
-                                            key={item.id}
-                                            onClick={() => handleNotificationClick(item)}
-                                            className={`flex items-start gap-3 px-5 py-4 cursor-pointer transition-all duration-200 hover:bg-gray-50 group ${!item.isRead ? 'bg-blue-50/50' : ''
-                                                }`}
-                                        >
-                                            {/* Unread Indicator */}
-                                            <div className="flex-shrink-0 mt-1.5">
-                                                {!item.isRead ? (
-                                                    <div className="w-2.5 h-2.5 rounded-full bg-blue-500 shadow-lg shadow-blue-500/50"></div>
-                                                ) : (
-                                                    <div className="w-2.5 h-2.5 rounded-full bg-gray-300"></div>
-                                                )}
-                                            </div>
+                                    {notifications.map((item) => {
+                                        const type = getNotificationType(item);
+                                        const hasNavigation = item.referenceId && type !== 'unknown';
 
-                                            {/* Content */}
-                                            <div className="flex-1 min-w-0">
-                                                <h4 className={`text-sm font-semibold mb-1 truncate ${!item.isRead ? 'text-gray-900' : 'text-gray-700'
-                                                    }`}>
-                                                    {item.title}
-                                                </h4>
-                                                <p className="text-xs text-gray-600 line-clamp-2 leading-relaxed mb-2">
-                                                    {item.content}
-                                                </p>
-                                                <span className="text-xs text-gray-400 font-medium">
-                                                    {dayjs(item.createDate).fromNow()}
-                                                </span>
-                                            </div>
-
-                                            {/* Delete Button */}
-                                            <button
-                                                onClick={(e) => handleDelete(e, item.id)}
-                                                className="flex-shrink-0 p-1.5 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all duration-200 opacity-0 group-hover:opacity-100"
+                                        return (
+                                            <div
+                                                key={item.id}
+                                                onClick={() => handleNotificationClick(item)}
+                                                className={`flex items-start gap-3 px-5 py-4 cursor-pointer transition-all duration-200 hover:bg-gray-50 group ${!item.isRead ? 'bg-blue-50/50' : ''
+                                                    }`}
                                             >
-                                                <Trash2 size={16} />
-                                            </button>
-                                        </div>
-                                    ))}
+                                                {/* Unread Indicator */}
+                                                <div className="flex-shrink-0 mt-1.5">
+                                                    {!item.isRead ? (
+                                                        <div className="w-2.5 h-2.5 rounded-full bg-blue-500 shadow-lg shadow-blue-500/50"></div>
+                                                    ) : (
+                                                        <div className="w-2.5 h-2.5 rounded-full bg-gray-300"></div>
+                                                    )}
+                                                </div>
+
+                                                {/* Content */}
+                                                <div className="flex-1 min-w-0">
+                                                    <div className="flex items-center gap-2 mb-1">
+                                                        <h4 className={`text-sm font-semibold truncate ${!item.isRead ? 'text-gray-900' : 'text-gray-700'
+                                                            }`}>
+                                                            {item.title}
+                                                        </h4>
+                                                        {getTypeLabel(item)}
+                                                    </div>
+                                                    <p className="text-xs text-gray-600 line-clamp-2 leading-relaxed mb-2">
+                                                        {item.content}
+                                                    </p>
+                                                    <div className="flex items-center justify-between">
+                                                        <span className="text-xs text-gray-400 font-medium">
+                                                            {dayjs(item.createDate).fromNow()}
+                                                        </span>
+                                                        {hasNavigation && (
+                                                            <span className="text-xs text-blue-500 flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                                                <ExternalLink size={12} />
+                                                                {type === 'follow' ? 'Xem hồ sơ' : 'Xem bài đăng'}
+                                                            </span>
+                                                        )}
+                                                    </div>
+                                                </div>
+
+                                                {/* Delete Button */}
+                                                <button
+                                                    onClick={(e) => handleDelete(e, item.id)}
+                                                    className="flex-shrink-0 p-1.5 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all duration-200 opacity-0 group-hover:opacity-100"
+                                                >
+                                                    <Trash2 size={16} />
+                                                </button>
+                                            </div>
+                                        );
+                                    })}
                                 </div>
                             )}
                         </div>
@@ -154,7 +247,7 @@ const NotificationDropdown = () => {
                 )}
             </div>
 
-            {/* Detail Modal */}
+            {/* Detail Modal (fallback khi không có referenceId) */}
             {detailModalOpen && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-fadeIn">
                     <div className="bg-white rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden animate-scaleIn">
@@ -222,7 +315,36 @@ const NotificationDropdown = () => {
                         )}
 
                         {/* Modal Footer */}
-                        <div className="px-6 py-4 bg-gray-50 border-t border-gray-200 flex justify-end">
+                        <div className="px-6 py-4 bg-gray-50 border-t border-gray-200 flex justify-between items-center">
+                            {/* Nút điều hướng theo loại thông báo */}
+                            <div>
+                                {selectedNotif && (() => {
+                                    const type = getNotificationType(selectedNotif);
+                                    if (type === 'follow') {
+                                        return (
+                                            <button
+                                                onClick={handleNavigateFromModal}
+                                                className="inline-flex items-center gap-2 px-4 py-2.5 text-sm font-semibold text-white bg-gradient-to-r from-green-500 to-emerald-600 rounded-lg hover:from-green-600 hover:to-emerald-700 transition-all duration-200 shadow-md hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-green-400/40"
+                                            >
+                                                <ExternalLink size={16} />
+                                                Xem hồ sơ
+                                            </button>
+                                        );
+                                    }
+                                    if (type === 'comment' || type === 'review') {
+                                        return (
+                                            <button
+                                                onClick={handleNavigateFromModal}
+                                                className="inline-flex items-center gap-2 px-4 py-2.5 text-sm font-semibold text-white bg-gradient-to-r from-blue-500 to-indigo-600 rounded-lg hover:from-blue-600 hover:to-indigo-700 transition-all duration-200 shadow-md hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-blue-400/40"
+                                            >
+                                                <ExternalLink size={16} />
+                                                Xem bài đăng
+                                            </button>
+                                        );
+                                    }
+                                    return null;
+                                })()}
+                            </div>
                             <button
                                 onClick={() => setDetailModalOpen(false)}
                                 className="px-5 py-2.5 text-sm font-semibold text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-gray-400/20"

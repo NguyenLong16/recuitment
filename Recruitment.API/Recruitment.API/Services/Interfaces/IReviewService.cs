@@ -8,5 +8,8 @@ namespace Recruitment.API.Services.Interfaces
     public interface IReviewService
     {
         Task<ReviewResponse> PostReviewAsync(int userId, int jobId, ReviewCreateRequest request);
+
+        // Hàm mới: Lấy thống kê và danh sách
+        Task<ReviewSummaryResponse> GetJobReviewsAsync(int jobId, int? starRating = null);
     }
 }

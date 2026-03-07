@@ -21,6 +21,7 @@ namespace Recruitment.API.Repositories
         {
             return await _context.Comments
                 .Include(c => c.user)
+                .Include(c => c.Replies)
                 .Where(c => c.jobId == jobId)
                 .OrderByDescending(c => c.createdDate)
                 .ToListAsync();
@@ -32,5 +33,9 @@ namespace Recruitment.API.Repositories
                 .CountAsync(c => c.jobId == jobId);
         }
 
+        public async Task<Comment> GetByIdAsync(int id)
+        {
+            return await _context.Comments.FindAsync(id);
+        }
     }
 }

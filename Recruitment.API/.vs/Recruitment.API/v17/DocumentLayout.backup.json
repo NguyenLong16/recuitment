@@ -7,32 +7,16 @@
       "RelativeMoniker": "D:0:0:{C5CC63EB-D88F-45C4-AA87-7D3AF0F156AA}|Recruitment.API\\Recruitment.API.csproj|solutionrelative:recruitment.api\\services\\profileservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{C5CC63EB-D88F-45C4-AA87-7D3AF0F156AA}|Recruitment.API\\Recruitment.API.csproj|f:\\workspace\\tuy\u1EC3n d\u1EE5ng\\recruitment.api\\recruitment.api\\mappings\\automapperprofile.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{C5CC63EB-D88F-45C4-AA87-7D3AF0F156AA}|Recruitment.API\\Recruitment.API.csproj|solutionrelative:recruitment.api\\mappings\\automapperprofile.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{C5CC63EB-D88F-45C4-AA87-7D3AF0F156AA}|Recruitment.API\\Recruitment.API.csproj|f:\\workspace\\tuy\u1EC3n d\u1EE5ng\\recruitment.api\\recruitment.api\\controllers\\profilecontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{C5CC63EB-D88F-45C4-AA87-7D3AF0F156AA}|Recruitment.API\\Recruitment.API.csproj|solutionrelative:recruitment.api\\controllers\\profilecontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{C5CC63EB-D88F-45C4-AA87-7D3AF0F156AA}|Recruitment.API\\Recruitment.API.csproj|f:\\workspace\\tuy\u1EC3n d\u1EE5ng\\recruitment.api\\recruitment.api\\models\\user.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{C5CC63EB-D88F-45C4-AA87-7D3AF0F156AA}|Recruitment.API\\Recruitment.API.csproj|solutionrelative:recruitment.api\\models\\user.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{C5CC63EB-D88F-45C4-AA87-7D3AF0F156AA}|Recruitment.API\\Recruitment.API.csproj|f:\\workspace\\tuy\u1EC3n d\u1EE5ng\\recruitment.api\\recruitment.api\\services\\applicationservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{C5CC63EB-D88F-45C4-AA87-7D3AF0F156AA}|Recruitment.API\\Recruitment.API.csproj|solutionrelative:recruitment.api\\services\\applicationservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{C5CC63EB-D88F-45C4-AA87-7D3AF0F156AA}|Recruitment.API\\Recruitment.API.csproj|f:\\workspace\\tuy\u1EC3n d\u1EE5ng\\recruitment.api\\recruitment.api\\dtos\\authdtos.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{C5CC63EB-D88F-45C4-AA87-7D3AF0F156AA}|Recruitment.API\\Recruitment.API.csproj|solutionrelative:recruitment.api\\dtos\\authdtos.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{C5CC63EB-D88F-45C4-AA87-7D3AF0F156AA}|Recruitment.API\\Recruitment.API.csproj|f:\\workspace\\tuy\u1EC3n d\u1EE5ng\\recruitment.api\\recruitment.api\\services\\commentservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{C5CC63EB-D88F-45C4-AA87-7D3AF0F156AA}|Recruitment.API\\Recruitment.API.csproj|solutionrelative:recruitment.api\\services\\commentservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{C5CC63EB-D88F-45C4-AA87-7D3AF0F156AA}|Recruitment.API\\Recruitment.API.csproj|f:\\workspace\\tuy\u1EC3n d\u1EE5ng\\recruitment.api\\recruitment.api\\services\\reviewsevice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{C5CC63EB-D88F-45C4-AA87-7D3AF0F156AA}|Recruitment.API\\Recruitment.API.csproj|solutionrelative:recruitment.api\\services\\reviewsevice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{C5CC63EB-D88F-45C4-AA87-7D3AF0F156AA}|Recruitment.API\\Recruitment.API.csproj|f:\\workspace\\tuy\u1EC3n d\u1EE5ng\\recruitment.api\\recruitment.api\\repositories\\commentrepository.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{C5CC63EB-D88F-45C4-AA87-7D3AF0F156AA}|Recruitment.API\\Recruitment.API.csproj|solutionrelative:recruitment.api\\repositories\\commentrepository.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{C5CC63EB-D88F-45C4-AA87-7D3AF0F156AA}|Recruitment.API\\Recruitment.API.csproj|f:\\workspace\\tuy\u1EC3n d\u1EE5ng\\recruitment.api\\recruitment.api\\migrations\\20260121091051_fixregister.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{C5CC63EB-D88F-45C4-AA87-7D3AF0F156AA}|Recruitment.API\\Recruitment.API.csproj|solutionrelative:recruitment.api\\migrations\\20260121091051_fixregister.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{C5CC63EB-D88F-45C4-AA87-7D3AF0F156AA}|Recruitment.API\\Recruitment.API.csproj|f:\\workspace\\tuy\u1EC3n d\u1EE5ng\\recruitment.api\\recruitment.api\\controllers\\applicationcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{C5CC63EB-D88F-45C4-AA87-7D3AF0F156AA}|Recruitment.API\\Recruitment.API.csproj|solutionrelative:recruitment.api\\controllers\\applicationcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     }
   ],
   "DocumentGroupContainers": [
@@ -42,12 +26,8 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": 1,
+          "SelectedChildIndex": 0,
           "Children": [
-            {
-              "$type": "Bookmark",
-              "Name": "ST:0:0:{aa2115a1-9712-457b-9047-dbb71ca2cdd2}"
-            },
             {
               "$type": "Document",
               "DocumentIndex": 0,
@@ -56,98 +36,53 @@
               "RelativeDocumentMoniker": "Recruitment.API\\Services\\ProfileService.cs",
               "ToolTip": "F:\\WorkSpace\\Tuy\u1EC3n D\u1EE5ng\\Recruitment.API\\Recruitment.API\\Services\\ProfileService.cs",
               "RelativeToolTip": "Recruitment.API\\Services\\ProfileService.cs",
-              "ViewState": "AgIAACkAAAAAAAAAAAAAADEAAAAIAAAAAAAAAA==",
+              "ViewState": "AgIAABIAAAAAAAAAAADwvyIAAABHAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-01-21T09:16:18.506Z",
+              "WhenOpened": "2026-03-02T15:53:15.517Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
               "DocumentIndex": 1,
-              "Title": "AutoMapperProfile.cs",
-              "DocumentMoniker": "F:\\WorkSpace\\Tuy\u1EC3n D\u1EE5ng\\Recruitment.API\\Recruitment.API\\Mappings\\AutoMapperProfile.cs",
-              "RelativeDocumentMoniker": "Recruitment.API\\Mappings\\AutoMapperProfile.cs",
-              "ToolTip": "F:\\WorkSpace\\Tuy\u1EC3n D\u1EE5ng\\Recruitment.API\\Recruitment.API\\Mappings\\AutoMapperProfile.cs",
-              "RelativeToolTip": "Recruitment.API\\Mappings\\AutoMapperProfile.cs",
-              "ViewState": "AgIAAC0AAAAAAAAAAAAkwEEAAAAuAAAAAAAAAA==",
+              "Title": "ProfileController.cs",
+              "DocumentMoniker": "F:\\WorkSpace\\Tuy\u1EC3n D\u1EE5ng\\Recruitment.API\\Recruitment.API\\Controllers\\ProfileController.cs",
+              "RelativeDocumentMoniker": "Recruitment.API\\Controllers\\ProfileController.cs",
+              "ToolTip": "F:\\WorkSpace\\Tuy\u1EC3n D\u1EE5ng\\Recruitment.API\\Recruitment.API\\Controllers\\ProfileController.cs",
+              "RelativeToolTip": "Recruitment.API\\Controllers\\ProfileController.cs",
+              "ViewState": "AgIAAA4AAAAAAAAAAAAAwBoAAABDAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-01-21T09:14:36.572Z"
+              "WhenOpened": "2026-03-02T15:52:59.854Z",
+              "EditorCaption": ""
             },
             {
-              "$type": "Document",
-              "DocumentIndex": 7,
-              "Title": "20260121091051_fixRegister.cs",
-              "DocumentMoniker": "F:\\WorkSpace\\Tuy\u1EC3n D\u1EE5ng\\Recruitment.API\\Recruitment.API\\Migrations\\20260121091051_fixRegister.cs",
-              "RelativeDocumentMoniker": "Recruitment.API\\Migrations\\20260121091051_fixRegister.cs",
-              "ToolTip": "F:\\WorkSpace\\Tuy\u1EC3n D\u1EE5ng\\Recruitment.API\\Recruitment.API\\Migrations\\20260121091051_fixRegister.cs",
-              "RelativeToolTip": "Recruitment.API\\Migrations\\20260121091051_fixRegister.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-01-21T09:10:52.004Z"
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{aa2115a1-9712-457b-9047-dbb71ca2cdd2}"
             },
             {
               "$type": "Document",
               "DocumentIndex": 2,
-              "Title": "User.cs",
-              "DocumentMoniker": "F:\\WorkSpace\\Tuy\u1EC3n D\u1EE5ng\\Recruitment.API\\Recruitment.API\\Models\\User.cs",
-              "RelativeDocumentMoniker": "Recruitment.API\\Models\\User.cs",
-              "ToolTip": "F:\\WorkSpace\\Tuy\u1EC3n D\u1EE5ng\\Recruitment.API\\Recruitment.API\\Models\\User.cs",
-              "RelativeToolTip": "Recruitment.API\\Models\\User.cs",
-              "ViewState": "AgIAAAMAAAAAAAAAAAAAAA4AAAAWAAAAAAAAAA==",
+              "Title": "ApplicationService.cs",
+              "DocumentMoniker": "F:\\WorkSpace\\Tuy\u1EC3n D\u1EE5ng\\Recruitment.API\\Recruitment.API\\Services\\ApplicationService.cs",
+              "RelativeDocumentMoniker": "Recruitment.API\\Services\\ApplicationService.cs",
+              "ToolTip": "F:\\WorkSpace\\Tuy\u1EC3n D\u1EE5ng\\Recruitment.API\\Recruitment.API\\Services\\ApplicationService.cs",
+              "RelativeToolTip": "Recruitment.API\\Services\\ApplicationService.cs",
+              "ViewState": "AgIAAHUAAAAAAAAAAAAcwHYAAAA+AAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-01-21T09:10:05.636Z"
+              "WhenOpened": "2026-03-02T15:09:19.017Z",
+              "EditorCaption": ""
             },
             {
               "$type": "Document",
               "DocumentIndex": 3,
-              "Title": "AuthDtos.cs",
-              "DocumentMoniker": "F:\\WorkSpace\\Tuy\u1EC3n D\u1EE5ng\\Recruitment.API\\Recruitment.API\\DTOs\\AuthDtos.cs",
-              "RelativeDocumentMoniker": "Recruitment.API\\DTOs\\AuthDtos.cs",
-              "ToolTip": "F:\\WorkSpace\\Tuy\u1EC3n D\u1EE5ng\\Recruitment.API\\Recruitment.API\\DTOs\\AuthDtos.cs",
-              "RelativeToolTip": "Recruitment.API\\DTOs\\AuthDtos.cs",
-              "ViewState": "AgIAAAIAAAAAAAAAAAAxwAgAAAAnAAAAAAAAAA==",
+              "Title": "ApplicationController.cs",
+              "DocumentMoniker": "F:\\WorkSpace\\Tuy\u1EC3n D\u1EE5ng\\Recruitment.API\\Recruitment.API\\Controllers\\ApplicationController.cs",
+              "RelativeDocumentMoniker": "Recruitment.API\\Controllers\\ApplicationController.cs",
+              "ToolTip": "F:\\WorkSpace\\Tuy\u1EC3n D\u1EE5ng\\Recruitment.API\\Recruitment.API\\Controllers\\ApplicationController.cs",
+              "RelativeToolTip": "Recruitment.API\\Controllers\\ApplicationController.cs",
+              "ViewState": "AgIAAFwAAAAAAAAAAAAswHUAAABTAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-01-21T09:09:50.419Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 5,
-              "Title": "ReviewSevice.cs",
-              "DocumentMoniker": "F:\\WorkSpace\\Tuy\u1EC3n D\u1EE5ng\\Recruitment.API\\Recruitment.API\\Services\\ReviewSevice.cs",
-              "RelativeDocumentMoniker": "Recruitment.API\\Services\\ReviewSevice.cs",
-              "ToolTip": "F:\\WorkSpace\\Tuy\u1EC3n D\u1EE5ng\\Recruitment.API\\Recruitment.API\\Services\\ReviewSevice.cs",
-              "RelativeToolTip": "Recruitment.API\\Services\\ReviewSevice.cs",
-              "ViewState": "AgIAABMAAAAAAAAAAAAzwCkAAAAAAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-01-19T08:05:58.413Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 6,
-              "Title": "CommentRepository.cs",
-              "DocumentMoniker": "F:\\WorkSpace\\Tuy\u1EC3n D\u1EE5ng\\Recruitment.API\\Recruitment.API\\Repositories\\CommentRepository.cs",
-              "RelativeDocumentMoniker": "Recruitment.API\\Repositories\\CommentRepository.cs",
-              "ToolTip": "F:\\WorkSpace\\Tuy\u1EC3n D\u1EE5ng\\Recruitment.API\\Recruitment.API\\Repositories\\CommentRepository.cs",
-              "RelativeToolTip": "Recruitment.API\\Repositories\\CommentRepository.cs",
-              "ViewState": "AgIAAAYAAAAAAAAAAAAAACQAAAAAAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-01-19T07:01:25.048Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 4,
-              "Title": "CommentService.cs",
-              "DocumentMoniker": "F:\\WorkSpace\\Tuy\u1EC3n D\u1EE5ng\\Recruitment.API\\Recruitment.API\\Services\\CommentService.cs",
-              "RelativeDocumentMoniker": "Recruitment.API\\Services\\CommentService.cs",
-              "ToolTip": "F:\\WorkSpace\\Tuy\u1EC3n D\u1EE5ng\\Recruitment.API\\Recruitment.API\\Services\\CommentService.cs",
-              "RelativeToolTip": "Recruitment.API\\Services\\CommentService.cs",
-              "ViewState": "AgIAABIAAAAAAAAAAAAYwCwAAABWAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-01-19T07:00:33.768Z"
-            },
-            {
-              "$type": "Bookmark",
-              "Name": "ST:0:0:{34e76e81-ee4a-11d0-ae2e-00a0c90fffc3}"
+              "WhenOpened": "2026-03-02T15:08:23.125Z",
+              "EditorCaption": ""
             }
           ]
         }

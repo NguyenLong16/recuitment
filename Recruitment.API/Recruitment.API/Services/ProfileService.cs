@@ -1,6 +1,8 @@
 ﻿using AutoMapper;
 using CloudinaryDotNet;
 using CloudinaryDotNet.Actions;
+using Microsoft.EntityFrameworkCore;
+using Recruitment.API.Data;
 using Recruitment.API.DTOs;
 using Recruitment.API.Models;
 using Recruitment.API.Repositories;
@@ -16,13 +18,15 @@ namespace Recruitment.API.Services
         private readonly INotificationRepository _notificationRepository;
         private readonly Cloudinary _cloudinary;
         private readonly IMapper _mapper;
-        public ProfileService(IUserRepository userRepository, Cloudinary cloudinary, IMapper mapper, IProfileRepository profileRepository, INotificationRepository notificationRepository   )
+        private readonly AppDbContext _context;
+        public ProfileService(IUserRepository userRepository, Cloudinary cloudinary, IMapper mapper, IProfileRepository profileRepository, INotificationRepository notificationRepository, AppDbContext context   )
         {
             _userRepository = userRepository;
             _cloudinary = cloudinary;
             _mapper = mapper;
             _profileRepository = profileRepository;
             _notificationRepository = notificationRepository;
+            _context = context;
         }
 
         public async Task<UserProfileResponse> GetProfileAsync(int userId, int? currentViewerId = null)
@@ -72,10 +76,70 @@ namespace Recruitment.API.Services
                 user.defaultCvUrl = await UploadMediaAsync(request.CvFile, "resumes", false);
             }
 
+            if (user.role.roleName == "Employer")
+            {
+                // TRƯỜNG HỢP 1: Chọn công ty có sẵn
+                if (request.CompanyId.HasValue && request.CompanyId > 0)
+                {
+                    var existingCompany = await _context.Companies.FindAsync(request.CompanyId.Value);
+                    if (existingCompany != null)
+                    {
+                        user.companyId = existingCompany.id;
+                    }
+                }
+                // TRƯỜNG HỢP 2: Tạo công ty mới (Nếu nhập tên công ty mới)
+                else if (!string.IsNullOrEmpty(request.NewCompanyName))
+                {
+                    // Kiểm tra xem công ty này đã tồn tại chưa để tránh trùng lặp
+                    var existingCompany = await _context.Companies
+                        .FirstOrDefaultAsync(c => c.companyName.ToLower() == request.NewCompanyName.ToLower());
+
+                    if (existingCompany != null)
+                    {
+                        user.companyId = existingCompany.id; // Nếu có rồi thì link luôn
+                    }
+                    else
+                    {
+                        // Tạo mới
+                        var newCompany = new Company
+                        {
+                            companyName = request.NewCompanyName,
+                            websiteLink = request.CompanyWebsite, // Cập nhật link site
+                            address = request.CompanyAddress,
+                            size = 0 // Mặc định
+                        };
+                        _context.Companies.Add(newCompany);
+                        await _context.SaveChangesAsync(); // Save để lấy ID
+
+                        user.companyId = newCompany.id; // Link user vào công ty mới
+                    }
+                }
+
+                // TRƯỜNG HỢP 3: Cập nhật thông tin công ty hiện tại (Ví dụ: Update Link Website)
+                if (user.companyId.HasValue)
+                {
+                    var myCompany = await _context.Companies.FindAsync(user.companyId.Value);
+                    if (myCompany != null)
+                    {
+                        if (!string.IsNullOrEmpty(request.CompanyWebsite)) myCompany.websiteLink = request.CompanyWebsite;
+                        if (!string.IsNullOrEmpty(request.CompanyAddress)) myCompany.address = request.CompanyAddress;
+                        // Cập nhật lại Company
+                        _context.Companies.Update(myCompany);
+                    }
+                }
+            }
+
             await _userRepository.UpdateAsync(user);
 
             var response = _mapper.Map<UserProfileResponse>(user);
             response.DefaultCvUrl = user.defaultCvUrl;
+
+            if (user.companyId.HasValue)
+            {
+                // Load lại company để trả về response đầy đủ nhất (vì vừa có thể bị sửa link website)
+                var company = await _context.Companies.FindAsync(user.companyId.Value);
+                response.Company = _mapper.Map<CompanyResponse>(company);
+            }
 
             return response;
 

@@ -103,5 +103,25 @@ namespace Recruitment.API.Controllers
                 return BadRequest(new { message = ex.Message });
             }
         }
+
+        [HttpGet("stats")]
+        public async Task<IActionResult> GetStats([FromQuery] string period = "month")
+        {
+            try
+            {
+                // Lấy ID của HR đang đăng nhập
+                var userIdString = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+                if (string.IsNullOrEmpty(userIdString)) return Unauthorized();
+
+                int employerId = int.Parse(userIdString);
+
+                var stats = await _applicationService.GetApplicationStatisticsAsync(employerId, period);
+                return Ok(stats);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+        }
     }
 }

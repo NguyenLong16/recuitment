@@ -50,6 +50,10 @@ const ProfileService = {
 
     unfollowHR: (employerId: number) => {
         return axiosClient.delete(`/Profile/unfollow/${employerId}`)
+    },
+
+    watchFollowerOfHR: (id: number) => {
+        return axiosClient.get(`/Profile/${id}/followers`)
     }
 }
 

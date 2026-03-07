@@ -86,31 +86,12 @@ namespace Recruitment.API.Services
                     .FirstOrDefaultAsync(u => u.id == employerId)
                     ?? throw new Exception("Employer not found");
 
-                Company company;
-
-                if (employer.companyId.HasValue)
+                if (!employer.companyId.HasValue || employer.company == null)
                 {
-                    company = await _context.Companies.FindAsync(employer.companyId.Value)
-                        ?? throw new Exception("Company not found");
-
-                    if (!string.IsNullOrEmpty(request.CompanyName))
-                        company.companyName = request.CompanyName;
+                    throw new Exception("Bạn chưa cập nhật thông tin công ty trong hồ sơ. Vui lòng cập nhật Profile trước khi đăng tin.");
                 }
-                else
-                {
-                    // Tạo Company KHÔNG có employerId (Company không có field này)
-                    company = new Company
-                    {
-                        companyName = request.CompanyName ?? "Chưa đặt tên"
-                    };
-                    _context.Companies.Add(company);
-                    await _context.SaveChangesAsync();  // Save để lấy ID
 
-                    // Link employer đến company
-                    employer.companyId = company.id;
-                    _context.Users.Update(employer);
-                    await _context.SaveChangesAsync();  // Save link
-                }
+                int companyId = employer.companyId.Value;
 
                 // Upload ảnh nếu có file
                 string? imageUrl = null;
@@ -131,7 +112,7 @@ namespace Recruitment.API.Services
                     categoryId = request.CategoryId,
                     jobType = request.JobType,
                     deadline = request.Deadline,
-                    companyId = company.id,
+                    companyId = companyId,
                     employerId = employerId,
                     status = JobStatus.Active,
                     createdDate = DateTime.Now,
@@ -220,32 +201,6 @@ namespace Recruitment.API.Services
                     job.categoryId = request.CategoryId.Value;
                 }
 
-                Company? company = job.company;
-                if (!string.IsNullOrEmpty(request.CompanyName))
-                {
-                    if (company == null)
-                    {
-                        // Tạo mới KHÔNG có employerId
-                        company = new Company { companyName = request.CompanyName };
-                        _context.Companies.Add(company);
-                        await _context.SaveChangesAsync();  // Save để lấy ID
-                        job.companyId = company.id;
-
-                        // Optional - Link employer nếu chưa có company
-                        var employer = await _context.Users.FindAsync(employerId);
-                        if (!employer.companyId.HasValue)
-                        {
-                            employer.companyId = company.id;
-                            _context.Users.Update(employer);
-                            await _context.SaveChangesAsync();
-                        }
-                    }
-                    else
-                    {
-                        company.companyName = request.CompanyName;
-                    }
-                }
-
                 if (request.JobType.HasValue) job.jobType = request.JobType.Value;
 
                 if (request.Deadline.HasValue)
@@ -302,8 +257,7 @@ namespace Recruitment.API.Services
                 }
             }
 
-            _context.Jobs.Update(job);  // Update Job (cascade nếu configured)
-                if (company != null) _context.Companies.Update(company);  // Explicit update Company
+                _context.Jobs.Update(job);  // Update Job (cascade nếu configured)
                 await _context.SaveChangesAsync();
 
                 return await GetJobByIdAsync(job.id);

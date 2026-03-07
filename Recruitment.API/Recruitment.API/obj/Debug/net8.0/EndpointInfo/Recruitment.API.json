@@ -143,6 +143,28 @@
         }
       }
     },
+    "/api/Application/stats": {
+      "get": {
+        "tags": [
+          "Application"
+        ],
+        "parameters": [
+          {
+            "name": "period",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "default": "month"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
     "/api/Auth/register": {
       "post": {
         "tags": [
@@ -339,7 +361,6 @@
               "schema": {
                 "required": [
                   "CategoryId",
-                  "CompanyName",
                   "Deadline",
                   "Description",
                   "JobType",
@@ -370,12 +391,9 @@
                     "type": "number",
                     "format": "double"
                   },
-                  "CompanyName": {
+                  "LocationId": {
                     "maxLength": 200,
                     "minLength": 0,
-                    "type": "string"
-                  },
-                  "LocationId": {
                     "type": "integer",
                     "format": "int32"
                   },
@@ -420,9 +438,6 @@
                   "style": "form"
                 },
                 "SalaryMax": {
-                  "style": "form"
-                },
-                "CompanyName": {
                   "style": "form"
                 },
                 "LocationId": {
@@ -659,10 +674,6 @@
                     "maxLength": 200,
                     "type": "string"
                   },
-                  "CompanyName": {
-                    "maxLength": 200,
-                    "type": "string"
-                  },
                   "Description": {
                     "type": "string"
                   },
@@ -713,9 +724,6 @@
               },
               "encoding": {
                 "Title": {
-                  "style": "form"
-                },
-                "CompanyName": {
                   "style": "form"
                 },
                 "Description": {
@@ -1120,6 +1128,19 @@
                   "CvFile": {
                     "type": "string",
                     "format": "binary"
+                  },
+                  "CompanyId": {
+                    "type": "integer",
+                    "format": "int32"
+                  },
+                  "NewCompanyName": {
+                    "type": "string"
+                  },
+                  "CompanyWebsite": {
+                    "type": "string"
+                  },
+                  "CompanyAddress": {
+                    "type": "string"
                   }
                 }
               },
@@ -1155,6 +1176,18 @@
                   "style": "form"
                 },
                 "CvFile": {
+                  "style": "form"
+                },
+                "CompanyId": {
+                  "style": "form"
+                },
+                "NewCompanyName": {
+                  "style": "form"
+                },
+                "CompanyWebsite": {
+                  "style": "form"
+                },
+                "CompanyAddress": {
                   "style": "form"
                 }
               }
@@ -1277,6 +1310,35 @@
             "description": "OK"
           }
         }
+      },
+      "get": {
+        "tags": [
+          "Review"
+        ],
+        "parameters": [
+          {
+            "name": "jobId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "rating",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
       }
     },
     "/api/SavedJob/{jobId}": {
@@ -1372,6 +1434,11 @@
         "properties": {
           "content": {
             "type": "string",
+            "nullable": true
+          },
+          "parentId": {
+            "type": "integer",
+            "format": "int32",
             "nullable": true
           }
         },

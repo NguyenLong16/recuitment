@@ -47,5 +47,49 @@ namespace Recruitment.API.Services
             }
             return _mapper.Map<ReviewResponse>(review);
         }
+
+        public async Task<ReviewSummaryResponse> GetJobReviewsAsync(int jobId, int? starRating = null)
+        {
+            // 1. Kiểm tra Job có tồn tại không
+            var job = await _jobRepository.GetByIdAsync(jobId);
+            if (job == null) throw new Exception("Không tìm thấy bài tuyển dụng");
+
+            // 2. Lấy tất cả review để tính thống kê (Average, Count per star)
+            // Lưu ý: Phần thống kê luôn tính trên TOÀN BỘ review, không bị ảnh hưởng bởi bộ lọc
+            var allReviews = await _repo.GetAllForJobAsync(jobId);
+
+            var totalReviews = allReviews.Count;
+            double averageRating = 0;
+            var starCounts = new Dictionary<int, int> { { 5, 0 }, { 4, 0 }, { 3, 0 }, { 2, 0 }, { 1, 0 } };
+
+            if (totalReviews > 0)
+            {
+                averageRating = Math.Round(allReviews.Average(r => r.rating), 1); // Làm tròn 1 chữ số thập phân
+
+                // Đếm số lượng từng sao
+                var grouped = allReviews.GroupBy(r => r.rating)
+                                        .Select(g => new { Rating = g.Key, Count = g.Count() });
+
+                foreach (var g in grouped)
+                {
+                    if (starCounts.ContainsKey(g.Rating))
+                    {
+                        starCounts[g.Rating] = g.Count;
+                    }
+                }
+            }
+
+            // 3. Lấy danh sách review chi tiết (Có áp dụng bộ lọc starRating nếu user chọn)
+            var filteredReviews = await _repo.GetByJobIdAsync(jobId, starRating);
+
+            // 4. Đóng gói vào DTO
+            return new ReviewSummaryResponse
+            {
+                AverageRating = averageRating,
+                TotalReviews = totalReviews,
+                StarCounts = starCounts,
+                Reviews = _mapper.Map<IEnumerable<ReviewResponse>>(filteredReviews)
+            };
+        }
     }
 }

@@ -95,6 +95,8 @@ const AppRoutes = () => {
                         <Route path="/hr/post-job" element={<JobForm />} />
                         <Route path="/hr/edit-job/:id" element={<JobForm />} />
                         <Route path="/hr/my-profile" element={<MyProfilePage />} />
+                        <Route path="/hr/profile/:id" element={<HRProfilePage />} />
+                        <Route path="/hr/job-detail/:id" element={<JobDetailPage />} />
                     </Route>
                 </Route>
 

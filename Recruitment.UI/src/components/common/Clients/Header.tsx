@@ -58,7 +58,7 @@ const Header = () => {
     ]
 
     const hrServiceItems: MenuProps['items'] = [
-        { key: '1', label: 'Mua dịch vụ' },
+        { key: '1', label: <Link to="hr/dashboard">Thống kê</Link> },
         { key: '2', label: 'Lịch sử đơn hàng' },
         { key: '3', label: 'Kích hoạt mã' },
     ];
@@ -116,7 +116,7 @@ const Header = () => {
                                         <Dropdown menu={{ items: hrServiceItems }} placement="bottomLeft">
                                             <button className="flex items-center space-x-1 text-gray-700 hover:text-blue-600 transition-colors py-2">
                                                 <BarChart size={18} className="mr-1" />
-                                                <span className="font-medium">Dịch vụ & Báo cáo</span>
+                                                <span className="font-medium">Thống kê & Báo cáo</span>
                                                 <ChevronDown size={14} />
                                             </button>
                                         </Dropdown>
