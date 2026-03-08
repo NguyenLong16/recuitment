@@ -49,7 +49,9 @@ namespace Recruitment.API.Services
                     await _notificationRepository.CreateNotificationAsync(
                         parentComment.userId,
                         "Có phản hồi mới",
-                        $"{userComment?.fullName} đã trả lời bình luận của bạn trong bài: {job.title}"
+                        $"{userComment?.fullName} đã trả lời bình luận của bạn trong bài: {job.title}",
+                        "REPLY", // THÊM MỚI: Loại thông báo
+                        jobId
                     );
                 }
             }
@@ -61,7 +63,9 @@ namespace Recruitment.API.Services
                     await _notificationRepository.CreateNotificationAsync(
                         job.employerId,
                         "Có bình luận mới",
-                        $"{userComment?.fullName} đã bình luận vào bài: {job.title}"
+                        $"{userComment?.fullName} đã bình luận vào bài: {job.title}",
+                        "COMMENT", // THÊM MỚI: Loại thông báo
+                        jobId
                     );
                 }
             }

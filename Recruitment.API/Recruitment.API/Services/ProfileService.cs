@@ -183,7 +183,8 @@ namespace Recruitment.API.Services
                     content = $"{follower?.fullName} đã bắt đầu theo dõi bạn.",
                     isRead = false,
                     createDate = DateTime.Now,
-                    applicationId = null // Không liên quan đến đơn ứng tuyển
+                    type = "FOLLOW",            // Gán loại thông báo là FOLLOW
+                    referenceId = followerId
                 };
 
                 await _notificationRepository.CreateAsync(notification);
@@ -215,7 +216,8 @@ namespace Recruitment.API.Services
                     content = $"{follower?.fullName} đã ngừng theo dõi trang cá nhân của bạn.",
                     isRead = false,
                     createDate = DateTime.Now,
-                    applicationId = null
+                    type = "UNFOLLOW",            // Gán loại thông báo là FOLLOW
+                    referenceId = followerId
                 };
 
                 // Lưu thông báo vào bảng Notifications

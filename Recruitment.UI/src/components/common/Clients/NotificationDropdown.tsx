@@ -1,37 +1,99 @@
 import { useEffect, useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Bell, Check, Trash2, X, ExternalLink } from 'lucide-react';
+import { Bell, Check, Trash2, X, ExternalLink, Briefcase, Star, MessageCircle, UserPlus, UserMinus } from 'lucide-react';
 import dayjs from 'dayjs';
 import relativeTime from 'dayjs/plugin/relativeTime';
 import 'dayjs/locale/vi';
 import { useAppDispatch, useAppSelector } from '../../../hooks/hook';
 import { deleteNotification, fetchNotification, markNotificationAsRead } from '../../../redux/slices/notificationSlice';
-import { Notification } from '../../../types/notification';
+import { Notification, NotificationType } from '../../../types/notification';
 
 dayjs.extend(relativeTime);
 dayjs.locale('vi');
 
-/**
- * Xác định loại thông báo dựa vào notificationType hoặc fallback bằng title/content
- */
-const getNotificationType = (notif: Notification): 'follow' | 'comment' | 'review' | 'unknown' => {
-    const type = notif.notificationType?.toLowerCase();
-    if (type === 'follow' || type === 'unfollow') return 'follow';
-    if (type === 'comment') return 'comment';
-    if (type === 'review') return 'review';
+/** Lấy route path đích dựa vào type và role */
+const getNavigationPath = (notif: Notification, isHR: boolean): string | null => {
+    const type = notif.type?.toUpperCase() as NotificationType | undefined;
+    const id = notif.referenceId;
 
-    // Fallback: phân tích từ title/content nếu backend chưa gửi notificationType
-    const text = `${notif.title} ${notif.content}`.toLowerCase();
-    if (text.includes('theo dõi') || text.includes('follow') || text.includes('hủy theo dõi') || text.includes('unfollow')) {
-        return 'follow';
+    if (!type || !id) return null;
+
+    switch (type) {
+        case NotificationType.FOLLOW:
+        case NotificationType.UNFOLLOW:
+            return isHR ? `/hr/profile/${id}` : `/profile/${id}`;
+
+        case NotificationType.COMMENT:
+        case NotificationType.REPLY:
+        case NotificationType.REVIEW:
+        case NotificationType.NEW_JOB:
+            return isHR ? `/hr/job-detail/${id}` : `/job/${id}`;
+
+        default:
+            return null;
     }
-    if (text.includes('bình luận') || text.includes('comment')) {
-        return 'comment';
+};
+
+/** Badge label + icon theo type */
+const TypeBadge = ({ type }: { type?: NotificationType }) => {
+    if (!type) return null;
+    switch (type.toUpperCase() as NotificationType) {
+        case NotificationType.FOLLOW:
+            return (
+                <span className="inline-flex items-center gap-1 px-1.5 py-0.5 text-[10px] font-medium rounded bg-green-100 text-green-700">
+                    <UserPlus size={10} /> Theo dõi
+                </span>
+            );
+        case NotificationType.UNFOLLOW:
+            return (
+                <span className="inline-flex items-center gap-1 px-1.5 py-0.5 text-[10px] font-medium rounded bg-gray-100 text-gray-600">
+                    <UserMinus size={10} /> Hủy theo dõi
+                </span>
+            );
+        case NotificationType.COMMENT:
+            return (
+                <span className="inline-flex items-center gap-1 px-1.5 py-0.5 text-[10px] font-medium rounded bg-blue-100 text-blue-700">
+                    <MessageCircle size={10} /> Bình luận
+                </span>
+            );
+        case NotificationType.REPLY:
+            return (
+                <span className="inline-flex items-center gap-1 px-1.5 py-0.5 text-[10px] font-medium rounded bg-cyan-100 text-cyan-700">
+                    <MessageCircle size={10} /> Phản hồi
+                </span>
+            );
+        case NotificationType.REVIEW:
+            return (
+                <span className="inline-flex items-center gap-1 px-1.5 py-0.5 text-[10px] font-medium rounded bg-purple-100 text-purple-700">
+                    <Star size={10} /> Đánh giá
+                </span>
+            );
+        case NotificationType.NEW_JOB:
+            return (
+                <span className="inline-flex items-center gap-1 px-1.5 py-0.5 text-[10px] font-medium rounded bg-amber-100 text-amber-700">
+                    <Briefcase size={10} /> Việc làm mới
+                </span>
+            );
+        default:
+            return null;
     }
-    if (text.includes('đánh giá') || text.includes('review')) {
-        return 'review';
+};
+
+/** Text gợi ý điều hướng khi hover */
+const getNavigationHint = (type?: NotificationType): string => {
+    if (!type) return '';
+    switch (type.toUpperCase() as NotificationType) {
+        case NotificationType.FOLLOW:
+        case NotificationType.UNFOLLOW:
+            return 'Xem hồ sơ';
+        case NotificationType.COMMENT:
+        case NotificationType.REPLY:
+        case NotificationType.REVIEW:
+        case NotificationType.NEW_JOB:
+            return 'Xem bài đăng';
+        default:
+            return 'Xem chi tiết';
     }
-    return 'unknown';
 };
 
 const NotificationDropdown = () => {
@@ -49,10 +111,9 @@ const NotificationDropdown = () => {
     useEffect(() => {
         dispatch(fetchNotification());
 
-        // Polling: tự động refresh thông báo mỗi 30 giây
         const interval = setInterval(() => {
             dispatch(fetchNotification());
-        }, 30000); // 30 giây
+        }, 30000);
 
         return () => clearInterval(interval);
     }, [dispatch]);
@@ -73,67 +134,29 @@ const NotificationDropdown = () => {
         };
     }, [open]);
 
-    /**
-     * Điều hướng dựa trên loại thông báo:
-     * - follow/unfollow → trang profile người dùng
-     * - comment/review → trang chi tiết bài đăng (job detail)
-     */
-    const navigateByNotificationType = (notif: Notification) => {
-        const type = getNotificationType(notif);
-        // Ưu tiên referenceId, fallback sang userId
-        const targetId = notif.referenceId || notif.userId;
-
-        if (type === 'follow') {
-            if (isHR) {
-                navigate(`/hr/profile/${targetId}`);
-            } else {
-                navigate(`/profile/${targetId}`);
-            }
-        } else if (type === 'comment' || type === 'review') {
-            if (isHR) {
-                navigate(`/hr/job-detail/${targetId}`);
-            } else {
-                navigate(`/job/${targetId}`);
-            }
-        }
-    };
-
     const handleNotificationClick = async (notif: Notification) => {
+        // Đánh dấu đã đọc
         if (!notif.isRead) {
             await dispatch(markNotificationAsRead(notif.id));
         }
-        // Luôn mở modal chi tiết
+
+        setOpen(false);
+
+        // Nếu có đường dẫn → navigate thẳng
+        const path = getNavigationPath(notif, isHR);
+        if (path) {
+            navigate(path);
+            return;
+        }
+
+        // Fallback: mở modal chi tiết nếu không biết điều hướng đâu
         setSelectedNotif(notif);
         setDetailModalOpen(true);
-        setOpen(false);
-    };
-
-    const handleNavigateFromModal = () => {
-        if (!selectedNotif) return;
-        setDetailModalOpen(false);
-        navigateByNotificationType(selectedNotif);
     };
 
     const handleDelete = async (e: React.MouseEvent, id: number) => {
         e.stopPropagation();
         await dispatch(deleteNotification(id));
-    };
-
-    /**
-     * Icon cho badge loại thông báo
-     */
-    const getTypeLabel = (notif: Notification) => {
-        const type = getNotificationType(notif);
-        switch (type) {
-            case 'follow':
-                return <span className="inline-flex items-center px-1.5 py-0.5 text-[10px] font-medium rounded bg-green-100 text-green-700">👤 Theo dõi</span>;
-            case 'comment':
-                return <span className="inline-flex items-center px-1.5 py-0.5 text-[10px] font-medium rounded bg-blue-100 text-blue-700">💬 Bình luận</span>;
-            case 'review':
-                return <span className="inline-flex items-center px-1.5 py-0.5 text-[10px] font-medium rounded bg-purple-100 text-purple-700">⭐ Đánh giá</span>;
-            default:
-                return null;
-        }
     };
 
     return (
@@ -186,15 +209,13 @@ const NotificationDropdown = () => {
                             ) : (
                                 <div className="divide-y divide-gray-100">
                                     {notifications.map((item) => {
-                                        const type = getNotificationType(item);
-                                        const hasNavigation = item.referenceId && type !== 'unknown';
+                                        const navPath = getNavigationPath(item, isHR);
 
                                         return (
                                             <div
                                                 key={item.id}
                                                 onClick={() => handleNotificationClick(item)}
-                                                className={`flex items-start gap-3 px-5 py-4 cursor-pointer transition-all duration-200 hover:bg-gray-50 group ${!item.isRead ? 'bg-blue-50/50' : ''
-                                                    }`}
+                                                className={`flex items-start gap-3 px-5 py-4 cursor-pointer transition-all duration-200 hover:bg-gray-50 group ${!item.isRead ? 'bg-blue-50/50' : ''}`}
                                             >
                                                 {/* Unread Indicator */}
                                                 <div className="flex-shrink-0 mt-1.5">
@@ -208,11 +229,10 @@ const NotificationDropdown = () => {
                                                 {/* Content */}
                                                 <div className="flex-1 min-w-0">
                                                     <div className="flex items-center gap-2 mb-1">
-                                                        <h4 className={`text-sm font-semibold truncate ${!item.isRead ? 'text-gray-900' : 'text-gray-700'
-                                                            }`}>
+                                                        <h4 className={`text-sm font-semibold truncate ${!item.isRead ? 'text-gray-900' : 'text-gray-700'}`}>
                                                             {item.title}
                                                         </h4>
-                                                        {getTypeLabel(item)}
+                                                        <TypeBadge type={item.type} />
                                                     </div>
                                                     <p className="text-xs text-gray-600 line-clamp-2 leading-relaxed mb-2">
                                                         {item.content}
@@ -221,10 +241,10 @@ const NotificationDropdown = () => {
                                                         <span className="text-xs text-gray-400 font-medium">
                                                             {dayjs(item.createDate).fromNow()}
                                                         </span>
-                                                        {hasNavigation && (
+                                                        {navPath && (
                                                             <span className="text-xs text-blue-500 flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                                                                 <ExternalLink size={12} />
-                                                                {type === 'follow' ? 'Xem hồ sơ' : 'Xem bài đăng'}
+                                                                {getNavigationHint(item.type)}
                                                             </span>
                                                         )}
                                                     </div>
@@ -247,8 +267,8 @@ const NotificationDropdown = () => {
                 )}
             </div>
 
-            {/* Detail Modal (fallback khi không có referenceId) */}
-            {detailModalOpen && (
+            {/* Detail Modal – chỉ hiện khi không có route điều hướng (fallback) */}
+            {detailModalOpen && selectedNotif && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-fadeIn">
                     <div className="bg-white rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden animate-scaleIn">
                         {/* Modal Header */}
@@ -268,83 +288,49 @@ const NotificationDropdown = () => {
                         </div>
 
                         {/* Modal Content */}
-                        {selectedNotif && (
-                            <div className="px-6 py-6 space-y-5">
-                                {/* Title Section */}
-                                <div>
-                                    <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2 block">
-                                        Tiêu đề
-                                    </label>
-                                    <h4 className="text-lg font-bold text-gray-900 leading-snug">
-                                        {selectedNotif.title}
-                                    </h4>
-                                </div>
+                        <div className="px-6 py-6 space-y-5">
+                            <div>
+                                <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2 block">
+                                    Tiêu đề
+                                </label>
+                                <h4 className="text-lg font-bold text-gray-900 leading-snug">
+                                    {selectedNotif.title}
+                                </h4>
+                            </div>
 
-                                {/* Content Section */}
-                                <div>
-                                    <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2 block">
-                                        Nội dung
-                                    </label>
-                                    <div className="p-4 bg-gradient-to-br from-gray-50 to-gray-100 rounded-xl border border-gray-200">
-                                        <p className="text-sm text-gray-700 leading-relaxed whitespace-pre-wrap">
-                                            {selectedNotif.content}
-                                        </p>
-                                    </div>
-                                </div>
-
-                                {/* Meta Information */}
-                                <div className="flex items-center gap-4 pt-3 border-t border-gray-200">
-                                    <div className="flex items-center gap-2 text-sm text-gray-600">
-                                        <span>📅</span>
-                                        <span className="font-medium">
-                                            {dayjs(selectedNotif.createDate).format('DD/MM/YYYY HH:mm')}
-                                        </span>
-                                    </div>
-                                    <div className="flex items-center gap-1.5 text-sm">
-                                        {selectedNotif.isRead ? (
-                                            <>
-                                                <Check size={16} className="text-green-600" />
-                                                <span className="font-medium text-green-600">Đã đọc</span>
-                                            </>
-                                        ) : (
-                                            <span className="font-medium text-orange-500">Chưa đọc</span>
-                                        )}
-                                    </div>
+                            <div>
+                                <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2 block">
+                                    Nội dung
+                                </label>
+                                <div className="p-4 bg-gradient-to-br from-gray-50 to-gray-100 rounded-xl border border-gray-200">
+                                    <p className="text-sm text-gray-700 leading-relaxed whitespace-pre-wrap">
+                                        {selectedNotif.content}
+                                    </p>
                                 </div>
                             </div>
-                        )}
+
+                            <div className="flex items-center gap-4 pt-3 border-t border-gray-200">
+                                <div className="flex items-center gap-2 text-sm text-gray-600">
+                                    <span>📅</span>
+                                    <span className="font-medium">
+                                        {dayjs(selectedNotif.createDate).format('DD/MM/YYYY HH:mm')}
+                                    </span>
+                                </div>
+                                <div className="flex items-center gap-1.5 text-sm">
+                                    {selectedNotif.isRead ? (
+                                        <>
+                                            <Check size={16} className="text-green-600" />
+                                            <span className="font-medium text-green-600">Đã đọc</span>
+                                        </>
+                                    ) : (
+                                        <span className="font-medium text-orange-500">Chưa đọc</span>
+                                    )}
+                                </div>
+                            </div>
+                        </div>
 
                         {/* Modal Footer */}
-                        <div className="px-6 py-4 bg-gray-50 border-t border-gray-200 flex justify-between items-center">
-                            {/* Nút điều hướng theo loại thông báo */}
-                            <div>
-                                {selectedNotif && (() => {
-                                    const type = getNotificationType(selectedNotif);
-                                    if (type === 'follow') {
-                                        return (
-                                            <button
-                                                onClick={handleNavigateFromModal}
-                                                className="inline-flex items-center gap-2 px-4 py-2.5 text-sm font-semibold text-white bg-gradient-to-r from-green-500 to-emerald-600 rounded-lg hover:from-green-600 hover:to-emerald-700 transition-all duration-200 shadow-md hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-green-400/40"
-                                            >
-                                                <ExternalLink size={16} />
-                                                Xem hồ sơ
-                                            </button>
-                                        );
-                                    }
-                                    if (type === 'comment' || type === 'review') {
-                                        return (
-                                            <button
-                                                onClick={handleNavigateFromModal}
-                                                className="inline-flex items-center gap-2 px-4 py-2.5 text-sm font-semibold text-white bg-gradient-to-r from-blue-500 to-indigo-600 rounded-lg hover:from-blue-600 hover:to-indigo-700 transition-all duration-200 shadow-md hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-blue-400/40"
-                                            >
-                                                <ExternalLink size={16} />
-                                                Xem bài đăng
-                                            </button>
-                                        );
-                                    }
-                                    return null;
-                                })()}
-                            </div>
+                        <div className="px-6 py-4 bg-gray-50 border-t border-gray-200 flex justify-end">
                             <button
                                 onClick={() => setDetailModalOpen(false)}
                                 className="px-5 py-2.5 text-sm font-semibold text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-gray-400/20"
@@ -358,51 +344,19 @@ const NotificationDropdown = () => {
 
             <style>{`
                 @keyframes fadeIn {
-                    from {
-                        opacity: 0;
-                        transform: translateY(-10px);
-                    }
-                    to {
-                        opacity: 1;
-                        transform: translateY(0);
-                    }
+                    from { opacity: 0; transform: translateY(-10px); }
+                    to   { opacity: 1; transform: translateY(0); }
                 }
-
                 @keyframes scaleIn {
-                    from {
-                        opacity: 0;
-                        transform: scale(0.95);
-                    }
-                    to {
-                        opacity: 1;
-                        transform: scale(1);
-                    }
+                    from { opacity: 0; transform: scale(0.95); }
+                    to   { opacity: 1; transform: scale(1); }
                 }
-
-                .animate-fadeIn {
-                    animation: fadeIn 0.2s ease-out;
-                }
-
-                .animate-scaleIn {
-                    animation: scaleIn 0.2s ease-out;
-                }
-
-                .custom-scrollbar::-webkit-scrollbar {
-                    width: 6px;
-                }
-
-                .custom-scrollbar::-webkit-scrollbar-track {
-                    background: #f3f4f6;
-                }
-
-                .custom-scrollbar::-webkit-scrollbar-thumb {
-                    background: #cbd5e1;
-                    border-radius: 3px;
-                }
-
-                .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-                    background: #94a3b8;
-                }
+                .animate-fadeIn  { animation: fadeIn  0.2s ease-out; }
+                .animate-scaleIn { animation: scaleIn 0.2s ease-out; }
+                .custom-scrollbar::-webkit-scrollbar       { width: 6px; }
+                .custom-scrollbar::-webkit-scrollbar-track { background: #f3f4f6; }
+                .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
+                .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
             `}</style>
         </>
     );

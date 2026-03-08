@@ -12,7 +12,7 @@ namespace Recruitment.API.Repositories
             _context = context;
         }
 
-        public async Task CreateNotificationAsync(int userId, string title, string content, int? applicationId = null)
+        public async Task CreateNotificationAsync(int userId, string title, string content, string type, int? referenceId = null)
         {
             var notifications = new Notification
             {
@@ -21,7 +21,8 @@ namespace Recruitment.API.Repositories
                 content = content,
                 isRead = false,
                 createDate = DateTime.Now,
-                applicationId = applicationId
+                type = type, // Gán loại thông báo
+                referenceId = referenceId // Gán ID tham chiếu
             };
 
             _context.Notifications.Add(notifications);
@@ -36,3 +37,4 @@ namespace Recruitment.API.Repositories
         }
     }
 }
+

@@ -151,7 +151,8 @@ namespace Recruitment.API.Services
                             content = $"{employer.fullName} vừa đăng tuyển vị trí: {job.title}",
                             isRead = false,
                             createDate = DateTime.Now,
-                            applicationId = null
+                            type = "NEW_JOB",         // Phân loại là thông báo Job mới
+                            referenceId = job.id
                         };
 
                         await _notificationRepository.CreateAsync(notifications);

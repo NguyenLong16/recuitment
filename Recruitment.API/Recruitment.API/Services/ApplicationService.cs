@@ -186,7 +186,8 @@ namespace Recruitment.API.Services
             var notification = new Notification
             {
                 userId = application.candidateId,
-                applicationId = application.id,
+                type = "APPLICATION",          // Phân loại là thông báo về Đơn ứng tuyển
+                referenceId = application.id,
                 title = "Cập nhật trạng thái hồ sơ",
                 content = $"Hồ sơ ứng tuyển vị trí \"{application.job.title}\" đã được cập nhật sang trạng thái: {statusText}",
                 createDate = DateTime.Now,

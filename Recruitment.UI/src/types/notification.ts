@@ -1,3 +1,12 @@
+export enum NotificationType {
+    COMMENT = 'COMMENT',
+    REPLY = 'REPLY',
+    REVIEW = 'REVIEW',
+    NEW_JOB = 'NEW_JOB',
+    FOLLOW = 'FOLLOW',
+    UNFOLLOW = 'UNFOLLOW',
+}
+
 export interface Notification {
     id: number;
     userId: number;
@@ -5,8 +14,8 @@ export interface Notification {
     content: string;
     isRead: boolean;
     createDate: string;
-    notificationType?: string;   // "follow" | "unfollow" | "comment" | "review"
-    referenceId?: number;        // userId (follow/unfollow) hoặc jobId (comment/review)
+    type?: NotificationType;     // COMMENT | REVIEW | NEW_JOB | FOLLOW | UNFOLLOW
+    referenceId?: number;        // userId (FOLLOW/UNFOLLOW) hoặc jobId (COMMENT/REVIEW/NEW_JOB)
 }
 
 export interface NotificationState {

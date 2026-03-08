@@ -9,7 +9,7 @@ import { Role } from '../../../types/auth';
 import NotificationDropdown from './NotificationDropdown';
 
 const Header = () => {
-    const [activeMenu, setActiveMenu] = useState<string>('');
+    const [_, setActiveMenu] = useState<string>('');
     const navigate = useNavigate()
     const dispatch = useAppDispatch()
     const { user } = useAppSelector(state => state.auth)

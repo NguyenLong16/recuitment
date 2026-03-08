@@ -43,7 +43,11 @@ namespace Recruitment.API.Services
             if (job.employerId != userId)
             {
                 await _notificationRepository.CreateNotificationAsync(
-                    job.employerId, "Có bình luận mới", $"{userReview?.fullName} đã bình luận vào bài: {job.title}");
+                    job.employerId,
+                    "Có đánh giá mới", // Đổi từ "bình luận" sang "đánh giá" cho chuẩn xác
+                    $"{userReview?.fullName} đã đánh giá bài: {job.title}",
+                    "REVIEW", // THÊM MỚI: Loại thông báo
+                    jobId);
             }
             return _mapper.Map<ReviewResponse>(review);
         }

@@ -4,7 +4,7 @@ namespace Recruitment.API.Repositories.Interfaces
 {
     public interface INotificationRepository
     {
-        Task CreateNotificationAsync(int userId, string title, string content, int? applicationId = null);
+        Task CreateNotificationAsync(int userId, string title, string content, string type, int? referenceId = null);
         Task<Notification> CreateAsync(Notification notifications);
     }
 }
