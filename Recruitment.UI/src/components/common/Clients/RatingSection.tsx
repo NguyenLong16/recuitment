@@ -1,7 +1,9 @@
-import { useState } from 'react';
-import { Button, Card, Input, message, Rate, Space, Typography } from 'antd';
-import { StarFilled, StarOutlined } from '@ant-design/icons';
+import { useState, useEffect } from 'react';
+import { Button, Card, Input, message, Rate, Space, Typography, Avatar, List } from 'antd';
+import { StarFilled, StarOutlined, UserOutlined } from '@ant-design/icons';
 import ReviewService from '../../../services/reviewService';
+import { ReviewResponse } from '../../../types/review';
+import dayjs from 'dayjs';
 const { TextArea } = Input;
 const { Title, Text } = Typography;
 interface RatingSectionProps {
@@ -15,7 +17,29 @@ const RatingSection = ({ jobId, averageRating, totalReviews, onRatingSubmitted }
     const [rating, setRating] = useState(0);
     const [comment, setComment] = useState('');
     const [submitting, setSubmitting] = useState(false);
+    const [reviews, setReviews] = useState<ReviewResponse[]>([]);
+    const [loadingReviews, setLoadingReviews] = useState(false);
+    const [avgRating, setAvgRating] = useState(averageRating);
+    const [totalCount, setTotalCount] = useState(totalReviews);
     const isLoggedIn = !!localStorage.getItem('token');
+
+    useEffect(() => {
+        fetchReviews();
+    }, [jobId]);
+
+    const fetchReviews = async () => {
+        setLoadingReviews(true);
+        try {
+            const res = await ReviewService.getJobReviews(jobId);
+            setReviews(res.reviews || []);
+            setAvgRating(res.averageRating ?? 0);
+            setTotalCount(res.totalReviews ?? 0);
+        } catch (error) {
+            console.error('Error fetching reviews:', error);
+        } finally {
+            setLoadingReviews(false);
+        }
+    };
 
     const handleSubmit = async () => {
         if (rating === 0) {
@@ -32,6 +56,7 @@ const RatingSection = ({ jobId, averageRating, totalReviews, onRatingSubmitted }
             setRating(0);
             setComment('');
             onRatingSubmitted?.();
+            fetchReviews();
         } catch (error: any) {
             message.error(error?.response?.data?.message || 'Có lỗi xảy ra');
         } finally {
@@ -63,19 +88,19 @@ const RatingSection = ({ jobId, averageRating, totalReviews, onRatingSubmitted }
                 >
                     <div style={{ marginBottom: 8 }}>
                         <Title level={1} style={{ margin: 0, color: '#faad14' }}>
-                            {averageRating > 0 ? averageRating.toFixed(1) : '—'}
+                            {avgRating > 0 ? avgRating.toFixed(1) : '—'}
                         </Title>
                     </div>
                     <Rate
                         disabled
                         allowHalf
-                        value={averageRating}
+                        value={avgRating}
                         style={{ fontSize: 24 }}
                     />
                     <div style={{ marginTop: 8 }}>
                         <Text type="secondary">
-                            {totalReviews > 0
-                                ? `${totalReviews} đánh giá`
+                            {totalCount > 0
+                                ? `${totalCount} đánh giá`
                                 : 'Chưa có đánh giá'}
                         </Text>
                     </div>
@@ -131,6 +156,46 @@ const RatingSection = ({ jobId, averageRating, totalReviews, onRatingSubmitted }
                         <Text type="secondary">
                             Vui lòng <a href="/login">đăng nhập</a> để đánh giá
                         </Text>
+                    </div>
+                )}
+
+                {/* Danh sách reviews */}
+                {reviews.length > 0 && (
+                    <div style={{ marginTop: 24 }}>
+                        <Title level={5}>Đánh giá ({reviews.length})</Title>
+                        <List
+                            loading={loadingReviews}
+                            dataSource={reviews}
+                            renderItem={(item: ReviewResponse) => (
+                                <List.Item style={{ padding: '12px 0', borderBottom: '1px solid #f0f0f0' }}>
+                                    <List.Item.Meta
+                                        avatar={
+                                            item.userAvatar ? (
+                                                <Avatar src={item.userAvatar} />
+                                            ) : (
+                                                <Avatar icon={<UserOutlined />} />
+                                            )
+                                        }
+                                        title={
+                                            <Space>
+                                                <Text strong>{item.userName}</Text>
+                                                <Rate disabled value={item.rating} style={{ fontSize: 12 }} />
+                                            </Space>
+                                        }
+                                        description={
+                                            <div>
+                                                {item.comment && <Text>{item.comment}</Text>}
+                                                <div>
+                                                    <Text type="secondary" style={{ fontSize: 12 }}>
+                                                        {dayjs(item.createdDate).format('DD/MM/YYYY HH:mm')}
+                                                    </Text>
+                                                </div>
+                                            </div>
+                                        }
+                                    />
+                                </List.Item>
+                            )}
+                        />
                     </div>
                 )}
             </Card>

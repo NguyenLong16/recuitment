@@ -168,5 +168,74 @@ namespace Recruitment.API.Repositories
             // KHÔNG dùng vòng lặp foreach ở đây nữa.
             await AddSkillToJobAsync(jobId, skillIds);
         }
+
+        //admin
+        public async Task<IEnumerable<Job>> GetAllJobsAsync(string? keyword = null, Enums.JobStatus? status = null)
+        {
+            var query = _context.Jobs
+                .Include(j => j.company)
+                .Include(j => j.employer)
+                .Include(j => j.category)
+                .Include(j => j.location)
+                .Include(j => j.applications) // Nạp bảng ứng tuyển để đếm số lượng
+                .AsQueryable();
+
+            // 1. Lọc theo trạng thái (Active / Closed / Expired)
+            if (status.HasValue)
+            {
+                query = query.Where(j => j.status == status.Value);
+            }
+
+            // 2. Tìm kiếm theo Tên công việc hoặc Tên công ty
+            if (!string.IsNullOrWhiteSpace(keyword))
+            {
+                query = query.Where(j =>
+                    j.title.Contains(keyword) ||
+                    (j.company != null && j.company.companyName.Contains(keyword))
+                );
+            }
+
+            // Sắp xếp bài mới nhất lên đầu
+            return await query.OrderByDescending(j => j.createdDate).ToListAsync();
+        }
+
+        // Xóa hàm HideJobAsync cũ đi và thay bằng hàm Toggle này:
+        public async Task<bool> ToggleHideJobAsync(int jobId)
+        {
+            var job = await _context.Jobs.FindAsync(jobId);
+            if (job == null) return false;
+
+            // Đảo trạng thái: Nếu đang Active thì chuyển thành Closed (Ẩn)
+            if (job.status == Enums.JobStatus.Active)
+            {
+                job.status = Enums.JobStatus.Closed;
+            }
+            // Nếu đang bị Đóng/Ẩn thì Admin mở lại thành Active
+            else
+            {
+                job.status = Enums.JobStatus.Active;
+
+                // (Tùy chọn) Nếu lúc mở lại mà hạn nộp (deadline) đã qua, 
+                // bạn có thể tự động cộng thêm 7 ngày cho HR kịp tìm người:
+                if (job.deadline < DateTime.Now)
+                {
+                    job.deadline = DateTime.Now.AddDays(7);
+                }
+            }
+
+            await _context.SaveChangesAsync();
+            return true;
+        }
+
+        public async Task<bool> DeleteJobAsync(int jobId)
+        {
+            var job = await _context.Jobs.FindAsync(jobId);
+            if (job == null) return false;
+
+            // Xóa bài đăng (EF Core sẽ tự động xóa các dữ liệu liên quan nếu bạn đã set Cascade Delete)
+            _context.Jobs.Remove(job);
+            await _context.SaveChangesAsync();
+            return true;
+        }
     }
 }

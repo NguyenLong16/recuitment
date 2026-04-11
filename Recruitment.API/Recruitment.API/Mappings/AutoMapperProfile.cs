@@ -35,10 +35,17 @@ public class AutoMapperProfile : Profile
 
         CreateMap<JobUpdateRequest, Job>(MemberList.None)
             .ForMember(dest => dest.imageUrl, opt => opt.Ignore());
-
+        //category
         CreateMap<Category, CategoryResponse>();
+        // Map từ Request DTO sang Model (Dùng cho Create/Update)
+        CreateMap<CategoryRequest, Category>();
         CreateMap<Location, LocationResponse>();
+        CreateMap<LocationRequest, Location>()
+            .ForMember(dest => dest.name, opt => opt.MapFrom(src => src.Name));
         CreateMap<Skill, SkillResponse>();
+        // Map từ Request DTO sang Model (Dùng cho Create/Update)
+        CreateMap<SkillRequest, Skill>()
+            .ForMember(dest => dest.skillName, opt => opt.MapFrom(src => src.Name));
 
         CreateMap<Application, ApplicationResponse>()
             .ForMember(dest => dest.jobTitle, opt => opt.MapFrom(src => src.job.title))
@@ -82,5 +89,36 @@ public class AutoMapperProfile : Profile
             .ForMember(dest => dest.JobTitle, opt => opt.MapFrom(src => src.job.title))
             .ForMember(dest => dest.CompanyName, opt => opt.MapFrom(src => src.job.company.companyName))
             .ForMember(dest => dest.ImageUrl, opt => opt.MapFrom(src => src.job.imageUrl));
+
+        // admin
+        CreateMap<User, AdminUserResponse>()
+            .ForMember(dest => dest.RoleName, opt => opt.MapFrom(src => src.role != null ? src.role.roleName : ""))
+            .ForMember(dest => dest.CompanyName, opt => opt.MapFrom(src => src.company != null ? src.company.companyName : null))
+            .ForMember(dest => dest.IsActive, opt => opt.MapFrom(src => src.isActive));
+
+        CreateMap<Company, AdminCompanyResponse>()
+            .ForMember(dest => dest.TotalJobs, opt => opt.MapFrom(src => src.Jobs != null ? src.Jobs.Count : 0));
+
+        CreateMap<Job, AdminJobResponse>()
+            .ForMember(dest => dest.CompanyName, opt => opt.MapFrom(src => src.company != null ? src.company.companyName : ""))
+            .ForMember(dest => dest.EmployerName, opt => opt.MapFrom(src => src.employer != null ? src.employer.fullName : ""))
+            .ForMember(dest => dest.CategoryName, opt => opt.MapFrom(src => src.category != null ? src.category.name : ""))
+            .ForMember(dest => dest.LocationName, opt => opt.MapFrom(src => src.location != null ? src.location.name : ""))
+            .ForMember(dest => dest.TotalApplications, opt => opt.MapFrom(src => src.applications != null ? src.applications.Count : 0));
+
+        // Map từ Review sang AdminReviewResponse
+        CreateMap<Review, AdminReviewResponse>()
+            .ForMember(dest => dest.ReviewerName, opt => opt.MapFrom(src => src.user != null ? src.user.fullName : ""))
+            .ForMember(dest => dest.JobTitle, opt => opt.MapFrom(src => src.job != null ? src.job.title : ""))
+            // Trỏ qua Job để lấy tên Company
+            .ForMember(dest => dest.CompanyName, opt => opt.MapFrom(src => (src.job != null && src.job.company != null) ? src.job.company.companyName : ""));
+
+        // Map từ Comment sang AdminCommentResponse
+        CreateMap<Comment, AdminCommentResponse>()
+            .ForMember(dest => dest.CommenterName, opt => opt.MapFrom(src => src.user != null ? src.user.fullName : ""))
+            .ForMember(dest => dest.JobTitle, opt => opt.MapFrom(src => src.job != null ? src.job.title : ""))
+            .ForMember(dest => dest.CompanyName, opt => opt.MapFrom(src => (src.job != null && src.job.company != null) ? src.job.company.companyName : ""))
+            // Nếu ParentId có giá trị (HasValue) thì nó là một câu trả lời (Reply)
+            .ForMember(dest => dest.IsReply, opt => opt.MapFrom(src => src.ParentId.HasValue));
     }
 }

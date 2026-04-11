@@ -13,4 +13,17 @@ namespace Recruitment.API.DTOs
         public string? address { get; set; }
         public int size { get; set; } 
     }
+
+    public class AdminCompanyResponse
+    {
+        public int Id { get; set; }
+        public string CompanyName { get; set; } = string.Empty;
+        public string? LogoUrl { get; set; }
+        public string? WebsiteLink { get; set; }
+        public string? Address { get; set; }
+        public int Size { get; set; }
+
+        // Cột đặc biệt dành cho Admin: Đếm tổng số Job của công ty này
+        public int TotalJobs { get; set; }
+    }
 }

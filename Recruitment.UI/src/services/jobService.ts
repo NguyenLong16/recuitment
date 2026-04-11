@@ -47,7 +47,7 @@ const JobService = {
 
         // Append fields (trừ file)
         Object.keys(data).forEach(key => {
-            if (key !== 'ImageFile' && data[key] !== undefined && data[key] !== null) {
+            if (key !== 'ImageFile' && data[key] !== undefined && data[key] !== null && data[key] !== '') {
                 if (key === 'deadline') {
                     formData.append(key, dayjs(data[key]).toISOString());  // ISO cho backend
                 } else if (Array.isArray(data[key])) {
@@ -78,7 +78,7 @@ const JobService = {
         Object.keys(data).forEach(key => {
             if (key !== 'ImageFile') {
                 const value = data[key];
-                if (value !== undefined && value !== null) {  // Skip null/undefined
+                if (value !== undefined && value !== null && value !== '') {  // Skip null/undefined/empty
                     if (key === 'jobType') {
                         formData.append(key, value.toString());  // "5" → Backend bind enum
                     } else if (key === 'deadline') {

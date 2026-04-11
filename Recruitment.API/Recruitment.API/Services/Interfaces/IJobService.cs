@@ -1,4 +1,5 @@
-﻿using Recruitment.API.DTOs;
+﻿using Recruitment.API.Data;
+using Recruitment.API.DTOs;
 
 namespace Recruitment.API.Services.Interfaces
 {
@@ -11,5 +12,9 @@ namespace Recruitment.API.Services.Interfaces
         Task<IEnumerable<JobResponse>> GetAllJobsAsync(JobFilterRequest filters);
         Task<IEnumerable<JobResponse>> GetJobsByEmployerAsync(int employerId);
         Task<bool> ToggleJobStatusAsync(int id, int employerId);
+        //admin
+        Task<IEnumerable<AdminJobResponse>> GetJobsAsync(string? keyword, Enums.JobStatus? status);
+        Task ToggleHideJobAsync(int jobId);
+        Task DeleteJobAsync(int jobId);
     }
 }

@@ -7,5 +7,8 @@ namespace Recruitment.API.Services.Interfaces
     {
         Task<CommentResponse> PostCommentAsync(int userId, int jobId, CommentCreateRequest request);
         Task<IEnumerable<CommentResponse>> GetJobCommentsAsync(int jobId);
+        //admin
+        Task<IEnumerable<AdminCommentResponse>> GetCommentsAsync(string? keyword);
+        Task DeleteCommentAsync(int commentId);
     }
 }

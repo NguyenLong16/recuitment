@@ -28,5 +28,20 @@
         // Danh sách review (đã lọc)
         public IEnumerable<ReviewResponse> Reviews { get; set; }
     }
+    //admin
+    public class AdminReviewResponse
+    {
+        public int Id { get; set; }
+        public int Rating { get; set; }
+        public string? Comment { get; set; }
+        public DateTime CreatedDate { get; set; }
+
+        // Thông tin người đánh giá
+        public string ReviewerName { get; set; } = string.Empty;
+
+        // Thông tin bài bị đánh giá
+        public string JobTitle { get; set; } = string.Empty;
+        public string CompanyName { get; set; } = string.Empty;
+    }
 
 }

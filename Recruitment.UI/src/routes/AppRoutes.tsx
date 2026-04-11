@@ -10,6 +10,14 @@ const MainLayout = lazy(() => import("../components/layouts/client/MainLayout"))
 const ProtectedRoute = lazy(() => import("./ProtectedRoute"));
 const AdminLayout = lazy(() => import("../components/layouts/admin/AdminLayout"));
 const Dashboard = lazy(() => import("../pages/admin/Dashboard"));
+const CategoryManagement = lazy(() => import("../pages/admin/CategoryManagement"));
+const LocationManagement = lazy(() => import("../pages/admin/LocationManagement"));
+const SkillManagement = lazy(() => import("../pages/admin/SkillManagement"));
+const CompanyManagement = lazy(() => import("../pages/admin/CompanyManagement"));
+const AdminJobManagement = lazy(() => import("../pages/admin/JobManagement"));
+const UserManagement = lazy(() => import("../pages/admin/UserManagement"));
+const CommentManagement = lazy(() => import("../pages/admin/CommentManagement"));
+const ReviewManagement = lazy(() => import("../pages/admin/ReviewManagement"));
 const HRDashboard = lazy(() => import("../pages/HR/HRDashboard"));
 const HRLayout = lazy(() => import("../components/layouts/hr/HRLayout"));
 const HomePage = lazy(() => import("../pages/client/HomePage"));
@@ -20,7 +28,8 @@ const AllApplicationsManagement = lazy(() => import("../pages/HR/AllApplications
 const JobDetailPage = lazy(() => import("../pages/client/JobDetailPage"));
 const ApplicationHistoryPage = lazy(() => import("../pages/client/ApplicationHistoryPage"));
 const HRProfilePage = lazy(() => import("../pages/HR/HRProfilePage"));
-const MyProfilePage = lazy(() => import("../pages/client/MyProfilePage"));
+const CandidateProfilePage = lazy(() => import("../pages/client/CandidateProfilePage"));
+const HRMyProfilePage = lazy(() => import("../pages/HR/HRMyProfilePage"));
 
 // Component để redirect dựa trên role của user
 const RoleBasedRedirect = () => {
@@ -70,7 +79,7 @@ const AppRoutes = () => {
                     <Route element={<ProtectedRoute allowedRoles={[Role.Candidate]} />}>
                         <Route path="/my-applications" element={<ApplicationHistoryPage />} />
                         <Route path="/profile/:id" element={<HRProfilePage />} />
-                        <Route path="/my-profile" element={<MyProfilePage />} />
+                        <Route path="/my-profile" element={<CandidateProfilePage />} />
                     </Route>
                 </Route>
 
@@ -79,7 +88,14 @@ const AppRoutes = () => {
                 <Route element={<ProtectedRoute allowedRoles={[Role.Admin]} />}>
                     <Route element={<AdminLayout />}>
                         <Route path="/admin/dashboard" element={<Dashboard />} />
-                        {/* <Route path="/admin/users" element={<UserManagement />} /> */}
+                        <Route path="/admin/categories" element={<CategoryManagement />} />
+                        <Route path="/admin/locations" element={<LocationManagement />} />
+                        <Route path="/admin/skills" element={<SkillManagement />} />
+                        <Route path="/admin/companies" element={<CompanyManagement />} />
+                        <Route path="/admin/jobs" element={<AdminJobManagement />} />
+                        <Route path="/admin/users" element={<UserManagement />} />
+                        <Route path="/admin/comments" element={<CommentManagement />} />
+                        <Route path="/admin/reviews" element={<ReviewManagement />} />
                     </Route>
                 </Route>
 
@@ -94,7 +110,7 @@ const AppRoutes = () => {
                         <Route path="/hr/candidate-management" element={<AllApplicationsManagement />} />
                         <Route path="/hr/post-job" element={<JobForm />} />
                         <Route path="/hr/edit-job/:id" element={<JobForm />} />
-                        <Route path="/hr/my-profile" element={<MyProfilePage />} />
+                        <Route path="/hr/my-profile" element={<HRMyProfilePage />} />
                         <Route path="/hr/profile/:id" element={<HRProfilePage />} />
                         <Route path="/hr/job-detail/:id" element={<JobDetailPage />} />
                     </Route>

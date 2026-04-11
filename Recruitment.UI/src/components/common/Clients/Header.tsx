@@ -134,7 +134,7 @@ const Header = () => {
                                             </button>
                                         </Dropdown>
 
-                                        <Dropdown menu={{ items: cvMenuItems }} placement="bottomLeft">
+                                        {/* <Dropdown menu={{ items: cvMenuItems }} placement="bottomLeft">
                                             <button
                                                 className="flex items-center space-x-1 text-emerald-600 hover:text-emerald-700 transition-colors py-2"
                                                 onMouseEnter={() => setActiveMenu('cv')}
@@ -143,9 +143,9 @@ const Header = () => {
                                                 <span className="font-medium">Tạo CV</span>
                                                 <ChevronDown size={16} />
                                             </button>
-                                        </Dropdown>
+                                        </Dropdown> */}
 
-                                        <Dropdown menu={{ items: toolsMenuItems }} placement="bottomLeft">
+                                        {/* <Dropdown menu={{ items: toolsMenuItems }} placement="bottomLeft">
                                             <button
                                                 className="flex items-center space-x-1 text-gray-700 hover:text-emerald-600 transition-colors py-2"
                                                 onMouseEnter={() => setActiveMenu('tools')}
@@ -154,9 +154,9 @@ const Header = () => {
                                                 <span className="font-medium">Công cụ</span>
                                                 <ChevronDown size={16} />
                                             </button>
-                                        </Dropdown>
+                                        </Dropdown> */}
 
-                                        <Dropdown menu={{ items: careerMenuItems }} placement="bottomLeft">
+                                        {/* <Dropdown menu={{ items: careerMenuItems }} placement="bottomLeft">
                                             <button
                                                 className="flex items-center space-x-1 text-gray-700 hover:text-emerald-600 transition-colors py-2"
                                                 onMouseEnter={() => setActiveMenu('career')}
@@ -165,7 +165,7 @@ const Header = () => {
                                                 <span className="font-medium">Cẩm nang nghề nghiệp</span>
                                                 <ChevronDown size={16} />
                                             </button>
-                                        </Dropdown>
+                                        </Dropdown> */}
                                     </>
                                 )}
 

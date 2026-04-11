@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using Recruitment.API.Data;
+using System.ComponentModel.DataAnnotations;
 using static Recruitment.API.Data.Enums;
 
 namespace Recruitment.API.DTOs
@@ -21,7 +22,6 @@ namespace Recruitment.API.DTOs
         public decimal? SalaryMax { get; set; }
 
         [Required]
-        [StringLength(200, ErrorMessage = "Tên công ty không quá 200 ký tự")]
         public int LocationId { get; set; }
         [Required]
         public int CategoryId { get; set; }
@@ -103,5 +103,23 @@ namespace Recruitment.API.DTOs
         public int? locationId { get; set; }
         public int? categoryId { get; set; }
         public List<int>? skillId { get; set; }
+    }
+
+    //admin
+    public class AdminJobResponse
+    {
+        public int Id { get; set; }
+        public string Title { get; set; } = string.Empty;
+        public string CompanyName { get; set; } = string.Empty;
+        public string EmployerName { get; set; } = string.Empty; // Tên HR đăng bài
+        public string CategoryName { get; set; } = string.Empty;
+        public string LocationName { get; set; } = string.Empty;
+
+        public Enums.JobStatus Status { get; set; } // Trạng thái: Active, Closed, Expired
+        public DateTime CreatedDate { get; set; }
+        public DateTime Deadline { get; set; }
+
+        // Cột đặc biệt cho Admin: Đếm xem job này có bao nhiêu người nộp CV
+        public int TotalApplications { get; set; }
     }
 }

@@ -4,7 +4,7 @@ import { useEffect } from "react";
 import { fetchMyJobs, toggleJobStatus, deleteJob } from "../../redux/slices/jobSlice";
 import { Button, message, Popconfirm, Space, Switch, Table, Tag } from "antd";
 import dayjs from "dayjs";
-import { DeleteOutlined, EditOutlined, ExclamationCircleOutlined, EyeOutlined, PlusOutlined, TeamOutlined } from "@ant-design/icons";
+import { DeleteOutlined, EditOutlined, ExclamationCircleOutlined, EyeOutlined, TeamOutlined } from "@ant-design/icons";
 import { JobResponse } from "../../types/job";
 
 const JobManagement = () => {

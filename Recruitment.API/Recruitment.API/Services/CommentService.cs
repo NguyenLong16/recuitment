@@ -78,5 +78,17 @@ namespace Recruitment.API.Services
             var comments = await _repo.GetByJobIdAsync(jobId);
             return _mapper.Map<IEnumerable<CommentResponse>>(comments);
         }
+
+        public async Task<IEnumerable<AdminCommentResponse>> GetCommentsAsync(string? keyword)
+        {
+            var comments = await _repo.GetAllCommentsAsync(keyword);
+            return _mapper.Map<IEnumerable<AdminCommentResponse>>(comments);
+        }
+
+        public async Task DeleteCommentAsync(int commentId)
+        {
+            var result = await _repo.DeleteCommentAsync(commentId);
+            if (!result) throw new Exception("Không tìm thấy bình luận này hoặc đã bị xóa.");
+        }
     }
 }

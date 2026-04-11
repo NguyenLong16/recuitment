@@ -402,5 +402,25 @@ namespace Recruitment.API.Services
                 return job.status == JobStatus.Expired ||
                        (job.status == JobStatus.Active && job.deadline < DateTime.Now);
             }
+
+        //admin
+        public async Task<IEnumerable<AdminJobResponse>> GetJobsAsync(string? keyword, Enums.JobStatus? status)
+        {
+            var jobs = await _jobRepository.GetAllJobsAsync(keyword, status);
+            return _mapper.Map<IEnumerable<AdminJobResponse>>(jobs);
         }
+
+        public async Task ToggleHideJobAsync(int jobId)
+        {
+            var result = await _jobRepository.ToggleHideJobAsync(jobId);
+            if (!result) throw new Exception("Không tìm thấy tin tuyển dụng này.");
+        }
+
+        public async Task DeleteJobAsync(int jobId)
+        {
+            var result = await _jobRepository.DeleteJobAsync(jobId);
+            if (!result) throw new Exception("Không tìm thấy tin tuyển dụng này.");
+        }
+
+    }
 }

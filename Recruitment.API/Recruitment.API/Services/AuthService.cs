@@ -36,6 +36,12 @@ namespace Recruitment.API.Services
                 throw new Exception("Tài khoản hoặc mật khẩu không đúng");
             }
 
+            //tài khoản bị ban
+            if (user.isActive)
+            {
+                throw new Exception("Tài khoản của bạn đã bị khóa. Vui lòng liên hệ Admin để biết thêm chi tiết.");
+            }
+
             //Tạo token
             string token = _jwtHelper.GenerateToken(user);
 

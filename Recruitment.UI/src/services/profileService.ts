@@ -13,34 +13,23 @@ const ProfileService = {
     updateProfile: (data: UpdateProfileRequest) => {
         const formData = new FormData();
 
-        // Thông tin cơ bản
-        if (data.fullName) formData.append('FullName', data.fullName);
-        if (data.phoneNumber) formData.append('PhoneNumber', data.phoneNumber);
+        // Luôn append text fields (kể cả chuỗi rỗng) để server nhận đủ
+        formData.append('FullName', data.fullName ?? '');
+        formData.append('PhoneNumber', data.phoneNumber ?? '');
+        formData.append('ProfessionalTitle', data.professionalTitle ?? '');
+        formData.append('Bio', data.bio ?? '');
+        formData.append('Address', data.address ?? '');
+        formData.append('WebsiteUrl', data.websiteUrl ?? '');
+        formData.append('LinkedInUrl', data.linkedInUrl ?? '');
+        formData.append('GitHubUrl', data.gitHubUrl ?? '');
 
-        // Thông tin bổ sung
-        if (data.professionalTitle) formData.append('ProfessionalTitle', data.professionalTitle);
-        if (data.bio) formData.append('Bio', data.bio);
-        if (data.address) formData.append('Address', data.address);
-
-        // Social links (có thể null để xóa)
-        if (data.websiteUrl !== undefined) formData.append('WebsiteUrl', data.websiteUrl || '');
-        if (data.linkedInUrl !== undefined) formData.append('LinkedInUrl', data.linkedInUrl || '');
-        if (data.gitHubUrl !== undefined) formData.append('GitHubUrl', data.gitHubUrl || '');
-
-        // Thêm files
+        // Chỉ append file nếu có chọn
         if (data.avatarFile) formData.append('AvatarFile', data.avatarFile);
         if (data.coverFile) formData.append('CoverFile', data.coverFile);
         if (data.cvFile) formData.append('CvFile', data.cvFile);
 
-        // Log tất cả entries trong FormData
-        for (const [key, value] of formData.entries()) {
-            console.log(`  FormData[${key}]:`, value instanceof File ? `File(${value.name})` : value);
-        }
-
         return axiosClient.put<UserProfileResponse>('/Profile/update', formData, {
-            headers: {
-                'Content-Type': 'multipart/form-data',
-            },
+            headers: { 'Content-Type': 'multipart/form-data' },
         });
     },
 

@@ -32,16 +32,16 @@ import {
     UploadOutlined,
 } from "@ant-design/icons";
 import useMyProfile from "../../hooks/useMyProfile";
-import type { UploadProps } from "antd";
+
 import { Role } from "../../types/auth";
 import { useAppSelector } from "../../hooks/hook";
 import { UpdateProfileRequest } from "../../types/profile";
-import ProfileService from "../../services/profileService";
+
 const { Title, Text, Paragraph } = Typography;
 const { TextArea } = Input;
 const PRIMARY_COLOR = "#00B14F";
 const MyProfilePage = () => {
-    const { profile, loading, updating, updateProfile, watchFollowerOfHR, refetch } = useMyProfile();
+    const { profile, loading, updating, updateProfile } = useMyProfile();
     const { user } = useAppSelector((state) => state.auth);
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
     const [form] = Form.useForm();
@@ -54,11 +54,7 @@ const MyProfilePage = () => {
     const [coverPreview, setCoverPreview] = useState<string | null>(null);
     const isCandidate = user?.role === Role.Candidate;
 
-    const [modal, setModal] = useState<boolean>(false)
 
-    const handleWatchFollowers = () => {
-
-    }
     // Helper function to build image URL
     const buildImageUrl = (url?: string) => {
         if (!url) return undefined;
@@ -100,20 +96,19 @@ const MyProfilePage = () => {
             websiteUrl: values.websiteUrl || '',
             linkedInUrl: values.linkedInUrl || '',
             gitHubUrl: values.gitHubUrl || '',
-
-            // Files
             avatarFile: avatarFile ?? undefined,
             coverFile: coverFile ?? undefined,
             cvFile: cvFile ?? undefined,
         };
 
-        try {
-            const response = await ProfileService.updateProfile(payload);
-            console.log('✅ Cập nhật thành công:', response.data);
+        const success = await updateProfile(payload);
+        if (success) {
             setIsEditModalOpen(false);
-            refetch();
-        } catch (error) {
-            console.error('❌ Lỗi cập nhật:', error);
+            setAvatarFile(null);
+            setCoverFile(null);
+            setCvFile(null);
+            setAvatarPreview(null);
+            setCoverPreview(null);
         }
     };
 
@@ -136,63 +131,77 @@ const MyProfilePage = () => {
         );
     }
     return (
-        <div className="min-h-screen bg-gray-50">
+        <div className="min-h-screen bg-gradient-to-b from-gray-100 to-gray-50">
             {/* Cover Image Section */}
             <div
-                className="relative h-64 md:h-80 bg-cover bg-center"
+                className="relative h-72 md:h-96 bg-cover bg-center overflow-hidden"
                 style={{
                     backgroundImage: `url(${coverUrl})`,
                     backgroundColor: PRIMARY_COLOR,
                 }}
             >
-                <div className="absolute inset-0 bg-black/30"></div>
+                <div className="absolute inset-0 bg-black/25"></div>
             </div>
-            <div className="max-w-6xl mx-auto px-4 -mt-24 relative z-10 pb-12">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 -mt-32 relative z-10 pb-16">
                 {/* Profile Header Card */}
                 <Card
-                    className="shadow-xl rounded-2xl border-0 mb-6"
+                    className="shadow-2xl rounded-3xl border-0 mb-8 overflow-hidden"
                     styles={{ body: { padding: 0 } }}
                 >
-                    <div className="p-6 md:p-8">
-                        <div className="flex flex-col md:flex-row gap-6">
+                    <div className="bg-white p-8 md:p-12">
+                        <div className="flex flex-col md:flex-row gap-8 items-start md:items-center">
                             {/* Avatar */}
                             <div className="flex-shrink-0">
-                                <Avatar
-                                    size={120}
-                                    src={avatarUrl}
-                                    className="border-4 border-white shadow-lg"
-                                    style={{ backgroundColor: PRIMARY_COLOR }}
-                                >
-                                    {profile.fullName?.charAt(0)?.toUpperCase()}
-                                </Avatar>
+                                <div className="relative">
+                                    <Avatar
+                                        size={140}
+                                        src={avatarUrl}
+                                        className="border-4 border-white shadow-2xl"
+                                        style={{ backgroundColor: PRIMARY_COLOR }}
+                                    >
+                                        {profile.fullName?.charAt(0)?.toUpperCase()}
+                                    </Avatar>
+                                    <div className="absolute -bottom-2 -right-2 bg-white rounded-full p-2 shadow-lg">
+                                        <div className="w-4 h-4 bg-green-500 rounded-full"></div>
+                                    </div>
+                                </div>
                             </div>
                             {/* Info */}
                             <div className="flex-1">
-                                <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
+                                <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
                                     <div>
-                                        <Title level={2} className="!m-0 !mb-1">
+                                        <Title level={2} className="!m-0 !mb-2 !text-3xl md:!text-4xl">
                                             {profile.fullName}
                                         </Title>
                                         {profile.professionalTitle && (
-                                            <Text className="text-lg text-gray-600 block mb-2">
+                                            <Text className="text-xl text-gray-600 block mb-3 font-medium">
                                                 {profile.professionalTitle}
                                             </Text>
                                         )}
-                                        <Space wrap size={[8, 8]}>
+                                        <Space wrap size={[8, 12]} className="mb-4">
                                             {profile.roleName && (
-                                                <Tag color={PRIMARY_COLOR} className="!m-0">
-                                                    <CheckCircleOutlined className="mr-1" />
+                                                <Tag
+                                                    color={PRIMARY_COLOR}
+                                                    className="!m-0 !px-3 !py-1 text-sm font-medium"
+                                                >
+                                                    <CheckCircleOutlined className="mr-1.5" />
                                                     {profile.roleName}
                                                 </Tag>
                                             )}
                                             {profile.company && (
-                                                <Tag color="blue" className="!m-0">
-                                                    <BuildOutlined className="mr-1" />
+                                                <Tag
+                                                    color="blue"
+                                                    className="!m-0 !px-3 !py-1 text-sm font-medium"
+                                                >
+                                                    <BuildOutlined className="mr-1.5" />
                                                     {profile.company.companyName}
                                                 </Tag>
                                             )}
-                                            <Tag color="default" className="!m-0">
-                                                <TeamOutlined className="mr-1" />
+                                            <Tag
+                                                color="default"
+                                                className="!m-0 !px-3 !py-1 text-sm font-medium bg-gray-100"
+                                            >
+                                                <TeamOutlined className="mr-1.5" />
                                                 {profile.followerCount} người theo dõi
                                             </Tag>
                                         </Space>
@@ -204,7 +213,7 @@ const MyProfilePage = () => {
                                             size="large"
                                             icon={<EditOutlined />}
                                             onClick={handleOpenEdit}
-                                            className="!h-12 !px-6 !rounded-lg !font-medium shadow-lg !bg-[#00B14F] hover:!bg-[#00a347] !border-0"
+                                            className="!h-14 !px-8 !rounded-xl !font-semibold shadow-lg !bg-[#00B14F] hover:!bg-[#00a347] !border-0 transition-all duration-300"
                                         >
                                             Chỉnh sửa hồ sơ
                                         </Button>
@@ -212,7 +221,7 @@ const MyProfilePage = () => {
                                 </div>
                                 {/* Bio */}
                                 {profile.bio && (
-                                    <Paragraph className="!mt-4 !mb-0 text-gray-600 text-base">
+                                    <Paragraph className="!mt-6 !mb-0 text-gray-700 text-base leading-relaxed">
                                         {profile.bio}
                                     </Paragraph>
                                 )}
@@ -220,47 +229,55 @@ const MyProfilePage = () => {
                         </div>
                     </div>
                 </Card>
-                <Row gutter={24}>
+                <Row gutter={[24, 24]}>
                     {/* Left Column - Contact Info */}
                     <Col xs={24} lg={8}>
                         {/* Contact Information */}
                         <Card
                             title={
-                                <span className="text-lg font-semibold">
-                                    📞 Thông tin liên hệ
+                                <span className="text-lg font-bold text-gray-900 flex items-center gap-2">
+                                    <span className="text-2xl">📞</span>
+                                    <span>Thông tin liên hệ</span>
                                 </span>
                             }
-                            className="shadow-lg rounded-xl border-0 mb-6"
+                            className="shadow-lg hover:shadow-xl rounded-2xl border-0 mb-6 transition-all duration-300 overflow-hidden"
+                            bodyStyle={{ padding: '24px' }}
                         >
-                            <Space direction="vertical" size={16} className="w-full">
-                                <div className="flex items-center gap-3">
-                                    <MailOutlined className="text-xl text-gray-400" />
-                                    <div>
-                                        <Text type="secondary" className="text-sm block">
+                            <Space direction="vertical" size={20} className="w-full">
+                                <div className="flex items-start gap-4 p-4 bg-gray-50 rounded-xl hover:bg-gray-100 transition-colors">
+                                    <div className="flex-shrink-0 text-2xl text-[#00B14F]">
+                                        <MailOutlined />
+                                    </div>
+                                    <div className="flex-1 min-w-0">
+                                        <Text type="secondary" className="text-xs font-semibold uppercase tracking-wide block mb-1">
                                             Email
                                         </Text>
-                                        <Text>{profile.email}</Text>
+                                        <Text className="text-sm font-medium truncate">{profile.email}</Text>
                                     </div>
                                 </div>
                                 {profile.phoneNumber && (
-                                    <div className="flex items-center gap-3">
-                                        <PhoneOutlined className="text-xl text-gray-400" />
-                                        <div>
-                                            <Text type="secondary" className="text-sm block">
+                                    <div className="flex items-start gap-4 p-4 bg-gray-50 rounded-xl hover:bg-gray-100 transition-colors">
+                                        <div className="flex-shrink-0 text-2xl text-[#00B14F]">
+                                            <PhoneOutlined />
+                                        </div>
+                                        <div className="flex-1">
+                                            <Text type="secondary" className="text-xs font-semibold uppercase tracking-wide block mb-1">
                                                 Điện thoại
                                             </Text>
-                                            <Text>{profile.phoneNumber}</Text>
+                                            <Text className="text-sm font-medium">{profile.phoneNumber}</Text>
                                         </div>
                                     </div>
                                 )}
                                 {profile.address && (
-                                    <div className="flex items-center gap-3">
-                                        <EnvironmentOutlined className="text-xl text-gray-400" />
-                                        <div>
-                                            <Text type="secondary" className="text-sm block">
+                                    <div className="flex items-start gap-4 p-4 bg-gray-50 rounded-xl hover:bg-gray-100 transition-colors">
+                                        <div className="flex-shrink-0 text-2xl text-[#00B14F]">
+                                            <EnvironmentOutlined />
+                                        </div>
+                                        <div className="flex-1">
+                                            <Text type="secondary" className="text-xs font-semibold uppercase tracking-wide block mb-1">
                                                 Địa chỉ
                                             </Text>
-                                            <Text>{profile.address}</Text>
+                                            <Text className="text-sm font-medium">{profile.address}</Text>
                                         </div>
                                     </div>
                                 )}
@@ -270,7 +287,7 @@ const MyProfilePage = () => {
                                     profile.gitHubUrl) && (
                                         <>
                                             <Divider className="!my-2" />
-                                            <Space size={16}>
+                                            <div className="flex gap-4 justify-center">
                                                 {profile.websiteUrl && (
                                                     <a
                                                         href={profile.websiteUrl}
@@ -280,7 +297,7 @@ const MyProfilePage = () => {
                                                         <Button
                                                             type="text"
                                                             icon={<GlobalOutlined />}
-                                                            className="!text-gray-500 hover:!text-[#00B14F]"
+                                                            className="!text-xl !text-gray-500 hover:!text-[#00B14F] transition-colors"
                                                         />
                                                     </a>
                                                 )}
@@ -293,7 +310,7 @@ const MyProfilePage = () => {
                                                         <Button
                                                             type="text"
                                                             icon={<LinkedinOutlined />}
-                                                            className="!text-gray-500 hover:!text-[#0077B5]"
+                                                            className="!text-xl !text-gray-500 hover:!text-[#0077B5] transition-colors"
                                                         />
                                                     </a>
                                                 )}
@@ -306,11 +323,11 @@ const MyProfilePage = () => {
                                                         <Button
                                                             type="text"
                                                             icon={<GithubOutlined />}
-                                                            className="!text-gray-500 hover:!text-[#333]"
+                                                            className="!text-xl !text-gray-500 hover:!text-gray-900 transition-colors"
                                                         />
                                                     </a>
                                                 )}
-                                            </Space>
+                                            </div>
                                         </>
                                     )}
                             </Space>
@@ -319,44 +336,51 @@ const MyProfilePage = () => {
                         {isCandidate && (
                             <Card
                                 title={
-                                    <span className="text-lg font-semibold">
-                                        📄 CV của tôi
+                                    <span className="text-lg font-bold text-gray-900 flex items-center gap-2">
+                                        <span className="text-2xl">📄</span>
+                                        <span>CV của tôi</span>
                                     </span>
                                 }
-                                className="shadow-lg rounded-xl border-0 mb-6"
+                                className="shadow-lg hover:shadow-xl rounded-2xl border-0 mb-6 transition-all duration-300 overflow-hidden"
+                                bodyStyle={{ padding: '24px' }}
                             >
                                 {profile.defaultCvUrl ? (
-                                    <div className="flex items-center justify-between">
-                                        <div className="flex items-center gap-3">
-                                            <FileTextOutlined className="text-2xl text-[#00B14F]" />
-                                            <div>
-                                                <Text strong>CV mặc định</Text>
+                                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 p-4 bg-gradient-to-br from-green-50 to-emerald-50 rounded-xl border border-green-200">
+                                        <div className="flex items-center gap-4">
+                                            <div className="flex-shrink-0 text-4xl text-[#00B14F]">
+                                                <FileTextOutlined />
+                                            </div>
+                                            <div className="min-w-0">
+                                                <Text strong className="block text-sm font-semibold mb-1">CV mặc định</Text>
                                                 <Text
                                                     type="secondary"
-                                                    className="text-sm block truncate max-w-[200px]"
+                                                    className="text-xs block truncate max-w-xs"
                                                     title={profile.defaultCvUrl}
                                                 >
                                                     {profile.defaultCvUrl.split('/').pop() || 'Đã tải lên'}
                                                 </Text>
                                             </div>
                                         </div>
-                                        <Space>
-                                            <a
-                                                href={profile.defaultCvUrl.startsWith('http') ? profile.defaultCvUrl : `https://localhost:7016${profile.defaultCvUrl}`}
-                                                target="_blank"
-                                                rel="noopener noreferrer"
-                                            >
-                                                <Button type="primary" className="!bg-[#00B14F] hover:!bg-[#00a347] !border-0">
-                                                    Xem CV
-                                                </Button>
-                                            </a>
-                                        </Space>
+                                        <a
+                                            href={profile.defaultCvUrl.startsWith('http') ? profile.defaultCvUrl : `https://localhost:7016${profile.defaultCvUrl}`}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                        >
+                                            <Button type="primary" className="!bg-[#00B14F] hover:!bg-[#00a347] !border-0 font-semibold">
+                                                Xem CV
+                                            </Button>
+                                        </a>
                                     </div>
                                 ) : (
-                                    <div className="text-center py-4">
-                                        <FileTextOutlined className="text-4xl text-gray-300 mb-2" />
-                                        <Text type="secondary" className="block">
-                                            Chưa có CV. Nhấn "Chỉnh sửa hồ sơ" để tải lên.
+                                    <div className="text-center py-8 px-4 bg-gray-50 rounded-xl border-2 border-dashed border-gray-200">
+                                        <div className="text-5xl text-gray-300 mb-3 flex justify-center">
+                                            <FileTextOutlined />
+                                        </div>
+                                        <Text type="secondary" className="block text-base font-medium">
+                                            Chưa có CV
+                                        </Text>
+                                        <Text type="secondary" className="block text-sm mt-1">
+                                            Nhấn "Chỉnh sửa hồ sơ" để tải lên
                                         </Text>
                                     </div>
                                 )}
@@ -366,28 +390,32 @@ const MyProfilePage = () => {
                         {profile.company && (
                             <Card
                                 title={
-                                    <span className="text-lg font-semibold">🏢 Công ty</span>
+                                    <span className="text-lg font-bold text-gray-900 flex items-center gap-2">
+                                        <span className="text-2xl">🏢</span>
+                                        <span>Công ty</span>
+                                    </span>
                                 }
-                                className="shadow-lg rounded-xl border-0 mb-6"
+                                className="shadow-lg hover:shadow-xl rounded-2xl border-0 mb-6 transition-all duration-300 overflow-hidden"
+                                bodyStyle={{ padding: '24px' }}
                             >
-                                <div className="flex items-start gap-4 mb-4">
+                                <div className="flex items-start gap-4 mb-6 p-4 bg-gray-50 rounded-xl">
                                     {companyLogoUrl ? (
                                         <img
                                             src={companyLogoUrl}
                                             alt={profile.company.companyName}
-                                            className="w-16 h-16 rounded-lg object-contain border border-gray-100"
+                                            className="w-20 h-20 rounded-lg object-contain bg-white border border-gray-200 p-2"
                                         />
                                     ) : (
-                                        <div className="w-16 h-16 rounded-lg bg-gray-100 flex items-center justify-center">
-                                            <BuildOutlined className="text-2xl text-gray-400" />
+                                        <div className="w-20 h-20 rounded-lg bg-gradient-to-br from-blue-100 to-blue-50 flex items-center justify-center border border-blue-200">
+                                            <BuildOutlined className="text-3xl text-blue-400" />
                                         </div>
                                     )}
-                                    <div>
-                                        <Title level={5} className="!m-0 !mb-1">
+                                    <div className="flex-1">
+                                        <Title level={5} className="!m-0 !mb-2 text-lg font-bold">
                                             {profile.company.companyName}
                                         </Title>
                                         {profile.company.size && (
-                                            <Tag color="blue">
+                                            <Tag color="blue" className="!px-3 !py-1 font-medium">
                                                 <TeamOutlined className="mr-1" />
                                                 {profile.company.size} nhân viên
                                             </Tag>
@@ -395,25 +423,25 @@ const MyProfilePage = () => {
                                     </div>
                                 </div>
                                 {profile.company.description && (
-                                    <Paragraph className="text-gray-600 !mb-4">
+                                    <Paragraph className="text-gray-700 !mb-6 text-sm leading-relaxed">
                                         {profile.company.description}
                                     </Paragraph>
                                 )}
-                                <Space direction="vertical" size={8} className="w-full">
+                                <Space direction="vertical" size={12} className="w-full">
                                     {profile.company.address && (
-                                        <div className="flex items-center gap-2 text-gray-600">
-                                            <EnvironmentOutlined />
-                                            <Text>{profile.company.address}</Text>
+                                        <div className="flex items-start gap-3 p-3 bg-gray-50 rounded-lg">
+                                            <EnvironmentOutlined className="text-[#00B14F] text-lg flex-shrink-0 mt-0.5" />
+                                            <Text className="text-sm">{profile.company.address}</Text>
                                         </div>
                                     )}
                                     {profile.company.websiteLink && (
-                                        <div className="flex items-center gap-2">
-                                            <GlobalOutlined className="text-gray-400" />
+                                        <div className="flex items-start gap-3 p-3 bg-gray-50 rounded-lg">
+                                            <GlobalOutlined className="text-[#00B14F] text-lg flex-shrink-0 mt-0.5" />
                                             <a
                                                 href={profile.company.websiteLink}
                                                 target="_blank"
                                                 rel="noopener noreferrer"
-                                                className="text-[#00B14F] hover:underline"
+                                                className="text-[#00B14F] hover:underline text-sm break-all"
                                             >
                                                 {profile.company.websiteLink}
                                             </a>
@@ -429,25 +457,27 @@ const MyProfilePage = () => {
                         {isCandidate && profile.educations && profile.educations.length > 0 && (
                             <Card
                                 title={
-                                    <span className="text-lg font-semibold">
-                                        🎓 Học vấn
+                                    <span className="text-lg font-bold text-gray-900 flex items-center gap-2">
+                                        <span className="text-2xl">🎓</span>
+                                        <span>Học vấn</span>
                                     </span>
                                 }
-                                className="shadow-lg rounded-xl border-0 mb-6"
+                                className="shadow-lg hover:shadow-xl rounded-2xl border-0 mb-6 transition-all duration-300 overflow-hidden"
+                                bodyStyle={{ padding: '24px' }}
                             >
-                                <Space direction="vertical" size={16} className="w-full">
+                                <Space direction="vertical" size={20} className="w-full">
                                     {profile.educations.map((edu) => (
                                         <div
                                             key={edu.id}
-                                            className="border-l-4 border-[#00B14F] pl-4"
+                                            className="border-l-4 border-[#00B14F] pl-6 py-4 hover:bg-green-50 rounded-r-xl transition-colors duration-200"
                                         >
-                                            <Title level={5} className="!m-0 !mb-1">
+                                            <Title level={5} className="!m-0 !mb-1 text-base font-bold">
                                                 {edu.schoolName}
                                             </Title>
-                                            <Text className="text-gray-600 block">
+                                            <Text className="text-gray-700 block font-medium text-sm">
                                                 {edu.major}
                                             </Text>
-                                            <Text type="secondary" className="text-sm">
+                                            <Text type="secondary" className="text-xs font-semibold uppercase tracking-wide mt-2 block">
                                                 {edu.startDate} - {edu.endDate || "Hiện tại"}
                                             </Text>
                                         </div>
@@ -461,29 +491,31 @@ const MyProfilePage = () => {
                             profile.experiences.length > 0 && (
                                 <Card
                                     title={
-                                        <span className="text-lg font-semibold">
-                                            💼 Kinh nghiệm làm việc
+                                        <span className="text-lg font-bold text-gray-900 flex items-center gap-2">
+                                            <span className="text-2xl">💼</span>
+                                            <span>Kinh nghiệm làm việc</span>
                                         </span>
                                     }
-                                    className="shadow-lg rounded-xl border-0 mb-6"
+                                    className="shadow-lg hover:shadow-xl rounded-2xl border-0 mb-6 transition-all duration-300 overflow-hidden"
+                                    bodyStyle={{ padding: '24px' }}
                                 >
-                                    <Space direction="vertical" size={16} className="w-full">
+                                    <Space direction="vertical" size={20} className="w-full">
                                         {profile.experiences.map((exp) => (
                                             <div
                                                 key={exp.id}
-                                                className="border-l-4 border-blue-500 pl-4"
+                                                className="border-l-4 border-blue-500 pl-6 py-4 hover:bg-blue-50 rounded-r-xl transition-colors duration-200"
                                             >
-                                                <Title level={5} className="!m-0 !mb-1">
+                                                <Title level={5} className="!m-0 !mb-1 text-base font-bold">
                                                     {exp.position}
                                                 </Title>
-                                                <Text className="text-gray-600 block">
+                                                <Text className="text-gray-700 block font-semibold text-sm">
                                                     {exp.company}
                                                 </Text>
-                                                <Text type="secondary" className="text-sm block">
+                                                <Text type="secondary" className="text-xs font-semibold uppercase tracking-wide block mt-2 mb-3">
                                                     {exp.startDate} - {exp.endDate || "Hiện tại"}
                                                 </Text>
                                                 {exp.description && (
-                                                    <Paragraph className="!mt-2 !mb-0 text-gray-500">
+                                                    <Paragraph className="!mt-2 !mb-0 text-gray-600 text-sm leading-relaxed">
                                                         {exp.description}
                                                     </Paragraph>
                                                 )}
@@ -498,41 +530,48 @@ const MyProfilePage = () => {
                             profile.postedJobs.length > 0 && (
                                 <Card
                                     title={
-                                        <div className="flex items-center justify-between">
-                                            <span className="text-lg font-semibold">
-                                                💼 Việc làm đã đăng
+                                        <div className="flex items-center justify-between w-full">
+                                            <span className="text-lg font-bold text-gray-900 flex items-center gap-2">
+                                                <span className="text-2xl">💼</span>
+                                                <span>Việc làm đã đăng</span>
                                             </span>
-                                            <Tag color={PRIMARY_COLOR} className="!m-0">
+                                            <Tag color={PRIMARY_COLOR} className="!m-0 !px-3 !py-1 font-semibold">
                                                 {profile.postedJobs.length} tin
                                             </Tag>
                                         </div>
                                     }
-                                    className="shadow-lg rounded-xl border-0"
+                                    className="shadow-lg hover:shadow-xl rounded-2xl border-0 transition-all duration-300 overflow-hidden"
+                                    bodyStyle={{ padding: '24px' }}
                                 >
-                                    <Space direction="vertical" size={12} className="w-full">
+                                    <Space direction="vertical" size={16} className="w-full">
                                         {profile.postedJobs.map((job) => (
-                                            <Card
+                                            <div
                                                 key={job.id}
-                                                size="small"
-                                                className="hover:shadow-md transition-all cursor-pointer"
+                                                className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-4 p-5 bg-gradient-to-br from-gray-50 to-gray-100 hover:from-gray-100 hover:to-gray-200 rounded-xl border border-gray-200 hover:border-gray-300 transition-all duration-200 cursor-pointer group"
                                             >
-                                                <div className="flex justify-between items-center">
-                                                    <div>
-                                                        <Text strong>{job.title}</Text>
+                                                <div className="flex-1 min-w-0">
+                                                    <Text strong className="text-base block mb-1 group-hover:text-[#00B14F] transition-colors">
+                                                        {job.title}
+                                                    </Text>
+                                                    <div className="flex items-center gap-2 text-gray-600">
+                                                        <EnvironmentOutlined className="text-sm" />
                                                         <Text
                                                             type="secondary"
-                                                            className="text-sm block"
+                                                            className="text-sm"
                                                         >
                                                             {job.locationName}
                                                         </Text>
                                                     </div>
-                                                    <Tag color={PRIMARY_COLOR}>
-                                                        {job.salaryMin && job.salaryMax
-                                                            ? `${(job.salaryMin / 1000000).toFixed(0)} - ${(job.salaryMax / 1000000).toFixed(0)} triệu`
-                                                            : "Thương lượng"}
-                                                    </Tag>
                                                 </div>
-                                            </Card>
+                                                <Tag
+                                                    color={PRIMARY_COLOR}
+                                                    className="!px-4 !py-1.5 font-semibold text-sm flex-shrink-0"
+                                                >
+                                                    {job.salaryMin && job.salaryMax
+                                                        ? `${(job.salaryMin / 1000000).toFixed(0)} - ${(job.salaryMax / 1000000).toFixed(0)} triệu`
+                                                        : "Thương lượng"}
+                                                </Tag>
+                                            </div>
                                         ))}
                                     </Space>
                                 </Card>
@@ -543,27 +582,30 @@ const MyProfilePage = () => {
             {/* Edit Profile Modal */}
             <Modal
                 title={
-                    <span className="text-xl font-semibold">
-                        ✏️ Chỉnh sửa hồ sơ
+                    <span className="text-2xl font-bold text-gray-900 flex items-center gap-3">
+                        <span className="text-3xl">✏️</span>
+                        <span>Chỉnh sửa hồ sơ</span>
                     </span>
                 }
                 open={isEditModalOpen}
                 onCancel={() => setIsEditModalOpen(false)}
                 footer={null}
-                width={700}
+                width={750}
                 centered
+                className="!rounded-2xl"
+                bodyStyle={{ padding: '32px' }}
             >
                 <Form
                     form={form}
                     layout="vertical"
                     onFinish={handleSubmit}
-                    className="mt-4"
+                    className="mt-6"
                 >
                     {/* Avatar & Cover Upload */}
-                    <div className="flex gap-6 mb-6">
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8 p-6 bg-gradient-to-br from-gray-50 to-blue-50 rounded-2xl border border-gray-200">
                         {/* Avatar Upload */}
-                        <div className="text-center">
-                            <Text type="secondary" className="block mb-2">
+                        <div className="md:col-span-1 text-center">
+                            <Text type="secondary" className="block mb-4 font-semibold text-xs uppercase tracking-wide">
                                 Ảnh đại diện
                             </Text>
                             <input
@@ -579,31 +621,32 @@ const MyProfilePage = () => {
                                     }
                                 }}
                             />
-                            <label htmlFor="avatar-upload" className="cursor-pointer">
+                            <label htmlFor="avatar-upload" className="cursor-pointer inline-block">
                                 <div className="relative group">
                                     <Avatar
-                                        size={100}
+                                        size={120}
                                         src={avatarPreview || buildImageUrl(profile?.avatarUrl)}
                                         style={{ backgroundColor: PRIMARY_COLOR }}
+                                        className="shadow-lg border-4 border-white"
                                     >
                                         {profile?.fullName?.charAt(0)?.toUpperCase()}
                                     </Avatar>
-                                    <div className="absolute inset-0 bg-black/50 rounded-full opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                                        <CameraOutlined className="text-white text-xl" />
+                                    <div className="absolute inset-0 bg-black/40 rounded-full opacity-0 group-hover:opacity-100 transition-all duration-200 flex items-center justify-center">
+                                        <CameraOutlined className="text-white text-2xl" />
                                     </div>
                                 </div>
                             </label>
                             {avatarFile && (
-                                <Text type="success" className="mt-2 block text-xs">
+                                <Text type="success" className="mt-3 block text-xs font-semibold">
                                     ✓ {avatarFile.name}
                                 </Text>
                             )}
                         </div>
 
                         {/* Cover Upload */}
-                        <div className="flex-1">
-                            <Text type="secondary" className="block mb-2">
-                                Ảnh bìa (1200x300 px)
+                        <div className="md:col-span-2">
+                            <Text type="secondary" className="block mb-4 font-semibold text-xs uppercase tracking-wide">
+                                Ảnh bìa (Tối ưu: 1200x300 px)
                             </Text>
                             <input
                                 type="file"
@@ -620,20 +663,20 @@ const MyProfilePage = () => {
                             />
                             <label htmlFor="cover-upload" className="cursor-pointer block">
                                 <div
-                                    className="h-32 rounded-lg bg-cover bg-center relative group overflow-hidden border-2 border-dashed border-gray-300 hover:border-[#00B14F]"
+                                    className="h-40 rounded-xl bg-cover bg-center relative group overflow-hidden border-2 border-dashed border-gray-300 hover:border-[#00B14F] transition-colors duration-200"
                                     style={{
                                         backgroundImage: `url(${coverPreview || buildImageUrl(profile?.coverImageUrl) || 'https://via.placeholder.com/1200x300?text=Cover+Image'})`,
                                         backgroundColor: "#f5f5f5",
                                     }}
                                 >
-                                    <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center">
-                                        <CameraOutlined className="text-white text-2xl mb-1" />
-                                        <Text className="text-white text-sm">Nhấp để thay đổi</Text>
+                                    <div className="absolute inset-0 bg-black/30 opacity-0 group-hover:opacity-100 transition-all duration-200 flex flex-col items-center justify-center">
+                                        <CameraOutlined className="text-white text-3xl mb-2" />
+                                        <Text className="text-white text-sm font-semibold">Nhấp để thay đổi</Text>
                                     </div>
                                 </div>
                             </label>
                             {coverFile && (
-                                <Text type="success" className="mt-2 block text-sm">
+                                <Text type="success" className="mt-3 block text-xs font-semibold">
                                     ✓ Đã chọn: {coverFile.name}
                                 </Text>
                             )}
@@ -641,69 +684,92 @@ const MyProfilePage = () => {
                     </div>
 
                     {/* Thông tin cơ bản */}
-                    <Row gutter={16}>
-                        <Col span={12}>
-                            <Form.Item
-                                label="Họ và tên"
-                                name="fullName"
-                                rules={[{ required: true, message: 'Vui lòng nhập họ tên' }]}
-                            >
-                                <Input placeholder="Nhập họ và tên" size="large" />
-                            </Form.Item>
-                        </Col>
-                        <Col span={12}>
-                            <Form.Item label="Số điện thoại" name="phoneNumber">
-                                <Input placeholder="VD: 0912345678" size="large" />
-                            </Form.Item>
-                        </Col>
-                    </Row>
+                    <div className="mb-8">
+                        <Title level={5} className="!text-lg !font-bold !mb-6 !text-gray-900 flex items-center gap-2">
+                            <span>👤</span>
+                            <span>Thông tin cơ bản</span>
+                        </Title>
+                        <Row gutter={[16, 16]}>
+                            <Col xs={24} sm={12}>
+                                <Form.Item
+                                    label={<span className="font-semibold text-gray-700">Họ và tên</span>}
+                                    name="fullName"
+                                    rules={[{ required: true, message: 'Vui lòng nhập họ tên' }]}
+                                >
+                                    <Input placeholder="Nhập họ và tên" size="large" className="!rounded-lg" />
+                                </Form.Item>
+                            </Col>
+                            <Col xs={24} sm={12}>
+                                <Form.Item label={<span className="font-semibold text-gray-700">Số điện thoại</span>} name="phoneNumber" rules={[{ required: true, message: 'Vui lòng nhập số điện thoại' }, { pattern: /^(0[0-9]{9,10})$/, message: 'Số điện thoại không hợp lệ' }]}>
+                                    <Input placeholder="VD: 0912345678" size="large" className="!rounded-lg" />
+                                </Form.Item>
+                            </Col>
+                        </Row>
 
-                    <Form.Item label="Chức danh / Nghề nghiệp" name="professionalTitle">
-                        <Input placeholder="VD: Senior Software Engineer" size="large" />
-                    </Form.Item>
-                    <Form.Item label="Giới thiệu bản thân" name="bio">
-                        <TextArea
-                            rows={4}
-                            placeholder="Viết một vài dòng giới thiệu về bản thân..."
-                        />
-                    </Form.Item>
-                    <Form.Item label="Địa chỉ" name="address">
-                        <Input placeholder="VD: Hà Nội, Việt Nam" size="large" />
-                    </Form.Item>
-                    <Divider />
-                    <Title level={5}>🔗 Liên kết xã hội</Title>
-                    <Row gutter={16}>
-                        <Col span={8}>
-                            <Form.Item label="Website" name="websiteUrl">
-                                <Input
-                                    prefix={<GlobalOutlined className="text-gray-400" />}
-                                    placeholder="https://..."
-                                />
-                            </Form.Item>
-                        </Col>
-                        <Col span={8}>
-                            <Form.Item label="LinkedIn" name="linkedInUrl">
-                                <Input
-                                    prefix={<LinkedinOutlined className="text-gray-400" />}
-                                    placeholder="https://linkedin.com/..."
-                                />
-                            </Form.Item>
-                        </Col>
-                        <Col span={8}>
-                            <Form.Item label="GitHub" name="gitHubUrl">
-                                <Input
-                                    prefix={<GithubOutlined className="text-gray-400" />}
-                                    placeholder="https://github.com/..."
-                                />
-                            </Form.Item>
-                        </Col>
-                    </Row>
+                        <Form.Item label={<span className="font-semibold text-gray-700">Chức danh / Nghề nghiệp</span>} name="professionalTitle" rules={[{ required: true, message: 'Vui lòng nhập chức danh / nghề nghiệp' }]}>
+                            <Input placeholder="VD: Senior Software Engineer" size="large" className="!rounded-lg" />
+                        </Form.Item>
+                        <Form.Item label={<span className="font-semibold text-gray-700">Giới thiệu bản thân</span>} name="bio" >
+                            <TextArea
+                                rows={4}
+                                placeholder="Viết một vài dòng giới thiệu về bản thân..."
+                                className="!rounded-lg"
+                            />
+                        </Form.Item>
+                        <Form.Item label={<span className="font-semibold text-gray-700">Địa chỉ</span>} name="address" rules={[{ required: true, message: 'Vui lòng nhập địa chỉ' }]}>
+                            <Input placeholder="VD: Hà Nội, Việt Nam" size="large" className="!rounded-lg" />
+                        </Form.Item>
+                    </div>
+
+                    <Divider className="!my-8" />
+
+                    <div className="mb-8">
+                        <Title level={5} className="!text-lg !font-bold !mb-6 !text-gray-900 flex items-center gap-2">
+                            <span>🔗</span>
+                            <span>Liên kết xã hội</span>
+                        </Title>
+                        <Row gutter={[16, 16]}>
+                            <Col xs={24} sm={8}>
+                                <Form.Item label={<span className="font-semibold text-gray-700">Website</span>} name="websiteUrl">
+                                    <Input
+                                        prefix={<GlobalOutlined className="text-[#00B14F]" />}
+                                        placeholder="https://..."
+                                        size="large"
+                                        className="!rounded-lg"
+                                    />
+                                </Form.Item>
+                            </Col>
+                            <Col xs={24} sm={8}>
+                                <Form.Item label={<span className="font-semibold text-gray-700">LinkedIn</span>} name="linkedInUrl">
+                                    <Input
+                                        prefix={<LinkedinOutlined className="text-[#0077B5]" />}
+                                        placeholder="https://linkedin.com/..."
+                                        size="large"
+                                        className="!rounded-lg"
+                                    />
+                                </Form.Item>
+                            </Col>
+                            <Col xs={24} sm={8}>
+                                <Form.Item label={<span className="font-semibold text-gray-700">GitHub</span>} name="gitHubUrl">
+                                    <Input
+                                        prefix={<GithubOutlined className="text-gray-800" />}
+                                        placeholder="https://github.com/..."
+                                        size="large"
+                                        className="!rounded-lg"
+                                    />
+                                </Form.Item>
+                            </Col>
+                        </Row>
+                    </div>
                     {/* CV Upload - Only for Candidate */}
                     {isCandidate && (
                         <>
-                            <Divider />
-                            <Title level={5}>📄 CV</Title>
-                            <Form.Item label="Tải lên CV mới">
+                            <Divider className="!my-8" />
+                            <Title level={5} className="!text-lg !font-bold !mb-6 !text-gray-900 flex items-center gap-2">
+                                <span>📄</span>
+                                <span>CV của bạn</span>
+                            </Title>
+                            <Form.Item label={<span className="font-semibold text-gray-700">Tải lên CV mới</span>}>
                                 <Upload
                                     beforeUpload={(file) => {
                                         setCvFile(file);
@@ -714,21 +780,25 @@ const MyProfilePage = () => {
                                     fileList={cvFile ? [{ uid: '-1', name: cvFile.name, status: 'done' }] : []}
                                     onRemove={() => setCvFile(null)}
                                 >
-                                    <Button icon={<UploadOutlined />}>
+                                    <Button size="large" icon={<UploadOutlined />} className="!rounded-lg !font-semibold">
                                         Chọn file CV (PDF, DOC)
                                     </Button>
                                 </Upload>
                                 {cvFile && (
-                                    <Text type="success" className="mt-2 block">
-                                        Đã chọn: {cvFile.name}
+                                    <Text type="success" className="mt-3 block text-sm font-semibold">
+                                        ✓ Đã chọn: {cvFile.name}
                                     </Text>
                                 )}
                             </Form.Item>
                         </>
                     )}
-                    <Divider />
-                    <div className="flex justify-end gap-3">
-                        <Button size="large" onClick={() => setIsEditModalOpen(false)}>
+                    <Divider className="!my-8" />
+                    <div className="flex justify-end gap-4">
+                        <Button
+                            size="large"
+                            onClick={() => setIsEditModalOpen(false)}
+                            className="!rounded-lg !font-semibold !px-8"
+                        >
                             Hủy
                         </Button>
                         <Button
@@ -737,7 +807,7 @@ const MyProfilePage = () => {
                             htmlType="submit"
                             loading={updating}
                             icon={<SaveOutlined />}
-                            className="!bg-[#00B14F] hover:!bg-[#00a347] !border-0"
+                            className="!bg-[#00B14F] hover:!bg-[#00a347] !border-0 !rounded-lg !font-semibold !px-8"
                         >
                             Lưu thay đổi
                         </Button>

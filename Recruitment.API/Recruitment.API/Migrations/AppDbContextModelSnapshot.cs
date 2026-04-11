@@ -499,6 +499,9 @@ namespace Recruitment.API.Migrations
                     b.Property<string>("githubUrl")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<bool>("isActive")
+                        .HasColumnType("bit");
+
                     b.Property<string>("linkedInUrl")
                         .HasColumnType("nvarchar(max)");
 

@@ -54,6 +54,9 @@ namespace Recruitment.API.Services
         public async Task<UserProfileResponse> UpdateProfileUser(int id, ProfileUpdateRequest request)
         {
             var user = await _userRepository.GetByIdAsync(id) ?? throw new Exception("Người dùng không tồn tại");
+
+            if (!string.IsNullOrEmpty(request.FullName)) user.fullName = request.FullName;
+            if (!string.IsNullOrEmpty(request.PhoneNumber)) user.phoneNumber = request.PhoneNumber;
             if (!string.IsNullOrEmpty(request.ProfessionalTitle)) user.professionalTitle = request.ProfessionalTitle;
             if (!string.IsNullOrEmpty(request.Bio)) user.bio = request.Bio;
             if (!string.IsNullOrEmpty(request.Address)) user.address = request.Address;

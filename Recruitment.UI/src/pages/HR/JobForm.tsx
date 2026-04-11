@@ -1,5 +1,5 @@
 // src/pages/HR/JobForm.tsx
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Form, Input, Button, Select, DatePicker, InputNumber, message, Card, Spin, Alert, Upload, Popconfirm } from 'antd';
 import { UploadOutlined, DeleteOutlined } from '@ant-design/icons';
 import type { UploadFile, UploadProps } from 'antd/es/upload/interface';
@@ -21,16 +21,15 @@ const JobForm = () => {
     // Sử dụng custom hook cho master data
     const { locations, categories, skills, loading: masterLoading, error: masterError } = useJobMasterData();
 
-    // State riêng của form
+    // State riêng của formlh
     const [loading, setLoading] = useState(false);
     const [fetchLoading, setFetchLoading] = useState(false);
-    const [jobData, setJobData] = useState<JobResponse | null>(null);
+    const [_, setJobData] = useState<JobResponse | null>(null);
     const [mappingWarnings, setMappingWarnings] = useState<string[]>([]);
 
     // Upload state: Lưu file gốc (không upload ngay)
     const [fileList, setFileList] = useState<UploadFile[]>([]);
     const [selectedFile, setSelectedFile] = useState<File | null>(null);
-    const [showRemoveConfirm, setShowRemoveConfirm] = useState(false);
 
     // Thêm warning nếu có lỗi fetch master data
     useEffect(() => {
@@ -176,7 +175,6 @@ const JobForm = () => {
             // Set form values
             form.setFieldsValue({
                 title: job.title || '',
-                companyName: job.companyName || '',
                 imageUrl: job.imageUrl || '',  // THÊM: Set URL cũ (hidden field)
                 description: job.description || '',
                 requirement: job.requirement || '',
@@ -276,7 +274,6 @@ const JobForm = () => {
             const payload: any = {
                 ...values,
                 jobType: jobTypeValue,
-                companyName: values.companyName || '',
                 deadline: deadlineValue
                     ? dayjs(deadlineValue).toISOString()  // SỬA: Full ISO cho backend
                     : dayjs().add(30, 'day').toISOString(),
@@ -359,11 +356,6 @@ const JobForm = () => {
             <Form form={form} layout="vertical" onFinish={onFinish} initialValues={{ jobType: [JobType.FullTime] }}>
                 <Form.Item name="title" label="Tiêu đề công việc" rules={[{ required: true, message: 'Vui lòng nhập tiêu đề' }]}>
                     <Input placeholder="Ví dụ: Senior React Developer" />
-                </Form.Item>
-
-                {/* THÊM: Form.Item cho companyName */}
-                <Form.Item name="companyName" label="Tên công ty" rules={[{ required: true, message: 'Vui lòng nhập tên công ty' }]}>
-                    <Input placeholder="Tên công ty tuyển dụng" />
                 </Form.Item>
 
                 <div className="grid grid-cols-2 gap-4">

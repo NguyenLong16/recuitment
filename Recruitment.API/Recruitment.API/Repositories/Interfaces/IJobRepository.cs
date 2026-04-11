@@ -1,4 +1,5 @@
 ﻿
+using Recruitment.API.Data;
 using Recruitment.API.DTOs;
 using Recruitment.API.Models;
 
@@ -15,6 +16,12 @@ namespace Recruitment.API.Repositories.Interfaces
         Task<bool> DeleteAsync(int id);
         Task AddSkillToJobAsync(int jobId, List<int> skillIds);
         Task RemoveSkillsFromJobAsync(int jobId);
-        
+        //admin
+        Task<IEnumerable<Job>> GetAllJobsAsync(string? keyword = null, Enums.JobStatus? status = null);
+        Task<bool> ToggleHideJobAsync(int jobId);
+
+        // Hàm xóa vĩnh viễn bài đăng
+        Task<bool> DeleteJobAsync(int jobId);
+
     }
 }

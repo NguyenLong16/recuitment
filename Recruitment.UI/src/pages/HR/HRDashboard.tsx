@@ -245,7 +245,7 @@ const HRDashboard = () => {
                                                 dataKey="value"
                                                 strokeWidth={0}
                                             >
-                                                {pieData.map((entry, index) => (
+                                                {pieData.map((_, index) => (
                                                     <Cell key={`cell-${index}`} fill={PIE_COLORS[index % PIE_COLORS.length]} />
                                                 ))}
                                             </Pie>

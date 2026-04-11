@@ -11,5 +11,8 @@ namespace Recruitment.API.Services.Interfaces
 
         // Hàm mới: Lấy thống kê và danh sách
         Task<ReviewSummaryResponse> GetJobReviewsAsync(int jobId, int? starRating = null);
+        //admin
+        Task<IEnumerable<AdminReviewResponse>> GetReviewsAsync(string? keyword, int? rating);
+        Task DeleteReviewAsync(int reviewId);
     }
 }

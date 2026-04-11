@@ -25,7 +25,7 @@
             FullTime = 1,
             PartTime = 2,
             Internship = 3,
-            Contract = 4,  // Nếu có Contract, giữ 4
+            Contract = 4,  
             Remote = 5
         }
     }

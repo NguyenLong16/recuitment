@@ -95,5 +95,17 @@ namespace Recruitment.API.Services
                 Reviews = _mapper.Map<IEnumerable<ReviewResponse>>(filteredReviews)
             };
         }
+        //admin
+        public async Task<IEnumerable<AdminReviewResponse>> GetReviewsAsync(string? keyword, int? rating)
+        {
+            var reviews = await _repo.GetAllReviewsAsync(keyword, rating);
+            return _mapper.Map<IEnumerable<AdminReviewResponse>>(reviews);
+        }
+
+        public async Task DeleteReviewAsync(int reviewId)
+        {
+            var result = await _repo.DeleteReviewAsync(reviewId);
+            if (!result) throw new Exception("Không tìm thấy đánh giá này hoặc đã bị xóa trước đó.");
+        }
     }
 }

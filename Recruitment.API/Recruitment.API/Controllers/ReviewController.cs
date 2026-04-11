@@ -48,5 +48,38 @@ namespace Recruitment.API.Controllers
                 return NotFound(new { message = ex.Message });
             }
         }
+
+        //admin
+        [HttpGet("admin")]
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> GetReviews([FromQuery] string? keyword, [FromQuery] int? rating)
+        {
+            try
+            {
+                var reviews = await _reviewService.GetReviewsAsync(keyword, rating);
+                return Ok(reviews);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+        }
+
+        // DELETE: api/admin/reviews/{id}
+        // Xóa các bình luận spam, chửi bới
+        [HttpDelete("admin/{id}")]
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> DeleteReview(int id)
+        {
+            try
+            {
+                await _reviewService.DeleteReviewAsync(id);
+                return Ok(new { message = "Đã xóa đánh giá vi phạm thành công!" });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+        }
     }
 }

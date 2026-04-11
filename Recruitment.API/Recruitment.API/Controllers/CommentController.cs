@@ -41,5 +41,37 @@ namespace Recruitment.API.Controllers
 
             return Ok(result);
         }
+        //admin
+        [HttpGet("admin")]
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> GetComments([FromQuery] string? keyword)
+        {
+            try
+            {
+                var comments = await _commentService.GetCommentsAsync(keyword);
+                return Ok(comments);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+        }
+
+        // DELETE: api/admin/comments/{id}
+        // Xóa bình luận độc hại
+        [HttpDelete("admin/{id}")]
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> DeleteComment(int id)
+        {
+            try
+            {
+                await _commentService.DeleteCommentAsync(id);
+                return Ok(new { message = "Đã xóa bình luận vi phạm thành công!" });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+        }
     }
 }

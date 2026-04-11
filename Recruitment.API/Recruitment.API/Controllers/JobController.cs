@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Recruitment.API.Data;
 using Recruitment.API.DTOs;
 using Recruitment.API.Services.Interfaces;
 using System.Security.Claims;
@@ -187,6 +188,53 @@ namespace Recruitment.API.Controllers
                 return id;
             }
             return 0;
+        }
+
+        //admin
+        [HttpGet("admin")]
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> GetJobs([FromQuery] string? keyword, [FromQuery] Enums.JobStatus? status)
+        {
+            try
+            {
+                var jobs = await _jobService.GetJobsAsync(keyword, status);
+                return Ok(jobs);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+        }
+
+        [HttpPatch("{id}/toggle-hide")]
+        public async Task<IActionResult> ToggleHideJob(int id)
+        {
+            try
+            {
+                await _jobService.ToggleHideJobAsync(id);
+                return Ok(new { message = "Đã thay đổi trạng thái hiển thị của tin tuyển dụng!" });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+        }
+
+        // DELETE: api/admin/jobs/{id}
+        // Chức năng: Xóa vĩnh viễn bài đăng
+        [HttpDelete("admin/{id}")]
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> DeleteJobForAdmin(int id)
+        {
+            try
+            {
+                await _jobService.DeleteJobAsync(id);
+                return Ok(new { message = "Đã xóa vĩnh viễn tin tuyển dụng này!" });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
         }
     }
 }

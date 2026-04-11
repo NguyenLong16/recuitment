@@ -76,7 +76,6 @@ export interface JobState {
 // Form values type (dùng cho Ant Design Form)
 export interface JobFormValues {
     title: string;
-    companyName?: string;
     imageUrl?: string;
     description: string;
     requirement: string;
