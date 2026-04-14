@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { Button, message, Select, Space, Table, Tag, Tooltip, Card, Empty } from "antd";
+import type { ColumnsType } from "antd/es/table";
 import { ArrowLeftOutlined, DownloadOutlined, EyeOutlined, UserOutlined } from "@ant-design/icons";
 import dayjs from "dayjs";
 import ApplicationService from "../../services/applicationService";
@@ -98,28 +99,33 @@ const ApplicationManagement = () => {
     };
 
     // Table columns
-    const columns = [
+    const columns: ColumnsType<ApplicationForHRLocal> = [
         {
             title: "STT",
             key: "stt",
             width: 60,
-            align: "center" as const,
-            render: (_: any, __: ApplicationForHRLocal, index: number) => (
-                <span className="font-medium">{index + 1}</span>
+            align: "center",
+            responsive: ["md"],
+            render: (_, __, index) => (
+                <span className="font-medium text-gray-500">{index + 1}</span>
             ),
         },
         {
             title: "Ứng viên",
             key: "candidate",
-            width: 200,
-            render: (_: any, record: ApplicationForHRLocal) => (
-                <div className="flex items-center gap-2">
-                    <div className="w-8 h-8 rounded-full bg-gradient-to-r from-blue-500 to-purple-500 flex items-center justify-center">
-                        <UserOutlined className="text-white text-sm" />
+            width: 250,
+            render: (_, record) => (
+                <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-full bg-gradient-to-r from-blue-500 to-indigo-600 flex items-center justify-center shadow-sm flex-shrink-0">
+                        <UserOutlined className="text-white text-lg" />
                     </div>
-                    <div>
-                        <div className="font-semibold text-gray-800">{record.candidateName}</div>
-                        <div className="text-xs text-gray-500">{record.candidateEmail || ''}</div>
+                    <div className="min-w-0">
+                        <div className="font-bold text-gray-800 text-sm truncate">{record.candidateName}</div>
+                        <div className="text-xs text-gray-500 truncate">{record.candidateEmail || 'Chưa cung cấp email'}</div>
+                        {/* Mobile: Date added here instead of a separate column */}
+                        <div className="md:hidden mt-0.5 text-[11px] text-gray-400">
+                            Ngày nộp: {dayjs(record.appliedDate).format("DD/MM/YYYY")}
+                        </div>
                     </div>
                 </div>
             ),
@@ -129,8 +135,9 @@ const ApplicationManagement = () => {
             dataIndex: "appliedDate",
             key: "appliedDate",
             width: 120,
+            responsive: ["md"],
             render: (date: string) => (
-                <span className="text-gray-600">
+                <span className="text-gray-600 font-medium">
                     {dayjs(date).format("DD/MM/YYYY")}
                 </span>
             ),
@@ -140,18 +147,19 @@ const ApplicationManagement = () => {
             dataIndex: "status",
             key: "status",
             width: 160,
-            render: (status: string, record: ApplicationForHRLocal) => (
+            render: (status: string, record) => (
                 <Select
                     value={status}
                     onChange={(value) => handleStatusChange(record.id, value)}
                     loading={updatingId === record.id}
                     disabled={updatingId === record.id}
-                    style={{ width: 140 }}
+                    className="w-full min-w-[140px]"
                     options={statusOptions}
                     optionRender={(option) => (
-                        <Tag color={statusColors[option.value as string]}>
-                            {option.label}
-                        </Tag>
+                        <div className="flex items-center gap-2">
+                             <div className={`w-2 h-2 rounded-full bg-${statusColors[option.value as string]}-500`}></div>
+                             <span className="font-medium">{option.label}</span>
+                        </div>
                     )}
                 />
             ),
@@ -160,9 +168,10 @@ const ApplicationManagement = () => {
             title: "Trạng thái hiện tại",
             dataIndex: "status",
             key: "currentStatus",
-            width: 140,
+            width: 150,
+            responsive: ["lg"],
             render: (status: string) => (
-                <Tag color={statusColors[status] || 'default'} className="font-medium">
+                <Tag color={statusColors[status] || 'default'} className="font-medium !m-0 !px-2.5 !py-1 rounded-md">
                     {statusLabels[status] || status}
                 </Tag>
             ),
@@ -170,9 +179,10 @@ const ApplicationManagement = () => {
         {
             title: "Hành động",
             key: "action",
-            width: 150,
-            fixed: "right" as const,
-            render: (_: any, record: ApplicationForHRLocal) => (
+            width: 110,
+            fixed: "right",
+            align: "center",
+            render: (_, record) => (
                 <Space size="small">
                     {record.cvUrl && (
                         <>
@@ -183,6 +193,7 @@ const ApplicationManagement = () => {
                                     icon={<EyeOutlined />}
                                     size="small"
                                     onClick={() => window.open(record.cvUrl, "_blank")}
+                                    className="!border-blue-200 hover:!bg-blue-50"
                                 />
                             </Tooltip>
                             <Tooltip title="Tải CV">
@@ -196,6 +207,7 @@ const ApplicationManagement = () => {
                                         link.download = `CV_${record.candidateName}.pdf`;
                                         link.click();
                                     }}
+                                    className="hover:!text-green-600 hover:!border-green-300"
                                 />
                             </Tooltip>
                         </>
@@ -206,39 +218,48 @@ const ApplicationManagement = () => {
     ];
 
     return (
-        <div className="p-6">
-            {/* Header */}
-            <Card className="mb-6 shadow-sm">
-                <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-4">
+        <div className="p-4 sm:p-6 lg:p-8 max-w-[1600px] mx-auto bg-gray-50 min-h-screen">
+            {/* ── HEADER ──────────────────────────────────────────────────────── */}
+            <Card className="mb-4 sm:mb-6 shadow-sm border-0 rounded-2xl" bodyStyle={{ padding: '16px sm:24px' }}>
+                <div className="flex flex-col sm:flex-row gap-4 sm:items-center sm:justify-between">
+                    <div className="flex items-start sm:items-center gap-3 sm:gap-4">
                         <Button
-                            type="text"
+                            type="default"
                             icon={<ArrowLeftOutlined />}
                             onClick={() => navigate("/hr/jobs-management")}
-                            className="hover:bg-gray-100"
+                            className="flex-shrink-0 mt-1 sm:mt-0 !rounded-lg hover:!text-[#00B14F] hover:!border-[#00B14F]"
                         >
-                            Quay lại
+                            <span className="hidden sm:inline">Quay lại</span>
                         </Button>
-                        <div>
-                            <h1 className="text-2xl font-bold text-gray-800 m-0">
+                        <div className="min-w-0">
+                            <h1 className="text-xl sm:text-2xl font-bold text-gray-800 m-0 tracking-tight leading-tight">
                                 Quản lý ứng viên
                             </h1>
-                            <p className="text-gray-500 m-0 mt-1">
+                            <p className="text-sm sm:text-base text-gray-500 m-0 mt-1 truncate">
                                 {jobTitle}
                             </p>
                         </div>
                     </div>
-                    <div className="text-right">
-                        <div className="text-3xl font-bold text-blue-600">
-                            {applications.length}
+                    
+                    {/* Badge total applications */}
+                    <div className="flex items-center gap-3 bg-blue-50 px-4 py-2.5 rounded-xl border border-blue-100 self-start sm:self-auto flex-shrink-0">
+                        <div className="w-10 h-10 rounded-full bg-white flex items-center justify-center shadow-sm">
+                            <UserOutlined className="text-xl text-blue-500" />
                         </div>
-                        <div className="text-sm text-gray-500">Ứng viên</div>
+                        <div>
+                            <div className="text-xl sm:text-2xl font-bold text-blue-600 leading-none">
+                                {applications.length}
+                            </div>
+                            <div className="text-[11px] sm:text-xs text-gray-500 font-medium uppercase tracking-wide mt-1">
+                                Ứng viên
+                            </div>
+                        </div>
                     </div>
                 </div>
             </Card>
 
-            {/* Table */}
-            <Card className="shadow-sm">
+            {/* ── TABLE ───────────────────────────────────────────────────────── */}
+            <Card className="shadow-sm border-0 rounded-2xl overflow-hidden" bodyStyle={{ padding: 0 }}>
                 <Table
                     columns={columns}
                     dataSource={applications}
@@ -247,14 +268,17 @@ const ApplicationManagement = () => {
                     pagination={{
                         pageSize: 10,
                         showSizeChanger: true,
-                        showTotal: (total) => `Tổng ${total} ứng viên`,
+                        showTotal: (total) => <span className="font-medium text-gray-600">Tổng {total} ứng viên</span>,
+                        className: "px-4 sm:px-6 my-4"
                     }}
-                    scroll={{ x: 900 }}
+                    scroll={{ x: 'max-content' }}
+                    className="custom-responsive-table"
                     locale={{
                         emptyText: (
                             <Empty
                                 image={Empty.PRESENTED_IMAGE_SIMPLE}
-                                description="Chưa có ứng viên nào ứng tuyển"
+                                description={<span className="text-gray-500 font-medium">Chưa có ứng viên nào ứng tuyển</span>}
+                                className="py-12"
                             />
                         ),
                     }}

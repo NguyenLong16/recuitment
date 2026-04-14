@@ -8,11 +8,11 @@ interface AuthState {
     error: string | null;
 }
 
-// Helper: Lấy user từ localStorage an toàn (tránh lỗi JSON undefined)
-const getUserFromLocalStorage = () => {
+// Helper: Lấy user từ localStorage an toàn
+const getUserFromLocalStorage = (): User | null => {
     try {
         const userStr = localStorage.getItem('user');
-        if (userStr && userStr !== "undefined") {
+        if (userStr && userStr !== 'undefined') {
             return JSON.parse(userStr);
         }
         return null;
@@ -27,18 +27,35 @@ const initialState: AuthState = {
     error: null,
 };
 
+// ─── Thunk: Đăng nhập ─────────────────────────────────────────────────────────
 export const loginUser = createAsyncThunk(
     'auth/loginUser',
     async (userData: { email: string; password: string }, { rejectWithValue }) => {
         try {
             const response = await authService.login(userData);
-            return response.data;
+            return response.data; // AuthResponse: { accessToken, refreshToken, fullName, role }
         } catch (error: any) {
-            if (error.response && error.response.data) {
-                // Ưu tiên lấy message từ backend
+            if (error.response?.data) {
                 return rejectWithValue(error.response.data.message || error.response.data);
             }
             return rejectWithValue('Lỗi kết nối đến server');
+        }
+    }
+);
+
+// ─── Thunk: Đăng xuất ─────────────────────────────────────────────────────────
+export const logoutUser = createAsyncThunk(
+    'auth/logoutUser',
+    async (_, { rejectWithValue }) => {
+        try {
+            const refreshToken = localStorage.getItem('refreshToken');
+            if (refreshToken) {
+                // Gọi API để backend thu hồi refreshToken
+                await authService.logout({ refreshToken });
+            }
+        } catch (error: any) {
+            // Dù API lỗi vẫn tiến hành xóa local state
+            return rejectWithValue(error.response?.data?.message || 'Logout thất bại');
         }
     }
 );
@@ -47,57 +64,70 @@ const authSlice = createSlice({
     name: 'auth',
     initialState,
     reducers: {
-        logout: (state) => {
+        // Logout nhanh phía client (không gọi API), dùng khi refreshToken hết hạn
+        clearAuth: (state) => {
             state.user = null;
             state.error = null;
             localStorage.removeItem('user');
-            localStorage.removeItem('token');
+            localStorage.removeItem('accessToken');
+            localStorage.removeItem('refreshToken');
         },
         clearError: (state) => {
             state.error = null;
-        }
+        },
     },
     extraReducers: (builder) => {
         builder
+            // ── Login ──────────────────────────────────────────────────────────
             .addCase(loginUser.pending, (state) => {
                 state.isLoading = true;
                 state.error = null;
             })
-            .addCase(loginUser.fulfilled, (state, action: any) => {
+            .addCase(loginUser.fulfilled, (state, action) => {
                 state.isLoading = false;
-                console.log("🔥 Payload API trả về:", action.payload);
+                const { accessToken, refreshToken, fullName, role } = action.payload;
 
-                // --- XỬ LÝ QUAN TRỌNG ĐỂ KHÔNG BỊ UNDEFINED ---
+                // Lưu user vào state
+                state.user = { fullName, role };
 
-                // Trường hợp 1: Backend trả về { token: "...", user: { id: 1, ... } }
-                if (action.payload.user) {
-                    state.user = action.payload.user;
-                }
-                // Trường hợp 2: Backend trả về { token: "...", fullName: "...", roleId: ... } (Dạng phẳng)
-                else {
-                    // Tách token ra, phần còn lại chính là User info
-                    const { token, ...userData } = action.payload;
-                    state.user = userData;
-                }
-
-                // Lưu vào LocalStorage
-                localStorage.setItem('user', JSON.stringify(state.user));
-
-                if (action.payload.token) {
-                    localStorage.setItem('token', action.payload.token);
-                }
+                // Lưu tokens vào LocalStorage
+                localStorage.setItem('accessToken', accessToken);
+                localStorage.setItem('refreshToken', refreshToken);
+                localStorage.setItem('user', JSON.stringify({ fullName, role }));
             })
             .addCase(loginUser.rejected, (state, action) => {
                 state.isLoading = false;
-                // Ép kiểu về string hoặc stringify object lỗi để không crash UI
-                if (typeof action.payload === 'object') {
-                    state.error = JSON.stringify(action.payload);
-                } else {
-                    state.error = action.payload as string;
-                }
+                state.error =
+                    typeof action.payload === 'object'
+                        ? JSON.stringify(action.payload)
+                        : (action.payload as string);
+            })
+
+            // ── Logout ─────────────────────────────────────────────────────────
+            .addCase(logoutUser.pending, (state) => {
+                state.isLoading = true;
+            })
+            .addCase(logoutUser.fulfilled, (state) => {
+                state.isLoading = false;
+                state.user = null;
+                state.error = null;
+                localStorage.removeItem('user');
+                localStorage.removeItem('accessToken');
+                localStorage.removeItem('refreshToken');
+            })
+            .addCase(logoutUser.rejected, (state) => {
+                // Dù API lỗi vẫn xóa local state
+                state.isLoading = false;
+                state.user = null;
+                state.error = null;
+                localStorage.removeItem('user');
+                localStorage.removeItem('accessToken');
+                localStorage.removeItem('refreshToken');
             });
     },
 });
 
-export const { logout, clearError } = authSlice.actions;
-export default authSlice.reducer;
+export const { clearAuth, clearError } = authSlice.actions;
+// Giữ alias 'logout' để không break import cũ
+export const logout = clearAuth;
+export default authSlice.reducer;

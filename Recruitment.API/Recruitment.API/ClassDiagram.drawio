@@ -1,0 +1,306 @@
+<mxfile host="app.diagrams.net" agent="Antigravity">
+  <diagram id="recruitment-class-diagram" name="Class Diagram">
+    <mxGraphModel dx="3000" dy="2200" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="4500" pageHeight="4000" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="class_role" value="&lt;p style=&quot;margin:0px;margin-top:4px;text-align:center;&quot;&gt;&lt;b&gt;ROLE&lt;/b&gt;&lt;/p&gt;&lt;hr size=&quot;1&quot;/&gt;&lt;p style=&quot;margin:0px;margin-left:4px;&quot;&gt;+ id : int&lt;br/&gt;+ roleName : string&lt;/p&gt;&lt;hr size=&quot;1&quot;/&gt;" style="verticalAlign=top;align=left;overflow=fill;fontSize=12;fontFamily=Helvetica;html=1;fillColor=#D5E8D4;strokeColor=#82B366;" vertex="1" parent="1">
+          <mxGeometry x="40" y="260" width="200" height="100" as="geometry" />
+        </mxCell>
+        <mxCell id="class_user" value="&lt;p style=&quot;margin:0px;margin-top:4px;text-align:center;&quot;&gt;&lt;b&gt;USER&lt;/b&gt;&lt;/p&gt;&lt;hr size=&quot;1&quot;/&gt;&lt;p style=&quot;margin:0px;margin-left:4px;&quot;&gt;+ id : int&lt;br/&gt;+ fullName : string&lt;br/&gt;+ email : string&lt;br/&gt;+ address : string?&lt;br/&gt;+ passwordHash : string&lt;br/&gt;+ phoneNumber : string?&lt;br/&gt;+ AvatarUrl : string?&lt;br/&gt;+ professionalTitle : string?&lt;br/&gt;+ bio : string?&lt;br/&gt;+ websiteUrl : string?&lt;br/&gt;+ linkedInUrl : string?&lt;br/&gt;+ githubUrl : string?&lt;br/&gt;+ coverImageUrl : string?&lt;br/&gt;+ defaultCvUrl : string?&lt;br/&gt;+ createdDate : DateTime?&lt;br/&gt;+ roleId : int&lt;br/&gt;+ companyId : int?&lt;br/&gt;+ isActive : bool&lt;/p&gt;&lt;hr size=&quot;1&quot;/&gt;" style="verticalAlign=top;align=left;overflow=fill;fontSize=12;fontFamily=Helvetica;html=1;fillColor=#D5E8D4;strokeColor=#82B366;" vertex="1" parent="1">
+          <mxGeometry x="340" y="80" width="260" height="400" as="geometry" />
+        </mxCell>
+        <mxCell id="class_company" value="&lt;p style=&quot;margin:0px;margin-top:4px;text-align:center;&quot;&gt;&lt;b&gt;COMPANY&lt;/b&gt;&lt;/p&gt;&lt;hr size=&quot;1&quot;/&gt;&lt;p style=&quot;margin:0px;margin-left:4px;&quot;&gt;+ id : int&lt;br/&gt;+ companyName : string&lt;br/&gt;+ logoUrl : string?&lt;br/&gt;+ description : string?&lt;br/&gt;+ websiteLink : string?&lt;br/&gt;+ address : string?&lt;br/&gt;+ size : int&lt;/p&gt;&lt;hr size=&quot;1&quot;/&gt;" style="verticalAlign=top;align=left;overflow=fill;fontSize=12;fontFamily=Helvetica;html=1;fillColor=#D5E8D4;strokeColor=#82B366;" vertex="1" parent="1">
+          <mxGeometry x="700" y="80" width="220" height="190" as="geometry" />
+        </mxCell>
+        <mxCell id="class_job" value="&lt;p style=&quot;margin:0px;margin-top:4px;text-align:center;&quot;&gt;&lt;b&gt;JOB&lt;/b&gt;&lt;/p&gt;&lt;hr size=&quot;1&quot;/&gt;&lt;p style=&quot;margin:0px;margin-left:4px;&quot;&gt;+ id : int&lt;br/&gt;+ title : string&lt;br/&gt;+ description : string&lt;br/&gt;+ requirement : string&lt;br/&gt;+ benefit : string&lt;br/&gt;+ salaryMin : decimal?&lt;br/&gt;+ salaryMax : decimal?&lt;br/&gt;+ locationId : int&lt;br/&gt;+ jobType : JobType&lt;br/&gt;+ status : JobStatus&lt;br/&gt;+ deadline : DateTime&lt;br/&gt;+ createdDate : DateTime&lt;br/&gt;+ companyId : int&lt;br/&gt;+ categoryId : int&lt;br/&gt;+ employerId : int&lt;br/&gt;+ imageUrl : string?&lt;/p&gt;&lt;hr size=&quot;1&quot;/&gt;" style="verticalAlign=top;align=left;overflow=fill;fontSize=12;fontFamily=Helvetica;html=1;fillColor=#D5E8D4;strokeColor=#82B366;" vertex="1" parent="1">
+          <mxGeometry x="700" y="340" width="250" height="370" as="geometry" />
+        </mxCell>
+        <mxCell id="class_application" value="&lt;p style=&quot;margin:0px;margin-top:4px;text-align:center;&quot;&gt;&lt;b&gt;APPLICATION&lt;/b&gt;&lt;/p&gt;&lt;hr size=&quot;1&quot;/&gt;&lt;p style=&quot;margin:0px;margin-left:4px;&quot;&gt;+ id : int&lt;br/&gt;+ jobId : int&lt;br/&gt;+ candidateId : int&lt;br/&gt;+ cvUrl : string&lt;br/&gt;+ coverLetter : string&lt;br/&gt;+ appliedDate : DateTime&lt;br/&gt;+ status : ApplicationStatus&lt;/p&gt;&lt;hr size=&quot;1&quot;/&gt;" style="verticalAlign=top;align=left;overflow=fill;fontSize=12;fontFamily=Helvetica;html=1;fillColor=#D5E8D4;strokeColor=#82B366;" vertex="1" parent="1">
+          <mxGeometry x="340" y="560" width="250" height="190" as="geometry" />
+        </mxCell>
+        <mxCell id="class_category" value="&lt;p style=&quot;margin:0px;margin-top:4px;text-align:center;&quot;&gt;&lt;b&gt;CATEGORY&lt;/b&gt;&lt;/p&gt;&lt;hr size=&quot;1&quot;/&gt;&lt;p style=&quot;margin:0px;margin-left:4px;&quot;&gt;+ id : int&lt;br/&gt;+ name : string&lt;/p&gt;&lt;hr size=&quot;1&quot;/&gt;" style="verticalAlign=top;align=left;overflow=fill;fontSize=12;fontFamily=Helvetica;html=1;fillColor=#D5E8D4;strokeColor=#82B366;" vertex="1" parent="1">
+          <mxGeometry x="1040" y="340" width="180" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="class_location" value="&lt;p style=&quot;margin:0px;margin-top:4px;text-align:center;&quot;&gt;&lt;b&gt;LOCATION&lt;/b&gt;&lt;/p&gt;&lt;hr size=&quot;1&quot;/&gt;&lt;p style=&quot;margin:0px;margin-left:4px;&quot;&gt;+ id : int&lt;br/&gt;+ name : string&lt;/p&gt;&lt;hr size=&quot;1&quot;/&gt;" style="verticalAlign=top;align=left;overflow=fill;fontSize=12;fontFamily=Helvetica;html=1;fillColor=#D5E8D4;strokeColor=#82B366;" vertex="1" parent="1">
+          <mxGeometry x="1040" y="460" width="180" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="class_skill" value="&lt;p style=&quot;margin:0px;margin-top:4px;text-align:center;&quot;&gt;&lt;b&gt;SKILL&lt;/b&gt;&lt;/p&gt;&lt;hr size=&quot;1&quot;/&gt;&lt;p style=&quot;margin:0px;margin-left:4px;&quot;&gt;+ id : int&lt;br/&gt;+ skillName : string&lt;/p&gt;&lt;hr size=&quot;1&quot;/&gt;" style="verticalAlign=top;align=left;overflow=fill;fontSize=12;fontFamily=Helvetica;html=1;fillColor=#D5E8D4;strokeColor=#82B366;" vertex="1" parent="1">
+          <mxGeometry x="1040" y="580" width="180" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="class_jobskill" value="&lt;p style=&quot;margin:0px;margin-top:4px;text-align:center;&quot;&gt;&lt;b&gt;JOB SKILL&lt;/b&gt;&lt;/p&gt;&lt;hr size=&quot;1&quot;/&gt;&lt;p style=&quot;margin:0px;margin-left:4px;&quot;&gt;+ jobId : int&lt;br/&gt;+ skillId : int&lt;/p&gt;&lt;hr size=&quot;1&quot;/&gt;" style="verticalAlign=top;align=left;overflow=fill;fontSize=12;fontFamily=Helvetica;html=1;fillColor=#D5E8D4;strokeColor=#82B366;" vertex="1" parent="1">
+          <mxGeometry x="1040" y="700" width="180" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="class_education" value="&lt;p style=&quot;margin:0px;margin-top:4px;text-align:center;&quot;&gt;&lt;b&gt;EDUCATION&lt;/b&gt;&lt;/p&gt;&lt;hr size=&quot;1&quot;/&gt;&lt;p style=&quot;margin:0px;margin-left:4px;&quot;&gt;+ id : int&lt;br/&gt;+ userId : int&lt;br/&gt;+ schoolName : string&lt;br/&gt;+ major : string&lt;br/&gt;+ startDate : DateTime&lt;br/&gt;+ endDate : DateTime&lt;/p&gt;&lt;hr size=&quot;1&quot;/&gt;" style="verticalAlign=top;align=left;overflow=fill;fontSize=12;fontFamily=Helvetica;html=1;fillColor=#D5E8D4;strokeColor=#82B366;" vertex="1" parent="1">
+          <mxGeometry x="40" y="430" width="200" height="160" as="geometry" />
+        </mxCell>
+        <mxCell id="class_experience" value="&lt;p style=&quot;margin:0px;margin-top:4px;text-align:center;&quot;&gt;&lt;b&gt;EXPERIENCE&lt;/b&gt;&lt;/p&gt;&lt;hr size=&quot;1&quot;/&gt;&lt;p style=&quot;margin:0px;margin-left:4px;&quot;&gt;+ id : int&lt;br/&gt;+ userId : int&lt;br/&gt;+ companyName : string&lt;br/&gt;+ position : string&lt;br/&gt;+ description : string?&lt;br/&gt;+ startDate : DateTime&lt;br/&gt;+ endDate : DateTime?&lt;/p&gt;&lt;hr size=&quot;1&quot;/&gt;" style="verticalAlign=top;align=left;overflow=fill;fontSize=12;fontFamily=Helvetica;html=1;fillColor=#D5E8D4;strokeColor=#82B366;" vertex="1" parent="1">
+          <mxGeometry x="40" y="640" width="200" height="180" as="geometry" />
+        </mxCell>
+        <mxCell id="class_follow" value="&lt;p style=&quot;margin:0px;margin-top:4px;text-align:center;&quot;&gt;&lt;b&gt;FOLLOW&lt;/b&gt;&lt;/p&gt;&lt;hr size=&quot;1&quot;/&gt;&lt;p style=&quot;margin:0px;margin-left:4px;&quot;&gt;+ id : int&lt;br/&gt;+ employerId : int&lt;br/&gt;+ createdDate : DateTime&lt;/p&gt;&lt;hr size=&quot;1&quot;/&gt;" style="verticalAlign=top;align=left;overflow=fill;fontSize=12;fontFamily=Helvetica;html=1;fillColor=#D5E8D4;strokeColor=#82B366;" vertex="1" parent="1">
+          <mxGeometry x="40" y="870" width="200" height="100" as="geometry" />
+        </mxCell>
+        <mxCell id="class_savedjob" value="&lt;p style=&quot;margin:0px;margin-top:4px;text-align:center;&quot;&gt;&lt;b&gt;SAVED JOB&lt;/b&gt;&lt;/p&gt;&lt;hr size=&quot;1&quot;/&gt;&lt;p style=&quot;margin:0px;margin-left:4px;&quot;&gt;+ userId : int&lt;br/&gt;+ jobId : int&lt;br/&gt;+ savedDate : DateTime&lt;/p&gt;&lt;hr size=&quot;1&quot;/&gt;" style="verticalAlign=top;align=left;overflow=fill;fontSize=12;fontFamily=Helvetica;html=1;fillColor=#D5E8D4;strokeColor=#82B366;" vertex="1" parent="1">
+          <mxGeometry x="340" y="810" width="200" height="100" as="geometry" />
+        </mxCell>
+        <mxCell id="class_comment" value="&lt;p style=&quot;margin:0px;margin-top:4px;text-align:center;&quot;&gt;&lt;b&gt;COMMENT&lt;/b&gt;&lt;/p&gt;&lt;hr size=&quot;1&quot;/&gt;&lt;p style=&quot;margin:0px;margin-left:4px;&quot;&gt;+ id : int&lt;br/&gt;+ content : string&lt;br/&gt;+ createdDate : DateTime&lt;br/&gt;+ userId : int&lt;br/&gt;+ jobId : int&lt;br/&gt;+ ParentId : int?&lt;/p&gt;&lt;hr size=&quot;1&quot;/&gt;" style="verticalAlign=top;align=left;overflow=fill;fontSize=12;fontFamily=Helvetica;html=1;fillColor=#D5E8D4;strokeColor=#82B366;" vertex="1" parent="1">
+          <mxGeometry x="700" y="780" width="220" height="160" as="geometry" />
+        </mxCell>
+        <mxCell id="class_review" value="&lt;p style=&quot;margin:0px;margin-top:4px;text-align:center;&quot;&gt;&lt;b&gt;REVIEW&lt;/b&gt;&lt;/p&gt;&lt;hr size=&quot;1&quot;/&gt;&lt;p style=&quot;margin:0px;margin-left:4px;&quot;&gt;+ id : int&lt;br/&gt;+ rating : int&lt;br/&gt;+ comment : string?&lt;br/&gt;+ createdDate : DateTime&lt;br/&gt;+ userId : int&lt;br/&gt;+ jobId : int&lt;/p&gt;&lt;hr size=&quot;1&quot;/&gt;" style="verticalAlign=top;align=left;overflow=fill;fontSize=12;fontFamily=Helvetica;html=1;fillColor=#D5E8D4;strokeColor=#82B366;" vertex="1" parent="1">
+          <mxGeometry x="1000" y="840" width="200" height="160" as="geometry" />
+        </mxCell>
+        <mxCell id="class_notification" value="&lt;p style=&quot;margin:0px;margin-top:4px;text-align:center;&quot;&gt;&lt;b&gt;NOTIFICATION&lt;/b&gt;&lt;/p&gt;&lt;hr size=&quot;1&quot;/&gt;&lt;p style=&quot;margin:0px;margin-left:4px;&quot;&gt;+ id : int&lt;br/&gt;+ userId : int&lt;br/&gt;+ title : string&lt;br/&gt;+ content : string&lt;br/&gt;+ isRead : bool&lt;br/&gt;+ createDate : DateTime&lt;br/&gt;+ type : string&lt;br/&gt;+ referenceId : int?&lt;/p&gt;&lt;hr size=&quot;1&quot;/&gt;" style="verticalAlign=top;align=left;overflow=fill;fontSize=12;fontFamily=Helvetica;html=1;fillColor=#D5E8D4;strokeColor=#82B366;" vertex="1" parent="1">
+          <mxGeometry x="40" y="1030" width="220" height="200" as="geometry" />
+        </mxCell>
+        <mxCell id="enum_jobstatus" value="&lt;p style=&quot;margin:0px;margin-top:4px;text-align:center;&quot;&gt;&lt;i&gt;&amp;lt;&amp;lt;enum&amp;gt;&amp;gt;&lt;/i&gt;&lt;br/&gt;&lt;b&gt;JOB STATUS&lt;/b&gt;&lt;/p&gt;&lt;hr size=&quot;1&quot;/&gt;&lt;p style=&quot;margin:0px;margin-left:4px;&quot;&gt;Draft = 0&lt;br/&gt;Active = 1&lt;br/&gt;Closed = 2&lt;br/&gt;Expired = 3&lt;/p&gt;" style="verticalAlign=top;align=left;overflow=fill;fontSize=12;fontFamily=Helvetica;html=1;fillColor=#FFF2CC;strokeColor=#D6B656;" vertex="1" parent="1">
+          <mxGeometry x="1040" y="80" width="160" height="120" as="geometry" />
+        </mxCell>
+        <mxCell id="enum_appstatus" value="&lt;p style=&quot;margin:0px;margin-top:4px;text-align:center;&quot;&gt;&lt;i&gt;&amp;lt;&amp;lt;enum&amp;gt;&amp;gt;&lt;/i&gt;&lt;br/&gt;&lt;b&gt;APPLICATION STATUS&lt;/b&gt;&lt;/p&gt;&lt;hr size=&quot;1&quot;/&gt;&lt;p style=&quot;margin:0px;margin-left:4px;&quot;&gt;Submitted = 0&lt;br/&gt;Viewed = 1&lt;br/&gt;Interview = 2&lt;br/&gt;Rejected = 3&lt;br/&gt;Accepted = 4&lt;/p&gt;" style="verticalAlign=top;align=left;overflow=fill;fontSize=12;fontFamily=Helvetica;html=1;fillColor=#FFF2CC;strokeColor=#D6B656;" vertex="1" parent="1">
+          <mxGeometry x="40" y="80" width="200" height="140" as="geometry" />
+        </mxCell>
+        <mxCell id="enum_jobtype" value="&lt;p style=&quot;margin:0px;margin-top:4px;text-align:center;&quot;&gt;&lt;i&gt;&amp;lt;&amp;lt;enum&amp;gt;&amp;gt;&lt;/i&gt;&lt;br/&gt;&lt;b&gt;JOB TYPE&lt;/b&gt;&lt;/p&gt;&lt;hr size=&quot;1&quot;/&gt;&lt;p style=&quot;margin:0px;margin-left:4px;&quot;&gt;Draft = 0&lt;br/&gt;FullTime = 1&lt;br/&gt;PartTime = 2&lt;br/&gt;Internship = 3&lt;br/&gt;Contract = 4&lt;br/&gt;Remote = 5&lt;/p&gt;" style="verticalAlign=top;align=left;overflow=fill;fontSize=12;fontFamily=Helvetica;html=1;fillColor=#FFF2CC;strokeColor=#D6B656;" vertex="1" parent="1">
+          <mxGeometry x="1040" y="210" width="160" height="120" as="geometry" />
+        </mxCell>
+        <mxCell id="svc_auth" value="&lt;p style=&quot;margin:0px;margin-top:4px;text-align:center;&quot;&gt;&lt;b&gt;AUTH SERVICE&lt;/b&gt;&lt;/p&gt;&lt;hr size=&quot;1&quot;/&gt;&lt;p style=&quot;margin:0px;margin-left:4px;&quot;&gt;- _userRepo : IUserRepository&lt;br/&gt;- _mapper : IMapper&lt;/p&gt;&lt;hr size=&quot;1&quot;/&gt;&lt;p style=&quot;margin:0px;margin-left:4px;&quot;&gt;+ RegisterAsync()&lt;br/&gt;+ LoginAsync()&lt;/p&gt;" style="verticalAlign=top;align=left;overflow=fill;fontSize=12;fontFamily=Helvetica;html=1;fillColor=#BBDEFB;strokeColor=#1976D2;" vertex="1" parent="1">
+          <mxGeometry x="1340" y="80" width="250" height="140" as="geometry" />
+        </mxCell>
+        <mxCell id="svc_profile" value="&lt;p style=&quot;margin:0px;margin-top:4px;text-align:center;&quot;&gt;&lt;b&gt;PROFILE SERVICE&lt;/b&gt;&lt;/p&gt;&lt;hr size=&quot;1&quot;/&gt;&lt;p style=&quot;margin:0px;margin-left:4px;&quot;&gt;- _profileRepo : IProfileRepository&lt;br/&gt;- _userRepo : IUserRepository&lt;br/&gt;- _mapper : IMapper&lt;/p&gt;&lt;hr size=&quot;1&quot;/&gt;&lt;p style=&quot;margin:0px;margin-left:4px;&quot;&gt;+ GetProfileAsync()&lt;br/&gt;+ UpdateProfileUser()&lt;br/&gt;+ FollowHRAsync()&lt;br/&gt;+ UnfollowHRAsync()&lt;br/&gt;+ UploadMediaAsync()&lt;br/&gt;+ GetFollowersAsync()&lt;/p&gt;" style="verticalAlign=top;align=left;overflow=fill;fontSize=12;fontFamily=Helvetica;html=1;fillColor=#BBDEFB;strokeColor=#1976D2;" vertex="1" parent="1">
+          <mxGeometry x="1340" y="260" width="270" height="220" as="geometry" />
+        </mxCell>
+        <mxCell id="svc_job" value="&lt;p style=&quot;margin:0px;margin-top:4px;text-align:center;&quot;&gt;&lt;b&gt;JOB SERVICE&lt;/b&gt;&lt;/p&gt;&lt;hr size=&quot;1&quot;/&gt;&lt;p style=&quot;margin:0px;margin-left:4px;&quot;&gt;- _jobRepo : IJobRepository&lt;br/&gt;- _mapper : IMapper&lt;/p&gt;&lt;hr size=&quot;1&quot;/&gt;&lt;p style=&quot;margin:0px;margin-left:4px;&quot;&gt;+ CreateJobAsync()&lt;br/&gt;+ UpdateJobAsync()&lt;br/&gt;+ DeleteJobAsync()&lt;br/&gt;+ GetJobByIdAsync()&lt;br/&gt;+ GetAllJobsAsync()&lt;br/&gt;+ GetJobsByEmployerAsync()&lt;br/&gt;+ ToggleJobStatusAsync()&lt;br/&gt;+ GetJobsAsync()&lt;br/&gt;+ ToggleHideJobAsync()&lt;/p&gt;" style="verticalAlign=top;align=left;overflow=fill;fontSize=12;fontFamily=Helvetica;html=1;fillColor=#BBDEFB;strokeColor=#1976D2;" vertex="1" parent="1">
+          <mxGeometry x="1340" y="520" width="270" height="250" as="geometry" />
+        </mxCell>
+        <mxCell id="svc_application" value="&lt;p style=&quot;margin:0px;margin-top:4px;text-align:center;&quot;&gt;&lt;b&gt;APPLICATION SERVICE&lt;/b&gt;&lt;/p&gt;&lt;hr size=&quot;1&quot;/&gt;&lt;p style=&quot;margin:0px;margin-left:4px;&quot;&gt;- _appRepo : IApplicationRepository&lt;br/&gt;- _context : AppDbContext&lt;br/&gt;- _mapper : IMapper&lt;/p&gt;&lt;hr size=&quot;1&quot;/&gt;&lt;p style=&quot;margin:0px;margin-left:4px;&quot;&gt;+ ApplyJobAsync()&lt;br/&gt;+ GetApplicationByIdAsync()&lt;br/&gt;+ GetApplicationsByCandidateAsync()&lt;br/&gt;+ GetApplicationJobIdAsync()&lt;br/&gt;+ UpdateApplicationStatusAsync()&lt;br/&gt;+ GetAllApplicationsForEmployerAsync()&lt;br/&gt;+ GetApplicationStatisticsAsync()&lt;/p&gt;" style="verticalAlign=top;align=left;overflow=fill;fontSize=12;fontFamily=Helvetica;html=1;fillColor=#BBDEFB;strokeColor=#1976D2;" vertex="1" parent="1">
+          <mxGeometry x="1340" y="810" width="310" height="240" as="geometry" />
+        </mxCell>
+        <mxCell id="svc_category" value="&lt;p style=&quot;margin:0px;margin-top:4px;text-align:center;&quot;&gt;&lt;b&gt;CATEGORY SERVICE&lt;/b&gt;&lt;/p&gt;&lt;hr size=&quot;1&quot;/&gt;&lt;p style=&quot;margin:0px;margin-left:4px;&quot;&gt;- _catRepo : ICategoryRepository&lt;br/&gt;- _mapper : IMapper&lt;/p&gt;&lt;hr size=&quot;1&quot;/&gt;&lt;p style=&quot;margin:0px;margin-left:4px;&quot;&gt;+ GetAllCategoriesAsync()&lt;br/&gt;+ GetAllAsyncForAdmin()&lt;br/&gt;+ GetCategoryByIdAsync()&lt;br/&gt;+ CreateCategoryAsync()&lt;br/&gt;+ UpdateCategoryAsync()&lt;br/&gt;+ DeleteCategoryAsync()&lt;/p&gt;" style="verticalAlign=top;align=left;overflow=fill;fontSize=12;fontFamily=Helvetica;html=1;fillColor=#BBDEFB;strokeColor=#1976D2;" vertex="1" parent="1">
+          <mxGeometry x="1700" y="80" width="270" height="200" as="geometry" />
+        </mxCell>
+        <mxCell id="svc_location" value="&lt;p style=&quot;margin:0px;margin-top:4px;text-align:center;&quot;&gt;&lt;b&gt;LOCATION SERVICE&lt;/b&gt;&lt;/p&gt;&lt;hr size=&quot;1&quot;/&gt;&lt;p style=&quot;margin:0px;margin-left:4px;&quot;&gt;- _locRepo : ILocationRepository&lt;br/&gt;- _mapper : IMapper&lt;/p&gt;&lt;hr size=&quot;1&quot;/&gt;&lt;p style=&quot;margin:0px;margin-left:4px;&quot;&gt;+ GetAllLocationAsync()&lt;br/&gt;+ GetAllLocationsForAdminAsync()&lt;br/&gt;+ GetLocationByIdAsync()&lt;br/&gt;+ CreateLocationAsync()&lt;br/&gt;+ UpdateLocationAsync()&lt;br/&gt;+ DeleteLocationAsync()&lt;/p&gt;" style="verticalAlign=top;align=left;overflow=fill;fontSize=12;fontFamily=Helvetica;html=1;fillColor=#BBDEFB;strokeColor=#1976D2;" vertex="1" parent="1">
+          <mxGeometry x="1700" y="320" width="270" height="200" as="geometry" />
+        </mxCell>
+        <mxCell id="svc_skill" value="&lt;p style=&quot;margin:0px;margin-top:4px;text-align:center;&quot;&gt;&lt;b&gt;SKILL SERVICE&lt;/b&gt;&lt;/p&gt;&lt;hr size=&quot;1&quot;/&gt;&lt;p style=&quot;margin:0px;margin-left:4px;&quot;&gt;- _skillRepo : ISkillRepository&lt;br/&gt;- _mapper : IMapper&lt;/p&gt;&lt;hr size=&quot;1&quot;/&gt;&lt;p style=&quot;margin:0px;margin-left:4px;&quot;&gt;+ GetAllSkillsAsync()&lt;br/&gt;+ GetAllSkillsForAdminAsync()&lt;br/&gt;+ GetSkillByIdAsync()&lt;br/&gt;+ CreateSkillAsync()&lt;br/&gt;+ UpdateSkillAsync()&lt;br/&gt;+ DeleteSkillAsync()&lt;/p&gt;" style="verticalAlign=top;align=left;overflow=fill;fontSize=12;fontFamily=Helvetica;html=1;fillColor=#BBDEFB;strokeColor=#1976D2;" vertex="1" parent="1">
+          <mxGeometry x="1700" y="560" width="270" height="200" as="geometry" />
+        </mxCell>
+        <mxCell id="svc_comment" value="&lt;p style=&quot;margin:0px;margin-top:4px;text-align:center;&quot;&gt;&lt;b&gt;COMMENT SERVICE&lt;/b&gt;&lt;/p&gt;&lt;hr size=&quot;1&quot;/&gt;&lt;p style=&quot;margin:0px;margin-left:4px;&quot;&gt;- _commentRepo : ICommentRepository&lt;br/&gt;- _notiRepo : INotificationRepository&lt;br/&gt;- _mapper : IMapper&lt;/p&gt;&lt;hr size=&quot;1&quot;/&gt;&lt;p style=&quot;margin:0px;margin-left:4px;&quot;&gt;+ PostCommentAsync()&lt;br/&gt;+ GetJobCommentsAsync()&lt;br/&gt;+ GetCommentsAsync()&lt;br/&gt;+ DeleteCommentAsync()&lt;/p&gt;" style="verticalAlign=top;align=left;overflow=fill;fontSize=12;fontFamily=Helvetica;html=1;fillColor=#BBDEFB;strokeColor=#1976D2;" vertex="1" parent="1">
+          <mxGeometry x="1700" y="800" width="280" height="180" as="geometry" />
+        </mxCell>
+        <mxCell id="svc_review" value="&lt;p style=&quot;margin:0px;margin-top:4px;text-align:center;&quot;&gt;&lt;b&gt;REVIEW SERVICE&lt;/b&gt;&lt;/p&gt;&lt;hr size=&quot;1&quot;/&gt;&lt;p style=&quot;margin:0px;margin-left:4px;&quot;&gt;- _reviewRepo : IReviewRepository&lt;br/&gt;- _notiRepo : INotificationRepository&lt;br/&gt;- _mapper : IMapper&lt;/p&gt;&lt;hr size=&quot;1&quot;/&gt;&lt;p style=&quot;margin:0px;margin-left:4px;&quot;&gt;+ PostReviewAsync()&lt;br/&gt;+ GetJobReviewsAsync()&lt;br/&gt;+ GetReviewsAsync()&lt;br/&gt;+ DeleteReviewAsync()&lt;/p&gt;" style="verticalAlign=top;align=left;overflow=fill;fontSize=12;fontFamily=Helvetica;html=1;fillColor=#BBDEFB;strokeColor=#1976D2;" vertex="1" parent="1">
+          <mxGeometry x="2040" y="80" width="270" height="180" as="geometry" />
+        </mxCell>
+        <mxCell id="svc_savedjob" value="&lt;p style=&quot;margin:0px;margin-top:4px;text-align:center;&quot;&gt;&lt;b&gt;SAVED JOB SERVICE&lt;/b&gt;&lt;/p&gt;&lt;hr size=&quot;1&quot;/&gt;&lt;p style=&quot;margin:0px;margin-left:4px;&quot;&gt;- _savedJobRepo : ISavedJobRepository&lt;/p&gt;&lt;hr size=&quot;1&quot;/&gt;&lt;p style=&quot;margin:0px;margin-left:4px;&quot;&gt;+ ToggleSaveJobAsync()&lt;/p&gt;" style="verticalAlign=top;align=left;overflow=fill;fontSize=12;fontFamily=Helvetica;html=1;fillColor=#BBDEFB;strokeColor=#1976D2;" vertex="1" parent="1">
+          <mxGeometry x="2040" y="300" width="270" height="100" as="geometry" />
+        </mxCell>
+        <mxCell id="svc_admindash" value="&lt;p style=&quot;margin:0px;margin-top:4px;text-align:center;&quot;&gt;&lt;b&gt;ADMIN DASHBOARD SERVICE&lt;/b&gt;&lt;/p&gt;&lt;hr size=&quot;1&quot;/&gt;&lt;p style=&quot;margin:0px;margin-left:4px;&quot;&gt;- _dashRepo : IAdminDashboardRepository&lt;/p&gt;&lt;hr size=&quot;1&quot;/&gt;&lt;p style=&quot;margin:0px;margin-left:4px;&quot;&gt;+ GetDashboardStatsAsync()&lt;br/&gt;+ GetTrendDataAsync()&lt;br/&gt;+ GetDistributionDataAsync()&lt;br/&gt;+ GetRankingDataAsync()&lt;/p&gt;" style="verticalAlign=top;align=left;overflow=fill;fontSize=12;fontFamily=Helvetica;html=1;fillColor=#BBDEFB;strokeColor=#1976D2;" vertex="1" parent="1">
+          <mxGeometry x="2040" y="440" width="280" height="160" as="geometry" />
+        </mxCell>
+        <mxCell id="svc_adminuser" value="&lt;p style=&quot;margin:0px;margin-top:4px;text-align:center;&quot;&gt;&lt;b&gt;ADMIN USER SERVICE&lt;/b&gt;&lt;/p&gt;&lt;hr size=&quot;1&quot;/&gt;&lt;p style=&quot;margin:0px;margin-left:4px;&quot;&gt;- _adminUserRepo : IAdminUserRepository&lt;br/&gt;- _mapper : IMapper&lt;/p&gt;&lt;hr size=&quot;1&quot;/&gt;&lt;p style=&quot;margin:0px;margin-left:4px;&quot;&gt;+ GetUsersAsync()&lt;br/&gt;+ ToggleUserStatusAsync()&lt;/p&gt;" style="verticalAlign=top;align=left;overflow=fill;fontSize=12;fontFamily=Helvetica;html=1;fillColor=#BBDEFB;strokeColor=#1976D2;" vertex="1" parent="1">
+          <mxGeometry x="2040" y="640" width="280" height="140" as="geometry" />
+        </mxCell>
+        <mxCell id="svc_admincomp" value="&lt;p style=&quot;margin:0px;margin-top:4px;text-align:center;&quot;&gt;&lt;b&gt;ADMIN COMPANY SERVICE&lt;/b&gt;&lt;/p&gt;&lt;hr size=&quot;1&quot;/&gt;&lt;p style=&quot;margin:0px;margin-left:4px;&quot;&gt;- _adminCompRepo : IAdminCompanyRepository&lt;br/&gt;- _mapper : IMapper&lt;/p&gt;&lt;hr size=&quot;1&quot;/&gt;&lt;p style=&quot;margin:0px;margin-left:4px;&quot;&gt;+ GetCompaniesAsync()&lt;/p&gt;" style="verticalAlign=top;align=left;overflow=fill;fontSize=12;fontFamily=Helvetica;html=1;fillColor=#BBDEFB;strokeColor=#1976D2;" vertex="1" parent="1">
+          <mxGeometry x="2040" y="820" width="280" height="120" as="geometry" />
+        </mxCell>
+        <mxCell id="rel_role_user" edge="1" parent="1" source="class_role" style="endArrow=none;html=1;strokeWidth=2;" target="class_user">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="rel_role_user_l1" connectable="0" parent="rel_role_user" style="edgeLabel;html=1;fontSize=11;fontStyle=1;" value="1" vertex="1">
+          <mxGeometry relative="1" x="-0.8" as="geometry"><mxPoint as="offset" /></mxGeometry>
+        </mxCell>
+        <mxCell id="rel_role_user_l2" connectable="0" parent="rel_role_user" style="edgeLabel;html=1;fontSize=11;fontStyle=1;" value="*" vertex="1">
+          <mxGeometry relative="1" x="0.8" as="geometry"><mxPoint as="offset" /></mxGeometry>
+        </mxCell>
+        <mxCell id="rel_user_company" edge="1" parent="1" source="class_user" style="endArrow=none;html=1;strokeWidth=2;" target="class_company">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="rel_user_company_l1" connectable="0" parent="rel_user_company" style="edgeLabel;html=1;fontSize=11;fontStyle=1;" value="*" vertex="1">
+          <mxGeometry relative="1" x="-0.8" as="geometry"><mxPoint as="offset" /></mxGeometry>
+        </mxCell>
+        <mxCell id="rel_user_company_l2" connectable="0" parent="rel_user_company" style="edgeLabel;html=1;fontSize=11;fontStyle=1;" value="0..1" vertex="1">
+          <mxGeometry relative="1" x="0.8" as="geometry"><mxPoint as="offset" /></mxGeometry>
+        </mxCell>
+        <mxCell id="rel_user_edu" edge="1" parent="1" source="class_user" style="endArrow=none;html=1;strokeWidth=2;" target="class_education">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="rel_user_edu_l1" connectable="0" parent="rel_user_edu" style="edgeLabel;html=1;fontSize=11;fontStyle=1;" value="1" vertex="1">
+          <mxGeometry relative="1" x="-0.8" as="geometry"><mxPoint as="offset" /></mxGeometry>
+        </mxCell>
+        <mxCell id="rel_user_edu_l2" connectable="0" parent="rel_user_edu" style="edgeLabel;html=1;fontSize=11;fontStyle=1;" value="*" vertex="1">
+          <mxGeometry relative="1" x="0.8" as="geometry"><mxPoint as="offset" /></mxGeometry>
+        </mxCell>
+        <mxCell id="rel_user_exp" edge="1" parent="1" source="class_user" style="endArrow=none;html=1;strokeWidth=2;" target="class_experience">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="rel_user_exp_l1" connectable="0" parent="rel_user_exp" style="edgeLabel;html=1;fontSize=11;fontStyle=1;" value="1" vertex="1">
+          <mxGeometry relative="1" x="-0.8" as="geometry"><mxPoint as="offset" /></mxGeometry>
+        </mxCell>
+        <mxCell id="rel_user_exp_l2" connectable="0" parent="rel_user_exp" style="edgeLabel;html=1;fontSize=11;fontStyle=1;" value="*" vertex="1">
+          <mxGeometry relative="1" x="0.8" as="geometry"><mxPoint as="offset" /></mxGeometry>
+        </mxCell>
+        <mxCell id="rel_user_app" edge="1" parent="1" source="class_user" style="endArrow=none;html=1;strokeWidth=2;" target="class_application">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="rel_user_app_l1" connectable="0" parent="rel_user_app" style="edgeLabel;html=1;fontSize=11;fontStyle=1;" value="1" vertex="1">
+          <mxGeometry relative="1" x="-0.8" as="geometry"><mxPoint as="offset" /></mxGeometry>
+        </mxCell>
+        <mxCell id="rel_user_app_l2" connectable="0" parent="rel_user_app" style="edgeLabel;html=1;fontSize=11;fontStyle=1;" value="*" vertex="1">
+          <mxGeometry relative="1" x="0.8" as="geometry"><mxPoint as="offset" /></mxGeometry>
+        </mxCell>
+        <mxCell id="rel_user_job" edge="1" parent="1" source="class_user" style="endArrow=none;html=1;strokeWidth=2;" target="class_job">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="rel_user_job_l1" connectable="0" parent="rel_user_job" style="edgeLabel;html=1;fontSize=11;fontStyle=1;" value="1" vertex="1">
+          <mxGeometry relative="1" x="-0.8" as="geometry"><mxPoint as="offset" /></mxGeometry>
+        </mxCell>
+        <mxCell id="rel_user_job_l2" connectable="0" parent="rel_user_job" style="edgeLabel;html=1;fontSize=11;fontStyle=1;" value="*" vertex="1">
+          <mxGeometry relative="1" x="0.8" as="geometry"><mxPoint as="offset" /></mxGeometry>
+        </mxCell>
+        <mxCell id="rel_user_follow" edge="1" parent="1" source="class_user" style="endArrow=none;html=1;strokeWidth=2;" target="class_follow">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="rel_user_follow_l1" connectable="0" parent="rel_user_follow" style="edgeLabel;html=1;fontSize=11;fontStyle=1;" value="1" vertex="1">
+          <mxGeometry relative="1" x="-0.8" as="geometry"><mxPoint as="offset" /></mxGeometry>
+        </mxCell>
+        <mxCell id="rel_user_follow_l2" connectable="0" parent="rel_user_follow" style="edgeLabel;html=1;fontSize=11;fontStyle=1;" value="*" vertex="1">
+          <mxGeometry relative="1" x="0.8" as="geometry"><mxPoint as="offset" /></mxGeometry>
+        </mxCell>
+        <mxCell id="rel_user_noti" edge="1" parent="1" source="class_user" style="endArrow=none;html=1;strokeWidth=2;" target="class_notification">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="rel_user_noti_l1" connectable="0" parent="rel_user_noti" style="edgeLabel;html=1;fontSize=11;fontStyle=1;" value="1" vertex="1">
+          <mxGeometry relative="1" x="-0.8" as="geometry"><mxPoint as="offset" /></mxGeometry>
+        </mxCell>
+        <mxCell id="rel_user_noti_l2" connectable="0" parent="rel_user_noti" style="edgeLabel;html=1;fontSize=11;fontStyle=1;" value="*" vertex="1">
+          <mxGeometry relative="1" x="0.8" as="geometry"><mxPoint as="offset" /></mxGeometry>
+        </mxCell>
+        <mxCell id="rel_comp_job" edge="1" parent="1" source="class_company" style="endArrow=none;html=1;strokeWidth=2;" target="class_job">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="rel_comp_job_l1" connectable="0" parent="rel_comp_job" style="edgeLabel;html=1;fontSize=11;fontStyle=1;" value="1" vertex="1">
+          <mxGeometry relative="1" x="-0.8" as="geometry"><mxPoint as="offset" /></mxGeometry>
+        </mxCell>
+        <mxCell id="rel_comp_job_l2" connectable="0" parent="rel_comp_job" style="edgeLabel;html=1;fontSize=11;fontStyle=1;" value="*" vertex="1">
+          <mxGeometry relative="1" x="0.8" as="geometry"><mxPoint as="offset" /></mxGeometry>
+        </mxCell>
+        <mxCell id="rel_cat_job" edge="1" parent="1" source="class_category" style="endArrow=none;html=1;strokeWidth=2;" target="class_job">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="rel_cat_job_l1" connectable="0" parent="rel_cat_job" style="edgeLabel;html=1;fontSize=11;fontStyle=1;" value="1" vertex="1">
+          <mxGeometry relative="1" x="-0.8" as="geometry"><mxPoint as="offset" /></mxGeometry>
+        </mxCell>
+        <mxCell id="rel_cat_job_l2" connectable="0" parent="rel_cat_job" style="edgeLabel;html=1;fontSize=11;fontStyle=1;" value="*" vertex="1">
+          <mxGeometry relative="1" x="0.8" as="geometry"><mxPoint as="offset" /></mxGeometry>
+        </mxCell>
+        <mxCell id="rel_loc_job" edge="1" parent="1" source="class_location" style="endArrow=none;html=1;strokeWidth=2;" target="class_job">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="rel_loc_job_l1" connectable="0" parent="rel_loc_job" style="edgeLabel;html=1;fontSize=11;fontStyle=1;" value="1" vertex="1">
+          <mxGeometry relative="1" x="-0.8" as="geometry"><mxPoint as="offset" /></mxGeometry>
+        </mxCell>
+        <mxCell id="rel_loc_job_l2" connectable="0" parent="rel_loc_job" style="edgeLabel;html=1;fontSize=11;fontStyle=1;" value="*" vertex="1">
+          <mxGeometry relative="1" x="0.8" as="geometry"><mxPoint as="offset" /></mxGeometry>
+        </mxCell>
+        <mxCell id="rel_job_app" edge="1" parent="1" source="class_job" style="endArrow=none;html=1;strokeWidth=2;" target="class_application">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="rel_job_app_l1" connectable="0" parent="rel_job_app" style="edgeLabel;html=1;fontSize=11;fontStyle=1;" value="1" vertex="1">
+          <mxGeometry relative="1" x="-0.8" as="geometry"><mxPoint as="offset" /></mxGeometry>
+        </mxCell>
+        <mxCell id="rel_job_app_l2" connectable="0" parent="rel_job_app" style="edgeLabel;html=1;fontSize=11;fontStyle=1;" value="*" vertex="1">
+          <mxGeometry relative="1" x="0.8" as="geometry"><mxPoint as="offset" /></mxGeometry>
+        </mxCell>
+        <mxCell id="rel_job_jskill" edge="1" parent="1" source="class_job" style="endArrow=none;html=1;strokeWidth=2;" target="class_jobskill">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="rel_job_jskill_l1" connectable="0" parent="rel_job_jskill" style="edgeLabel;html=1;fontSize=11;fontStyle=1;" value="1" vertex="1">
+          <mxGeometry relative="1" x="-0.8" as="geometry"><mxPoint as="offset" /></mxGeometry>
+        </mxCell>
+        <mxCell id="rel_job_jskill_l2" connectable="0" parent="rel_job_jskill" style="edgeLabel;html=1;fontSize=11;fontStyle=1;" value="*" vertex="1">
+          <mxGeometry relative="1" x="0.8" as="geometry"><mxPoint as="offset" /></mxGeometry>
+        </mxCell>
+        <mxCell id="rel_skill_jskill" edge="1" parent="1" source="class_skill" style="endArrow=none;html=1;strokeWidth=2;" target="class_jobskill">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="rel_skill_jskill_l1" connectable="0" parent="rel_skill_jskill" style="edgeLabel;html=1;fontSize=11;fontStyle=1;" value="1" vertex="1">
+          <mxGeometry relative="1" x="-0.8" as="geometry"><mxPoint as="offset" /></mxGeometry>
+        </mxCell>
+        <mxCell id="rel_skill_jskill_l2" connectable="0" parent="rel_skill_jskill" style="edgeLabel;html=1;fontSize=11;fontStyle=1;" value="*" vertex="1">
+          <mxGeometry relative="1" x="0.8" as="geometry"><mxPoint as="offset" /></mxGeometry>
+        </mxCell>
+        <mxCell id="rel_job_comment" edge="1" parent="1" source="class_job" style="endArrow=none;html=1;strokeWidth=2;" target="class_comment">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="rel_job_comment_l1" connectable="0" parent="rel_job_comment" style="edgeLabel;html=1;fontSize=11;fontStyle=1;" value="1" vertex="1">
+          <mxGeometry relative="1" x="-0.8" as="geometry"><mxPoint as="offset" /></mxGeometry>
+        </mxCell>
+        <mxCell id="rel_job_comment_l2" connectable="0" parent="rel_job_comment" style="edgeLabel;html=1;fontSize=11;fontStyle=1;" value="*" vertex="1">
+          <mxGeometry relative="1" x="0.8" as="geometry"><mxPoint as="offset" /></mxGeometry>
+        </mxCell>
+        <mxCell id="rel_job_review" edge="1" parent="1" source="class_job" style="endArrow=none;html=1;strokeWidth=2;" target="class_review">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="rel_job_review_l1" connectable="0" parent="rel_job_review" style="edgeLabel;html=1;fontSize=11;fontStyle=1;" value="1" vertex="1">
+          <mxGeometry relative="1" x="-0.8" as="geometry"><mxPoint as="offset" /></mxGeometry>
+        </mxCell>
+        <mxCell id="rel_job_review_l2" connectable="0" parent="rel_job_review" style="edgeLabel;html=1;fontSize=11;fontStyle=1;" value="*" vertex="1">
+          <mxGeometry relative="1" x="0.8" as="geometry"><mxPoint as="offset" /></mxGeometry>
+        </mxCell>
+        <mxCell id="rel_job_saved" edge="1" parent="1" source="class_job" style="endArrow=none;html=1;strokeWidth=2;" target="class_savedjob">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="rel_job_saved_l1" connectable="0" parent="rel_job_saved" style="edgeLabel;html=1;fontSize=11;fontStyle=1;" value="1" vertex="1">
+          <mxGeometry relative="1" x="-0.8" as="geometry"><mxPoint as="offset" /></mxGeometry>
+        </mxCell>
+        <mxCell id="rel_job_saved_l2" connectable="0" parent="rel_job_saved" style="edgeLabel;html=1;fontSize=11;fontStyle=1;" value="*" vertex="1">
+          <mxGeometry relative="1" x="0.8" as="geometry"><mxPoint as="offset" /></mxGeometry>
+        </mxCell>
+        <mxCell id="rel_comment_self" edge="1" parent="1" source="class_comment" style="endArrow=none;html=1;strokeWidth=2;curved=1;" target="class_comment">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="960" y="870" />
+              <mxPoint x="960" y="810" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="rel_comment_self_l" connectable="0" parent="rel_comment_self" style="edgeLabel;html=1;fontSize=10;" value="ParentId" vertex="1">
+          <mxGeometry relative="1" x="0.5" as="geometry"><mxPoint x="10" as="offset" /></mxGeometry>
+        </mxCell>
+        <mxCell id="dep_auth_user" edge="1" parent="1" source="svc_auth" style="endArrow=open;endSize=12;dashed=1;html=1;strokeWidth=1;strokeColor=#1976D2;" target="class_user">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="dep_profile_user" edge="1" parent="1" source="svc_profile" style="endArrow=open;endSize=12;dashed=1;html=1;strokeWidth=1;strokeColor=#1976D2;" target="class_user">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="dep_job_svc_job" edge="1" parent="1" source="svc_job" style="endArrow=open;endSize=12;dashed=1;html=1;strokeWidth=1;strokeColor=#1976D2;" target="class_job">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="dep_app_svc_app" edge="1" parent="1" source="svc_application" style="endArrow=open;endSize=12;dashed=1;html=1;strokeWidth=1;strokeColor=#1976D2;" target="class_application">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="dep_cat_svc" edge="1" parent="1" source="svc_category" style="endArrow=open;endSize=12;dashed=1;html=1;strokeWidth=1;strokeColor=#1976D2;" target="class_category">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="dep_loc_svc" edge="1" parent="1" source="svc_location" style="endArrow=open;endSize=12;dashed=1;html=1;strokeWidth=1;strokeColor=#1976D2;" target="class_location">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="dep_skill_svc" edge="1" parent="1" source="svc_skill" style="endArrow=open;endSize=12;dashed=1;html=1;strokeWidth=1;strokeColor=#1976D2;" target="class_skill">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="dep_comment_svc" edge="1" parent="1" source="svc_comment" style="endArrow=open;endSize=12;dashed=1;html=1;strokeWidth=1;strokeColor=#1976D2;" target="class_comment">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="dep_review_svc" edge="1" parent="1" source="svc_review" style="endArrow=open;endSize=12;dashed=1;html=1;strokeWidth=1;strokeColor=#1976D2;" target="class_review">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="dep_savedjob_svc" edge="1" parent="1" source="svc_savedjob" style="endArrow=open;endSize=12;dashed=1;html=1;strokeWidth=1;strokeColor=#1976D2;" target="class_savedjob">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="dep_adminuser_svc" edge="1" parent="1" source="svc_adminuser" style="endArrow=open;endSize=12;dashed=1;html=1;strokeWidth=1;strokeColor=#1976D2;" target="class_user">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="dep_admincomp_svc" edge="1" parent="1" source="svc_admincomp" style="endArrow=open;endSize=12;dashed=1;html=1;strokeWidth=1;strokeColor=#1976D2;" target="class_company">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

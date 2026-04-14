@@ -1,14 +1,21 @@
 // src/services/authService.ts
-import { LoginResponse, RegisterPayload } from '../types/auth';
+import { AuthResponse, RegisterPayload, RefreshTokenRequest } from '../types/auth';
 import axiosClient from './axiosClient';
 
 export const authService = {
     login: (data: { email: string; password: string }) => {
-        // Đường dẫn này sẽ nối vào baseURL -> https://localhost:7016/api/Auth/login
-        return axiosClient.post<LoginResponse>('/Auth/login', data);
+        return axiosClient.post<AuthResponse>('/Auth/login', data);
     },
 
     register: (data: RegisterPayload) => {
-        return axiosClient.post('Auth/register', data)
-    }
-};
+        return axiosClient.post('Auth/register', data);
+    },
+
+    refreshToken: (data: RefreshTokenRequest) => {
+        return axiosClient.post<AuthResponse>('/Auth/refresh-token', data);
+    },
+
+    logout: (data: RefreshTokenRequest) => {
+        return axiosClient.post('/Auth/logout', data);
+    },
+};

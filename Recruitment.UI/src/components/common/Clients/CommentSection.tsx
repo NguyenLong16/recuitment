@@ -22,7 +22,6 @@ dayjs.locale("vi");
 const { TextArea } = Input;
 const { Text } = Typography;
 
-// Số bình luận hiển thị mặc định mỗi cấp
 const ROOT_PAGE_SIZE = 3;
 const REPLY_PAGE_SIZE = 2;
 
@@ -31,27 +30,30 @@ interface CommentSectionProps {
     totalComments: number;
 }
 
-/* ─── Item comment (đệ quy, hỗ trợ collapse replies) ─── */
 interface CommentItemProps {
     comment: CommentResponse;
     jobId: number;
     isLoggedIn: boolean;
-    currentUserId?: number;
     onRefresh: () => void;
     depth?: number;
 }
 
-const CommentItem = ({ comment, jobId, isLoggedIn, currentUserId, onRefresh, depth = 0 }: CommentItemProps) => {
+/* ─── CommentItem (đệ quy) ───────────────────────────────────────────────────── */
+const CommentItem = ({ comment, jobId, isLoggedIn, onRefresh, depth = 0 }: CommentItemProps) => {
     const [replyOpen, setReplyOpen] = useState(false);
     const [replyContent, setReplyContent] = useState("");
     const [submitting, setSubmitting] = useState(false);
-    // Số replies hiển thị
     const [visibleReplies, setVisibleReplies] = useState(REPLY_PAGE_SIZE);
 
-    const canReply = isLoggedIn;
-    const indentLeft = Math.min(depth, 3) * 28;
     const replies = comment.replies ?? [];
     const hiddenRepliesCount = replies.length - visibleReplies;
+
+    // Indent: sm nhỏ hơn, md/lg bình thường
+    const indentClass =
+        depth === 0 ? "" :
+        depth === 1 ? "ml-6 sm:ml-8 md:ml-10" :
+        depth === 2 ? "ml-10 sm:ml-14 md:ml-16" :
+                      "ml-12 sm:ml-16 md:ml-20";
 
     const handleReply = async () => {
         if (!replyContent.trim()) {
@@ -75,96 +77,66 @@ const CommentItem = ({ comment, jobId, isLoggedIn, currentUserId, onRefresh, dep
         }
     };
 
-    const handleShowMoreReplies = () => {
-        setVisibleReplies((prev) => prev + REPLY_PAGE_SIZE);
-    };
-
-    const handleCollapseReplies = () => {
-        setVisibleReplies(REPLY_PAGE_SIZE);
-    };
-
     return (
-        <div style={{ marginLeft: indentLeft, marginBottom: 12 }}>
-            {/* Bubble bình luận */}
+        <div className={`${indentClass} mb-2.5`}>
+            {/* ── Bubble ── */}
             <div
-                style={{
-                    display: "flex",
-                    gap: 10,
-                    padding: "10px 14px",
-                    background: depth === 0 ? "#fff" : "#f9fafb",
-                    borderRadius: 10,
-                    border: "1px solid",
-                    borderColor: depth === 0 ? "#e5e7eb" : "#f0f1f3",
-                    boxShadow: depth === 0 ? "0 1px 4px rgba(0,0,0,0.06)" : "none",
-                }}
+                className={`flex gap-2 sm:gap-2.5 p-2.5 sm:p-3 md:p-3.5 rounded-xl border
+                    ${depth === 0
+                        ? "bg-white border-gray-200 shadow-sm"
+                        : "bg-gray-50 border-gray-100"
+                    }`}
             >
-                {/* Avatar */}
+                {/* Avatar — nhỏ hơn trên sm */}
                 <Avatar
                     src={comment.userAvatar}
                     icon={<UserOutlined />}
-                    size={depth === 0 ? 38 : 30}
-                    style={{ flexShrink: 0, backgroundColor: "#00B14F" }}
+                    size={depth === 0 ? 34 : 28}
+                    className="flex-shrink-0 bg-emerald-500 sm:w-9 sm:h-9"
                 />
 
                 {/* Content */}
-                <div style={{ flex: 1, minWidth: 0 }}>
-                    <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 3 }}>
-                        <Text strong style={{ fontSize: depth === 0 ? 14 : 13 }}>
+                <div className="flex-1 min-w-0">
+                    {/* Name + time */}
+                    <div className="flex items-center gap-1.5 sm:gap-2 mb-1 flex-wrap">
+                        <Text strong className={`${depth === 0 ? "text-sm" : "text-xs sm:text-sm"}`}>
                             {comment.userName}
                         </Text>
-                        <Text type="secondary" style={{ fontSize: 11 }}>
+                        <Text type="secondary" className="text-[11px]">
                             {dayjs(comment.createdDate).fromNow()}
                         </Text>
                     </div>
 
+                    {/* Body */}
                     <Text
-                        style={{
-                            whiteSpace: "pre-wrap",
-                            fontSize: depth === 0 ? 14 : 13,
-                            color: "#374151",
-                        }}
+                        className={`whitespace-pre-wrap text-gray-700
+                            ${depth === 0 ? "text-sm" : "text-xs sm:text-sm"}`}
                     >
                         {comment.content}
                     </Text>
 
-                    {/* Nút Trả lời */}
-                    {canReply && (
-                        <div style={{ marginTop: 6 }}>
+                    {/* Reply button */}
+                    {isLoggedIn && (
+                        <div className="mt-1.5">
                             <Button
                                 type="link"
                                 size="small"
                                 icon={replyOpen ? <CloseOutlined /> : <MessageOutlined />}
-                                onClick={() => {
-                                    setReplyOpen(!replyOpen);
-                                    setReplyContent("");
-                                }}
-                                style={{
-                                    padding: 0,
-                                    height: "auto",
-                                    color: replyOpen ? "#9ca3af" : "#00B14F",
-                                    fontWeight: 500,
-                                    fontSize: 12,
-                                }}
+                                onClick={() => { setReplyOpen(!replyOpen); setReplyContent(""); }}
+                                className="p-0 h-auto font-medium text-xs"
+                                style={{ color: replyOpen ? "#9ca3af" : "#00B14F" }}
                             >
                                 {replyOpen ? "Hủy" : "Trả lời"}
                             </Button>
                         </div>
                     )}
 
-                    {/* Form reply */}
+                    {/* Reply form */}
                     {replyOpen && (
-                        <div
-                            style={{
-                                marginTop: 10,
-                                padding: "10px 12px",
-                                background: "#f0fdf4",
-                                borderRadius: 8,
-                                border: "1px solid #bbf7d0",
-                            }}
-                        >
-                            <div style={{ marginBottom: 4, fontSize: 12, color: "#6b7280" }}>
+                        <div className="mt-2.5 p-2.5 sm:p-3 bg-green-50 rounded-lg border border-green-200">
+                            <div className="mb-1.5 text-xs text-gray-500">
                                 Trả lời{" "}
-                                <Text strong style={{ color: "#00B14F", fontSize: 12 }}>
+                                <Text strong className="text-emerald-600 text-xs">
                                     @{comment.userName}
                                 </Text>
                             </div>
@@ -173,20 +145,15 @@ const CommentItem = ({ comment, jobId, isLoggedIn, currentUserId, onRefresh, dep
                                 value={replyContent}
                                 onChange={(e) => setReplyContent(e.target.value)}
                                 placeholder={`Trả lời ${comment.userName}...`}
-                                style={{ marginBottom: 8, borderColor: "#86efac" }}
+                                className="mb-2 text-sm"
+                                style={{ borderColor: "#86efac", resize: "none" }}
                                 onPressEnter={(e) => {
-                                    if (!e.shiftKey) {
-                                        e.preventDefault();
-                                        handleReply();
-                                    }
+                                    if (!e.shiftKey) { e.preventDefault(); handleReply(); }
                                 }}
                                 autoFocus
                             />
-                            <div style={{ display: "flex", justifyContent: "flex-end", gap: 8 }}>
-                                <Button
-                                    size="small"
-                                    onClick={() => { setReplyOpen(false); setReplyContent(""); }}
-                                >
+                            <div className="flex justify-end gap-2">
+                                <Button size="small" onClick={() => { setReplyOpen(false); setReplyContent(""); }}>
                                     Hủy
                                 </Button>
                                 <Button
@@ -205,67 +172,40 @@ const CommentItem = ({ comment, jobId, isLoggedIn, currentUserId, onRefresh, dep
                 </div>
             </div>
 
-            {/* ── Replies lồng nhau ── */}
+            {/* ── Nested replies ── */}
             {replies.length > 0 && (
-                <div style={{ marginTop: 6 }}>
+                <div className="mt-1.5">
                     {replies.slice(0, visibleReplies).map((reply) => (
                         <CommentItem
                             key={reply.id}
                             comment={reply}
                             jobId={jobId}
                             isLoggedIn={isLoggedIn}
-                            currentUserId={currentUserId}
                             onRefresh={onRefresh}
                             depth={depth + 1}
                         />
                     ))}
 
-                    {/* Nút Xem thêm phản hồi */}
+                    {/* Xem thêm replies */}
                     {hiddenRepliesCount > 0 && (
                         <button
-                            onClick={handleShowMoreReplies}
-                            style={{
-                                marginLeft: 8,
-                                marginTop: 4,
-                                display: "inline-flex",
-                                alignItems: "center",
-                                gap: 4,
-                                background: "none",
-                                border: "none",
-                                cursor: "pointer",
-                                color: "#00B14F",
-                                fontSize: 12,
-                                fontWeight: 600,
-                                padding: "2px 6px",
-                                borderRadius: 6,
-                            }}
+                            onClick={() => setVisibleReplies((p) => p + REPLY_PAGE_SIZE)}
+                            className="ml-2 mt-1 inline-flex items-center gap-1 text-emerald-600
+                                       text-xs font-semibold px-1.5 py-0.5 rounded hover:bg-green-50 transition-colors"
                         >
-                            <DownOutlined style={{ fontSize: 10 }} />
+                            <DownOutlined className="text-[10px]" />
                             Xem thêm {hiddenRepliesCount} phản hồi
                         </button>
                     )}
 
-                    {/* Nút Thu gọn replies – hiện ngay khi đã expand */}
+                    {/* Thu gọn replies */}
                     {visibleReplies > REPLY_PAGE_SIZE && (
                         <button
-                            onClick={handleCollapseReplies}
-                            style={{
-                                marginLeft: 8,
-                                marginTop: 4,
-                                display: "inline-flex",
-                                alignItems: "center",
-                                gap: 4,
-                                background: "none",
-                                border: "none",
-                                cursor: "pointer",
-                                color: "#6b7280",
-                                fontSize: 12,
-                                fontWeight: 500,
-                                padding: "2px 6px",
-                                borderRadius: 6,
-                            }}
+                            onClick={() => setVisibleReplies(REPLY_PAGE_SIZE)}
+                            className="ml-2 mt-1 inline-flex items-center gap-1 text-gray-400
+                                       text-xs font-medium px-1.5 py-0.5 rounded hover:bg-gray-100 transition-colors"
                         >
-                            <UpOutlined style={{ fontSize: 10 }} />
+                            <UpOutlined className="text-[10px]" />
                             Ẩn bớt
                         </button>
                     )}
@@ -275,7 +215,7 @@ const CommentItem = ({ comment, jobId, isLoggedIn, currentUserId, onRefresh, dep
     );
 };
 
-/* ─── Component chính ─── */
+/* ─── CommentSection chính ───────────────────────────────────────────────────── */
 const CommentSection = ({ jobId, totalComments }: CommentSectionProps) => {
     const user = useAppSelector((state) => state.auth.user);
 
@@ -283,19 +223,15 @@ const CommentSection = ({ jobId, totalComments }: CommentSectionProps) => {
     const [loading, setLoading] = useState(false);
     const [submitting, setSubmitting] = useState(false);
     const [content, setContent] = useState("");
-    // Phân trang bình luận gốc
     const [visibleRoots, setVisibleRoots] = useState(ROOT_PAGE_SIZE);
 
-    useEffect(() => {
-        fetchComments();
-    }, [jobId]);
+    useEffect(() => { fetchComments(); }, [jobId]);
 
     const fetchComments = async () => {
         setLoading(true);
         try {
             const data = await commentService.getJobComment(jobId);
             setComments(buildTree(data));
-            // Reset về trang đầu khi reload
             setVisibleRoots(ROOT_PAGE_SIZE);
         } catch (error) {
             console.error("Error fetching comments:", error);
@@ -304,39 +240,22 @@ const CommentSection = ({ jobId, totalComments }: CommentSectionProps) => {
         }
     };
 
-    /**
-     * Build cây comment từ flat list
-     * - Comment gốc: parentId === null/undefined
-     * - Reply: parentId !== null
-     */
     const buildTree = (flat: CommentResponse[]): CommentResponse[] => {
         const map = new Map<number, CommentResponse>();
         const roots: CommentResponse[] = [];
-
         flat.forEach((c) => map.set(c.id, { ...c, replies: [] }));
-
         map.forEach((c) => {
             if (c.parentId) {
                 const parent = map.get(c.parentId);
-                if (parent) {
-                    parent.replies = parent.replies || [];
-                    parent.replies.push(c);
-                } else {
-                    roots.push(c);
-                }
-            } else {
-                roots.push(c);
-            }
+                if (parent) { parent.replies = parent.replies || []; parent.replies.push(c); }
+                else roots.push(c);
+            } else roots.push(c);
         });
-
         return roots;
     };
 
     const handleSubmit = async () => {
-        if (!content.trim()) {
-            message.warning("Vui lòng nhập nội dung bình luận");
-            return;
-        }
+        if (!content.trim()) { message.warning("Vui lòng nhập nội dung bình luận"); return; }
         setSubmitting(true);
         try {
             await commentService.postComment(jobId, { content: content.trim() });
@@ -353,124 +272,81 @@ const CommentSection = ({ jobId, totalComments }: CommentSectionProps) => {
     const hiddenRootsCount = comments.length - visibleRoots;
 
     return (
-        <div
-            style={{
-                background: "#fff",
-                borderRadius: 12,
-                border: "1px solid #e5e7eb",
-                marginBottom: 16,
-                overflow: "hidden",
-                boxShadow: "0 1px 6px rgba(0,0,0,0.06)",
-            }}
-        >
-            {/* Header */}
-            <div
-                style={{
-                    padding: "14px 20px",
-                    borderBottom: "1px solid #f0f0f0",
-                    display: "flex",
-                    alignItems: "center",
-                    gap: 8,
-                    background: "#fafafa",
-                }}
-            >
-                <CommentOutlined style={{ color: "#00B14F", fontSize: 18 }} />
-                <Text strong style={{ fontSize: 15 }}>
-                    Bình luận
-                </Text>
-                <span
-                    style={{
-                        background: "#dcfce7",
-                        color: "#15803d",
-                        fontSize: 12,
-                        fontWeight: 600,
-                        padding: "1px 8px",
-                        borderRadius: 99,
-                    }}
-                >
+        <div className="bg-white rounded-xl border border-gray-200 mb-4 overflow-hidden shadow-sm">
+
+            {/* ── Header ── */}
+            <div className="flex items-center gap-2 px-3 py-3 sm:px-4 sm:py-3.5 md:px-5
+                            border-b border-gray-100 bg-gray-50">
+                <CommentOutlined className="text-emerald-500 text-base sm:text-lg" />
+                <Text strong className="text-sm sm:text-[15px]">Bình luận</Text>
+                <span className="bg-green-100 text-green-700 text-xs font-semibold
+                                 px-2 py-0.5 rounded-full">
                     {totalComments}
                 </span>
             </div>
 
-            <div style={{ padding: "20px" }}>
+            {/* ── Body ── */}
+            <div className="p-3 sm:p-4 md:p-5">
+
                 {/* Comment Form */}
                 {user ? (
-                    <div
-                        style={{
-                            marginBottom: 24,
-                            padding: 14,
-                            background: "#f9fafb",
-                            borderRadius: 10,
-                            border: "1px solid #e5e7eb",
-                        }}
-                    >
-                        <div style={{ display: "flex", gap: 10, alignItems: "flex-start" }}>
+                    <div className="mb-4 sm:mb-5 p-3 sm:p-3.5 bg-gray-50 rounded-xl border border-gray-200">
+                        <div className="flex gap-2 sm:gap-2.5 items-start">
+                            {/* Avatar: ẩn trên màn rất nhỏ */}
                             <Avatar
-                                src={user.avatarUrl}
                                 icon={<UserOutlined />}
-                                size={38}
-                                style={{ flexShrink: 0, backgroundColor: "#00B14F" }}
+                                size={34}
+                                className="flex-shrink-0 bg-emerald-500 hidden xs:flex sm:flex"
                             />
-                            <div style={{ flex: 1 }}>
+                            <div className="flex-1">
                                 <TextArea
                                     rows={2}
                                     value={content}
                                     onChange={(e) => setContent(e.target.value)}
-                                    placeholder="Viết bình luận của bạn... (Enter để gửi, Shift+Enter để xuống dòng)"
-                                    style={{ marginBottom: 10, resize: "none" }}
+                                    placeholder="Viết bình luận... (Enter để gửi, Shift+Enter xuống dòng)"
+                                    className="mb-2 text-sm"
+                                    style={{ resize: "none" }}
                                     onPressEnter={(e) => {
-                                        if (!e.shiftKey) {
-                                            e.preventDefault();
-                                            handleSubmit();
-                                        }
+                                        if (!e.shiftKey) { e.preventDefault(); handleSubmit(); }
                                     }}
                                 />
-                                <div style={{ display: "flex", justifyContent: "flex-end" }}>
+                                <div className="flex justify-between items-center">
+                                    {/* Hint: chỉ hiện md trở lên */}
+                                    <span className="hidden md:block text-xs text-gray-400">
+                                        Enter để gửi · Shift+Enter xuống dòng
+                                    </span>
                                     <Button
                                         type="primary"
                                         icon={<SendOutlined />}
                                         onClick={handleSubmit}
                                         loading={submitting}
+                                        size="middle"
                                         style={{ backgroundColor: "#00B14F", borderColor: "#00B14F" }}
+                                        className="ml-auto"
                                     >
-                                        Gửi bình luận
+                                        {/* Label: ẩn trên sm */}
+                                        <span className="hidden sm:inline">Gửi bình luận</span>
+                                        <span className="sm:hidden">Gửi</span>
                                     </Button>
                                 </div>
                             </div>
                         </div>
                     </div>
                 ) : (
-                    <div
-                        style={{
-                            textAlign: "center",
-                            padding: 16,
-                            background: "#f5f5f5",
-                            borderRadius: 8,
-                            marginBottom: 24,
-                        }}
-                    >
-                        <Text type="secondary">
-                            Vui lòng <a href="/login">đăng nhập</a> để bình luận
-                        </Text>
+                    <div className="text-center py-3 px-4 bg-gray-50 rounded-lg mb-4 text-sm text-gray-500">
+                        Vui lòng <a href="/login" className="text-emerald-600 font-medium">đăng nhập</a> để bình luận
                     </div>
                 )}
 
                 {/* Comment List */}
                 {loading ? (
-                    <div style={{ textAlign: "center", padding: 32 }}>
+                    <div className="text-center py-8">
                         <Spin tip="Đang tải bình luận..." />
                     </div>
                 ) : comments.length === 0 ? (
-                    <div
-                        style={{
-                            textAlign: "center",
-                            padding: 32,
-                            color: "#9ca3af",
-                            fontSize: 14,
-                        }}
-                    >
-                        <CommentOutlined style={{ fontSize: 32, marginBottom: 8, display: "block" }} />
-                        Chưa có bình luận nào. Hãy là người đầu tiên!
+                    <div className="text-center py-8 text-gray-400">
+                        <CommentOutlined className="text-3xl sm:text-4xl block mb-2" />
+                        <span className="text-sm">Chưa có bình luận nào. Hãy là người đầu tiên!</span>
                     </div>
                 ) : (
                     <div>
@@ -480,65 +356,39 @@ const CommentSection = ({ jobId, totalComments }: CommentSectionProps) => {
                                 comment={comment}
                                 jobId={jobId}
                                 isLoggedIn={!!user}
-                                currentUserId={user?.id}
                                 onRefresh={fetchComments}
                                 depth={0}
                             />
                         ))}
 
-                        {/* ── Nút Xem thêm bình luận gốc ── */}
+                        {/* Xem thêm comments gốc */}
                         {hiddenRootsCount > 0 && (
                             <button
                                 onClick={() => setVisibleRoots((v) => v + ROOT_PAGE_SIZE)}
-                                style={{
-                                    display: "flex",
-                                    alignItems: "center",
-                                    justifyContent: "center",
-                                    gap: 6,
-                                    width: "100%",
-                                    marginTop: 12,
-                                    padding: "9px 0",
-                                    background: "#f0fdf4",
-                                    border: "1px dashed #86efac",
-                                    borderRadius: 8,
-                                    cursor: "pointer",
-                                    color: "#00B14F",
-                                    fontSize: 13,
-                                    fontWeight: 600,
-                                    transition: "background 0.2s",
-                                }}
-                                onMouseEnter={(e) => (e.currentTarget.style.background = "#dcfce7")}
-                                onMouseLeave={(e) => (e.currentTarget.style.background = "#f0fdf4")}
+                                className="flex items-center justify-center gap-1.5 w-full mt-3
+                                           py-2 sm:py-2.5
+                                           bg-green-50 hover:bg-green-100
+                                           border border-dashed border-green-300
+                                           rounded-lg text-emerald-600 text-xs sm:text-sm font-semibold
+                                           transition-colors"
                             >
-                                <DownOutlined style={{ fontSize: 11 }} />
+                                <DownOutlined className="text-[11px]" />
                                 Xem thêm {hiddenRootsCount} bình luận
                             </button>
                         )}
 
-                        {/* ── Nút Ẩn bớt bình luận gốc – hiện ngay khi đã expand ── */}
+                        {/* Thu gọn */}
                         {visibleRoots > ROOT_PAGE_SIZE && (
                             <button
                                 onClick={() => setVisibleRoots(ROOT_PAGE_SIZE)}
-                                style={{
-                                    display: "flex",
-                                    alignItems: "center",
-                                    justifyContent: "center",
-                                    gap: 6,
-                                    width: "100%",
-                                    marginTop: 8,
-                                    padding: "9px 0",
-                                    background: "#f9fafb",
-                                    border: "1px dashed #d1d5db",
-                                    borderRadius: 8,
-                                    cursor: "pointer",
-                                    color: "#6b7280",
-                                    fontSize: 13,
-                                    fontWeight: 500,
-                                }}
-                                onMouseEnter={(e) => (e.currentTarget.style.background = "#f3f4f6")}
-                                onMouseLeave={(e) => (e.currentTarget.style.background = "#f9fafb")}
+                                className="flex items-center justify-center gap-1.5 w-full mt-2
+                                           py-2 sm:py-2.5
+                                           bg-gray-50 hover:bg-gray-100
+                                           border border-dashed border-gray-300
+                                           rounded-lg text-gray-500 text-xs sm:text-sm font-medium
+                                           transition-colors"
                             >
-                                <UpOutlined style={{ fontSize: 11 }} />
+                                <UpOutlined className="text-[11px]" />
                                 Ẩn bớt
                             </button>
                         )}

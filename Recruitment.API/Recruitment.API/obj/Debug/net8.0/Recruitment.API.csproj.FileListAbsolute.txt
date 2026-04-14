@@ -177,4 +177,8 @@ F:\WorkSpace\Tuyển Dụng\Recruitment.API\Recruitment.API\bin\Debug\net8.0\BCr
 F:\WorkSpace\Tuyển Dụng\Recruitment.API\Recruitment.API\bin\Debug\net8.0\Recruitment.API.staticwebassets.runtime.json
 F:\WorkSpace\Tuyển Dụng\Recruitment.API\Recruitment.API\bin\Debug\net8.0\CloudinaryDotNet.dll
 F:\WorkSpace\Tuyển Dụng\Recruitment.API\Recruitment.API\bin\Debug\net8.0\Newtonsoft.Json.dll
-F:\WorkSpace\Tuyển Dụng\Recruitment.API\Recruitment.API\obj\Debug\net8.0\staticwebassets.upToDateCheck.txt
+F:\WorkSpace\Tuyển Dụng\Recruitment.API\Recruitment.API\obj\Debug\net8.0\rpswa.dswa.cache.json
+F:\WorkSpace\Tuyển Dụng\Recruitment.API\Recruitment.API\obj\Debug\net8.0\rjimswa.dswa.cache.json
+F:\WorkSpace\Tuyển Dụng\Recruitment.API\Recruitment.API\obj\Debug\net8.0\rjsmrazor.dswa.cache.json
+F:\WorkSpace\Tuyển Dụng\Recruitment.API\Recruitment.API\obj\Debug\net8.0\rjsmcshtml.dswa.cache.json
+F:\WorkSpace\Tuyển Dụng\Recruitment.API\Recruitment.API\obj\Debug\net8.0\swae.build.ex.cache

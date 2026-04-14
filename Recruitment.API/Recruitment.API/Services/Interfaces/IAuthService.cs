@@ -1,4 +1,4 @@
-﻿using Recruitment.API.DTOs;
+using Recruitment.API.DTOs;
 
 namespace Recruitment.API.Services.Interfaces
 {
@@ -6,5 +6,7 @@ namespace Recruitment.API.Services.Interfaces
     {
         Task<string> RegisterAsync(RegisterRequest request);
         Task<AuthResponse> LoginAsync(LoginRequest request);
+        Task<AuthResponse> RefreshTokenAsync(string refreshToken);
+        Task LogoutAsync(string refreshToken);
     }
 }

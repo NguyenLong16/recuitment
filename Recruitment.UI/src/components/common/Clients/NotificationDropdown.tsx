@@ -165,11 +165,12 @@ const NotificationDropdown = () => {
             <div className="relative" ref={dropdownRef}>
                 <button
                     onClick={() => setOpen(!open)}
-                    className="relative p-2.5 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-xl transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
+                    aria-label="Thông báo"
+                    className="relative p-2 sm:p-2.5 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-xl transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
                 >
-                    <Bell size={22} strokeWidth={2} />
+                    <Bell size={20} strokeWidth={2} className="sm:w-[22px] sm:h-[22px]" />
                     {unreadCount > 0 && (
-                        <span className="absolute -top-1 -right-1 min-w-[20px] h-5 flex items-center justify-center px-1.5 text-xs font-semibold text-white bg-gradient-to-br from-red-500 to-red-600 rounded-full shadow-lg animate-pulse">
+                        <span className="absolute -top-1 -right-1 min-w-[18px] h-[18px] sm:min-w-[20px] sm:h-5 flex items-center justify-center px-1 sm:px-1.5 text-[10px] sm:text-xs font-semibold text-white bg-gradient-to-br from-red-500 to-red-600 rounded-full shadow-lg animate-pulse">
                             {unreadCount > 99 ? '99+' : unreadCount}
                         </span>
                     )}
@@ -177,22 +178,38 @@ const NotificationDropdown = () => {
 
                 {/* Dropdown Panel */}
                 {open && (
-                    <div className="absolute right-0 mt-3 w-96 bg-white rounded-2xl shadow-2xl border border-gray-200 overflow-hidden z-50 animate-fadeIn">
+                    <div className="absolute right-0 mt-2 sm:mt-3
+                                    /* sm: panel rộng vừa màn hình, dịch trái để không tràn */
+                                    w-[calc(100vw-24px)] sm:w-80 md:w-96
+                                    /* căn phải nhưng giới hạn không tràn viewport bên trái */
+                                    -right-2 sm:right-0
+                                    bg-white rounded-2xl shadow-2xl border border-gray-200 overflow-hidden z-50 animate-fadeIn">
                         {/* Header */}
-                        <div className="flex justify-between items-center px-5 py-4 bg-gradient-to-r from-blue-50 to-indigo-50 border-b border-gray-200">
+                        <div className="flex justify-between items-center px-4 sm:px-5 py-3 sm:py-4 bg-gradient-to-r from-blue-50 to-indigo-50 border-b border-gray-200">
                             <div className="flex items-center gap-2">
-                                <Bell size={20} className="text-blue-600" />
-                                <h3 className="text-lg font-semibold text-gray-800">Thông báo</h3>
+                                <Bell size={18} className="text-blue-600 sm:w-5 sm:h-5" />
+                                <h3 className="text-base sm:text-lg font-semibold text-gray-800">Thông báo</h3>
                             </div>
-                            {unreadCount > 0 && (
-                                <span className="px-2.5 py-1 text-xs font-medium text-blue-700 bg-blue-100 rounded-full">
-                                    {unreadCount} chưa đọc
-                                </span>
-                            )}
+                            <div className="flex items-center gap-2">
+                                {unreadCount > 0 && (
+                                    <span className="px-2 py-0.5 sm:px-2.5 sm:py-1 text-xs font-medium text-blue-700 bg-blue-100 rounded-full">
+                                        {unreadCount} chưa đọc
+                                    </span>
+                                )}
+                                {/* Nút đóng — hiện trên sm để dễ tắt hơn */}
+                                <button
+                                    onClick={() => setOpen(false)}
+                                    className="sm:hidden p-1 text-gray-400 hover:text-gray-600 rounded-lg"
+                                    aria-label="Đóng"
+                                >
+                                    <X size={16} />
+                                </button>
+                            </div>
                         </div>
 
                         {/* Notification List */}
-                        <div className="overflow-y-auto max-h-[420px] custom-scrollbar">
+                        {/* List — chiều cao giới hạn theo màn */}
+                        <div className="overflow-y-auto max-h-[50vh] sm:max-h-[380px] md:max-h-[420px] custom-scrollbar">
                             {loading ? (
                                 <div className="flex flex-col items-center justify-center py-12 gap-3">
                                     <div className="w-10 h-10 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin"></div>
@@ -215,7 +232,11 @@ const NotificationDropdown = () => {
                                             <div
                                                 key={item.id}
                                                 onClick={() => handleNotificationClick(item)}
-                                                className={`flex items-start gap-3 px-5 py-4 cursor-pointer transition-all duration-200 hover:bg-gray-50 group ${!item.isRead ? 'bg-blue-50/50' : ''}`}
+                                                className={`flex items-start gap-2.5 sm:gap-3
+                                                            px-3 sm:px-5 py-3 sm:py-4
+                                                            cursor-pointer transition-all duration-200
+                                                            hover:bg-gray-50 group
+                                                            ${!item.isRead ? 'bg-blue-50/50' : ''}`}
                                             >
                                                 {/* Unread Indicator */}
                                                 <div className="flex-shrink-0 mt-1.5">
@@ -228,13 +249,13 @@ const NotificationDropdown = () => {
 
                                                 {/* Content */}
                                                 <div className="flex-1 min-w-0">
-                                                    <div className="flex items-center gap-2 mb-1">
-                                                        <h4 className={`text-sm font-semibold truncate ${!item.isRead ? 'text-gray-900' : 'text-gray-700'}`}>
+                                                    <div className="flex items-start gap-1.5 mb-1 flex-wrap">
+                                                        <h4 className={`text-xs sm:text-sm font-semibold flex-1 min-w-0 truncate ${!item.isRead ? 'text-gray-900' : 'text-gray-700'}`}>
                                                             {item.title}
                                                         </h4>
                                                         <TypeBadge type={item.type} />
                                                     </div>
-                                                    <p className="text-xs text-gray-600 line-clamp-2 leading-relaxed mb-2">
+                                                    <p className="text-[11px] sm:text-xs text-gray-600 line-clamp-2 leading-relaxed mb-1.5 sm:mb-2">
                                                         {item.content}
                                                     </p>
                                                     <div className="flex items-center justify-between">
@@ -269,15 +290,16 @@ const NotificationDropdown = () => {
 
             {/* Detail Modal – chỉ hiện khi không có route điều hướng (fallback) */}
             {detailModalOpen && selectedNotif && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-fadeIn">
-                    <div className="bg-white rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden animate-scaleIn">
+                <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center sm:p-4 bg-black/50 backdrop-blur-sm animate-fadeIn">
+                    {/* sm: sheet từ dưới lên; md+: modal giữa màn */}
+                    <div className="bg-white w-full sm:rounded-2xl rounded-t-2xl shadow-2xl sm:max-w-lg overflow-hidden animate-scaleIn">
                         {/* Modal Header */}
-                        <div className="flex items-center justify-between px-6 py-4 bg-gradient-to-r from-blue-50 to-indigo-50 border-b border-gray-200">
-                            <div className="flex items-center gap-2.5">
-                                <div className="p-2 bg-blue-100 rounded-lg">
-                                    <Bell size={20} className="text-blue-600" />
+                        <div className="flex items-center justify-between px-4 sm:px-6 py-3 sm:py-4 bg-gradient-to-r from-blue-50 to-indigo-50 border-b border-gray-200">
+                            <div className="flex items-center gap-2 sm:gap-2.5">
+                                <div className="p-1.5 sm:p-2 bg-blue-100 rounded-lg">
+                                    <Bell size={18} className="text-blue-600 sm:w-5 sm:h-5" />
                                 </div>
-                                <h3 className="text-lg font-semibold text-gray-800">Chi tiết thông báo</h3>
+                                <h3 className="text-base sm:text-lg font-semibold text-gray-800">Chi tiết thông báo</h3>
                             </div>
                             <button
                                 onClick={() => setDetailModalOpen(false)}
@@ -288,7 +310,7 @@ const NotificationDropdown = () => {
                         </div>
 
                         {/* Modal Content */}
-                        <div className="px-6 py-6 space-y-5">
+                        <div className="px-4 sm:px-6 py-4 sm:py-6 space-y-4 sm:space-y-5">
                             <div>
                                 <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2 block">
                                     Tiêu đề
@@ -330,7 +352,7 @@ const NotificationDropdown = () => {
                         </div>
 
                         {/* Modal Footer */}
-                        <div className="px-6 py-4 bg-gray-50 border-t border-gray-200 flex justify-end">
+                        <div className="px-4 sm:px-6 py-3 sm:py-4 bg-gray-50 border-t border-gray-200 flex justify-end">
                             <button
                                 onClick={() => setDetailModalOpen(false)}
                                 className="px-5 py-2.5 text-sm font-semibold text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-gray-400/20"

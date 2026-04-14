@@ -61,7 +61,7 @@ const JobDetailPage = () => {
             console.log('jobId:', id, 'type:', typeof id);
             console.log('cvFile:', cvFile);
             console.log('coverLetter:', values.coverLetter);
-            console.log('Token:', localStorage.getItem('token'));
+            console.log('Token:', localStorage.getItem('accessToken'));
 
             await ApplicationService.applyJob({
                 jobId: id!,

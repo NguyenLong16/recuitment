@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import {
     Avatar,
     Button,
@@ -37,6 +38,7 @@ const PRIMARY_COLOR = "#00B14F";
 
 const HRMyProfilePage = () => {
     const { profile, loading, updating, updateProfile } = useMyProfile();
+    const navigate = useNavigate();
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
     const [form] = Form.useForm();
     // File states
@@ -414,6 +416,7 @@ const HRMyProfilePage = () => {
                                     {profile.postedJobs.map((job) => (
                                         <div
                                             key={job.id}
+                                            onClick={() => navigate(`/hr/job-detail/${job.id}`)}
                                             className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-4 p-5 bg-gradient-to-br from-gray-50 to-gray-100 hover:from-gray-100 hover:to-gray-200 rounded-xl border border-gray-200 hover:border-gray-300 transition-all duration-200 cursor-pointer group"
                                         >
                                             <div className="flex-1 min-w-0">

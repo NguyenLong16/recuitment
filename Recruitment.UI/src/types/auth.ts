@@ -1,11 +1,7 @@
+// Thông tin user lưu trong Redux state
 export interface User {
-    id: number;
     fullName: string;
-    email: string;
-    roleId: number;
     role: string;
-    avatarUrl: string;
-    token?: string;
 }
 
 export enum Role {
@@ -14,10 +10,16 @@ export enum Role {
     Candidate = 'Candidate'
 }
 
-export interface LoginResponse {
-    token: string;
-    user: User; // <--- fullName và roleId nằm trong object con này
+// Response trả về từ API login / refresh-token
+export interface AuthResponse {
+    accessToken: string;
+    refreshToken: string;
+    fullName: string;
+    role: string;
 }
+
+// Giữ alias LoginResponse để không phá vỡ import cũ
+export type LoginResponse = AuthResponse;
 
 export interface AuthState {
     user: User | null;
@@ -25,19 +27,13 @@ export interface AuthState {
     error: string | null;
 }
 
-// Kiểu dữ liệu gửi lên (Payload)
 export interface LoginPayload {
     email: string;
-    passwordHash: string; // Lưu ý: Backend bạn đặt tên là passwordHash hay password? 
-    // Thường API login nhận "password", backend mới hash. 
-    // Ở đây tôi để "password" cho chuẩn REST API thường gặp.
+    password: string;
 }
 
-// Kiểu dữ liệu nhận về (Response)
-// Cần khớp với DTO LoginResponse từ Backend .NET của bạn
-export interface LoginResponse {
-    token: string;
-    user: User; // Object user chứa id, fullName, roleId...
+export interface RefreshTokenRequest {
+    refreshToken: string;
 }
 
 export interface RegisterPayload {

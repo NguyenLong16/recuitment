@@ -1,4 +1,4 @@
-﻿namespace Recruitment.API.DTOs
+namespace Recruitment.API.DTOs
 {
     public class RegisterRequest
     {
@@ -17,8 +17,15 @@
 
     public class AuthResponse
     {
-        public string token { get; set; }
+        public string accessToken { get; set; }
+        public string refreshToken { get; set; }
         public string fullName { get; set; }
         public string role { get; set; }
     }
+
+    public class RefreshTokenRequest
+    {
+        public string refreshToken { get; set; }
+    }
 }
+

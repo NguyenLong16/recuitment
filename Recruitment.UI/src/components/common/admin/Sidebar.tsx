@@ -12,7 +12,11 @@ import {
     Star,
 } from 'lucide-react';
 
-const Sidebar = () => {
+interface SidebarProps {
+    onClose?: () => void;
+}
+
+const Sidebar = ({ onClose }: SidebarProps) => {
     const navigate = useNavigate();
     const location = useLocation();
 
@@ -66,6 +70,7 @@ const Sidebar = () => {
 
     const handleMenuClick = ({ key }: { key: string }) => {
         navigate(key);
+        onClose?.(); // Đóng Drawer trên mobile sau khi chọn menu
     };
 
     return (

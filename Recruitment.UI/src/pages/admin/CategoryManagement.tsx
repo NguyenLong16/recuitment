@@ -7,84 +7,50 @@ import useCategory from '../../hooks/useCategory';
 
 const CategoryManagement = () => {
     const {
-        categories,
-        loading,
-        deletingId,
-        submitting,
-        refetch,
-        createCategory,
-        updateCategory,
-        deleteCategory,
+        categories, loading, deletingId, submitting,
+        refetch, createCategory, updateCategory, deleteCategory,
     } = useCategory();
 
-    const [searchText, setSearchText] = useState('');
-
-    // Modal state
-    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [searchText, setSearchText]           = useState('');
+    const [isModalOpen, setIsModalOpen]         = useState(false);
     const [editingCategory, setEditingCategory] = useState<Category | null>(null);
-    const [form] = Form.useForm();
+    const [form]                                = Form.useForm();
 
-    // Mở modal Thêm mới
     const handleOpenAddModal = () => {
-        setEditingCategory(null);
-        form.resetFields();
-        setIsModalOpen(true);
+        setEditingCategory(null); form.resetFields(); setIsModalOpen(true);
     };
-
-    // Mở modal Chỉnh sửa
-    const handleOpenEditModal = (category: Category) => {
-        setEditingCategory(category);
-        form.setFieldsValue({ name: category.name });
-        setIsModalOpen(true);
+    const handleOpenEditModal = (cat: Category) => {
+        setEditingCategory(cat); form.setFieldsValue({ name: cat.name }); setIsModalOpen(true);
     };
-
-    // Đóng modal
     const handleCloseModal = () => {
-        setIsModalOpen(false);
-        setEditingCategory(null);
-        form.resetFields();
+        setIsModalOpen(false); setEditingCategory(null); form.resetFields();
     };
-
-    // Submit form (Thêm / Sửa)
     const handleSubmit = async () => {
         try {
             const values = await form.validateFields();
-            let success = false;
-
-            if (editingCategory) {
-                success = await updateCategory(editingCategory.id, { name: values.name });
-            } else {
-                success = await createCategory({ name: values.name });
-            }
-
-            if (success) {
-                handleCloseModal();
-            }
+            const success = editingCategory
+                ? await updateCategory(editingCategory.id, { name: values.name })
+                : await createCategory({ name: values.name });
+            if (success) handleCloseModal();
         } catch (error: any) {
-            // Lỗi validation form, bỏ qua
             if (error?.errorFields) return;
         }
     };
 
-    // Xoá ngành nghề
-    const handleDelete = async (id: number) => {
-        await deleteCategory(id);
-    };
-
-    // Lọc theo tên
     const filteredCategories = categories.filter((cat) =>
         cat.name.toLowerCase().includes(searchText.toLowerCase())
     );
 
-    // Cấu hình cột cho Table
+    // ── Columns ───────────────────────────────────────────────────────────────
     const columns: ColumnsType<Category> = [
         {
             title: 'STT',
             key: 'stt',
-            width: 80,
+            width: 60,
             align: 'center',
-            render: (_: any, __: Category, index: number) => (
-                <span style={{ fontWeight: 600, color: '#6366f1' }}>{index + 1}</span>
+            responsive: ['md'],               // ẩn trên sm
+            render: (_: any, __: Category, i: number) => (
+                <span className="font-semibold text-indigo-500">{i + 1}</span>
             ),
         },
         {
@@ -92,28 +58,17 @@ const CategoryManagement = () => {
             dataIndex: 'name',
             key: 'name',
             render: (name: string) => (
-                <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                    <div style={{
-                        width: 36,
-                        height: 36,
-                        borderRadius: 10,
-                        background: 'linear-gradient(135deg, #6366f1, #8b5cf6)',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        flexShrink: 0,
-                    }}>
-                        <Layers size={18} color="#fff" />
+                <div className="flex items-center gap-2 sm:gap-3">
+                    {/* Icon box — nhỏ hơn trên sm */}
+                    <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-lg sm:rounded-xl flex-shrink-0
+                                    flex items-center justify-center
+                                    bg-gradient-to-br from-indigo-500 to-purple-500">
+                        <Layers size={15} color="#fff" className="sm:w-4 sm:h-4" />
                     </div>
                     <Tag
                         color="purple"
-                        style={{
-                            fontSize: 14,
-                            padding: '4px 14px',
-                            borderRadius: 8,
-                            fontWeight: 500,
-                            border: 'none',
-                        }}
+                        className="!text-xs sm:!text-sm !font-medium !rounded-lg !border-0
+                                   !px-2 sm:!px-3.5 !py-0.5 sm:!py-1"
                     >
                         {name}
                     </Tag>
@@ -123,26 +78,16 @@ const CategoryManagement = () => {
         {
             title: 'Hành động',
             key: 'action',
-            width: 140,
+            width: 100,
             align: 'center',
             render: (_: any, record: Category) => (
                 <Space size={4}>
                     <Tooltip title="Chỉnh sửa">
                         <Button
                             type="text"
-                            icon={<Pencil size={17} />}
+                            icon={<Pencil size={15} />}
                             onClick={() => handleOpenEditModal(record)}
-                            style={{
-                                borderRadius: 10,
-                                width: 40,
-                                height: 40,
-                                display: 'flex',
-                                alignItems: 'center',
-                                justifyContent: 'center',
-                                color: '#6366f1',
-                                transition: 'all 0.2s ease',
-                            }}
-                            className="edit-action-btn"
+                            className="edit-action-btn !rounded-lg !w-9 !h-9 !flex !items-center !justify-center !text-indigo-500"
                         />
                     </Tooltip>
                     <Popconfirm
@@ -150,34 +95,21 @@ const CategoryManagement = () => {
                         description={
                             <span>
                                 Bạn có chắc muốn xoá <strong>{record.name}</strong>?
-                                <br />
-                                Hành động này không thể hoàn tác.
+                                <br />Hành động này không thể hoàn tác.
                             </span>
                         }
-                        onConfirm={() => handleDelete(record.id)}
+                        onConfirm={() => deleteCategory(record.id)}
                         okText="Xoá"
                         cancelText="Huỷ"
-                        okButtonProps={{
-                            danger: true,
-                            loading: deletingId === record.id,
-                        }}
+                        okButtonProps={{ danger: true, loading: deletingId === record.id }}
                     >
                         <Tooltip title="Xoá ngành nghề">
                             <Button
                                 type="text"
                                 danger
-                                icon={<Trash2 size={17} />}
+                                icon={<Trash2 size={15} />}
                                 loading={deletingId === record.id}
-                                style={{
-                                    borderRadius: 10,
-                                    width: 40,
-                                    height: 40,
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    justifyContent: 'center',
-                                    transition: 'all 0.2s ease',
-                                }}
-                                className="delete-action-btn"
+                                className="delete-action-btn !rounded-lg !w-9 !h-9 !flex !items-center !justify-center"
                             />
                         </Tooltip>
                     </Popconfirm>
@@ -187,117 +119,68 @@ const CategoryManagement = () => {
     ];
 
     return (
-        <div style={{ padding: '0' }}>
-            {/* Page Header */}
-            <div style={{
-                marginBottom: 28,
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                flexWrap: 'wrap',
-                gap: 16,
-            }}>
+        <div className="space-y-4 sm:space-y-5 md:space-y-6">
+
+            {/* ── Page Header ───────────────────────────────────────────────── */}
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4">
                 <div>
-                    <h1 style={{
-                        fontSize: 28,
-                        fontWeight: 700,
-                        color: '#1e293b',
-                        margin: 0,
-                        letterSpacing: '-0.02em',
-                    }}>
+                    <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-slate-800
+                                   tracking-tight leading-tight m-0">
                         Quản lý Ngành nghề
                     </h1>
-                    <p style={{
-                        color: '#94a3b8',
-                        margin: '6px 0 0 0',
-                        fontSize: 15,
-                    }}>
+                    {/* Subtitle: ẩn trên sm để tiết kiệm chỗ */}
+                    <p className="hidden sm:block text-slate-400 text-sm md:text-[15px] mt-1 m-0">
                         Quản lý các ngành nghề tuyển dụng trong hệ thống
                     </p>
                 </div>
 
-                <Space>
+                {/* Action buttons */}
+                <div className="flex items-center gap-2">
                     <Tooltip title="Làm mới danh sách">
                         <Button
-                            icon={<RefreshCw size={16} />}
+                            icon={<RefreshCw size={15} />}
                             onClick={refetch}
                             loading={loading}
-                            style={{
-                                borderRadius: 10,
-                                height: 42,
-                                display: 'flex',
-                                alignItems: 'center',
-                                gap: 6,
-                                fontWeight: 500,
-                                border: '1px solid #e2e8f0',
-                            }}
+                            size="middle"
+                            className="!rounded-xl !h-10 sm:!h-[42px] !font-medium !border-slate-200 flex items-center gap-1.5"
                         >
-                            Làm mới
+                            <span className="hidden sm:inline">Làm mới</span>
                         </Button>
                     </Tooltip>
                     <Button
                         type="primary"
-                        icon={<Plus size={18} />}
+                        icon={<Plus size={16} />}
                         onClick={handleOpenAddModal}
+                        size="middle"
+                        className="!rounded-xl !h-10 sm:!h-[42px] !font-semibold !border-0 flex items-center gap-1.5"
                         style={{
-                            borderRadius: 10,
-                            height: 42,
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: 6,
-                            fontWeight: 600,
                             background: 'linear-gradient(135deg, #6366f1, #8b5cf6)',
-                            border: 'none',
-                            boxShadow: '0 4px 14px rgba(99, 102, 241, 0.35)',
-                            paddingInline: 20,
+                            boxShadow: '0 4px 14px rgba(99,102,241,0.35)',
                         }}
                     >
-                        Thêm ngành nghề
+                        <span className="hidden sm:inline">Thêm ngành nghề</span>
+                        <span className="sm:hidden">Thêm</span>
                     </Button>
-                </Space>
+                </div>
             </div>
 
-            {/* Stats Cards */}
-            <div style={{
-                display: 'grid',
-                gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
-                gap: 16,
-                marginBottom: 24,
-            }}>
+            {/* ── Stat Card ─────────────────────────────────────────────────── */}
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4">
                 <Card
-                    style={{
-                        borderRadius: 16,
-                        border: 'none',
-                        boxShadow: '0 1px 3px rgba(0,0,0,0.04), 0 1px 2px rgba(0,0,0,0.02)',
-                    }}
-                    styles={{ body: { padding: '20px 24px' } }}
+                    className="!rounded-2xl !border-0 !shadow-sm col-span-1"
+                    styles={{ body: { padding: '16px 20px' } }}
                 >
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
-                        <div style={{
-                            width: 48,
-                            height: 48,
-                            borderRadius: 14,
-                            background: 'linear-gradient(135deg, #6366f1, #8b5cf6)',
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                        }}>
-                            <Layers size={24} color="#fff" />
+                    <div className="flex items-center gap-3 sm:gap-4">
+                        <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl flex-shrink-0
+                                        flex items-center justify-center
+                                        bg-gradient-to-br from-indigo-500 to-purple-500">
+                            <Layers size={20} color="#fff" className="sm:w-6 sm:h-6" />
                         </div>
                         <div>
-                            <div style={{
-                                fontSize: 28,
-                                fontWeight: 700,
-                                color: '#1e293b',
-                                lineHeight: 1.2,
-                            }}>
+                            <div className="text-2xl sm:text-3xl font-bold text-slate-800 leading-none">
                                 {categories.length}
                             </div>
-                            <div style={{
-                                fontSize: 13,
-                                color: '#94a3b8',
-                                fontWeight: 500,
-                            }}>
+                            <div className="text-xs sm:text-sm text-slate-400 font-medium mt-0.5">
                                 Tổng ngành nghề
                             </div>
                         </div>
@@ -305,61 +188,43 @@ const CategoryManagement = () => {
                 </Card>
             </div>
 
-            {/* Search & Table */}
+            {/* ── Search + Table Card ────────────────────────────────────────── */}
             <Card
-                style={{
-                    borderRadius: 16,
-                    border: 'none',
-                    boxShadow: '0 1px 3px rgba(0,0,0,0.04), 0 1px 2px rgba(0,0,0,0.02)',
-                    overflow: 'hidden',
-                }}
+                className="!rounded-2xl !border-0 !shadow-sm !overflow-hidden"
                 styles={{ body: { padding: 0 } }}
             >
                 {/* Search bar */}
-                <div style={{
-                    padding: '20px 24px',
-                    borderBottom: '1px solid #f1f5f9',
-                    background: '#fafbfc',
-                }}>
+                <div className="px-3 py-3 sm:px-5 sm:py-4 md:px-6 border-b border-slate-100 bg-slate-50/60">
                     <Input
                         placeholder="Tìm kiếm ngành nghề..."
-                        prefix={<Search size={16} color="#94a3b8" />}
+                        prefix={<Search size={15} color="#94a3b8" />}
                         value={searchText}
                         onChange={(e) => setSearchText(e.target.value)}
                         allowClear
-                        style={{
-                            maxWidth: 400,
-                            borderRadius: 10,
-                            height: 42,
-                            border: '1px solid #e2e8f0',
-                        }}
+                        size="middle"
+                        className="!rounded-xl !max-w-xs sm:!max-w-sm !h-10 !border-slate-200"
                     />
                 </div>
 
-                {/* Table */}
+                {/* Table — scroll ngang trên sm */}
                 <Table
                     columns={columns}
                     dataSource={filteredCategories}
                     rowKey="id"
                     loading={loading}
+                    scroll={{ x: 360 }}
                     pagination={{
                         pageSize: 10,
                         showSizeChanger: true,
                         showTotal: (total) => `Tổng ${total} ngành nghề`,
-                        style: { padding: '16px 24px', margin: 0 },
+                        style: { padding: '12px 16px', margin: 0 },
+                        simple: false,
                     }}
                     locale={{
                         emptyText: (
-                            <div style={{
-                                padding: '48px 0',
-                                textAlign: 'center',
-                            }}>
-                                <Layers size={48} color="#cbd5e1" style={{ marginBottom: 16 }} />
-                                <p style={{
-                                    color: '#94a3b8',
-                                    fontSize: 15,
-                                    margin: 0,
-                                }}>
+                            <div className="py-10 sm:py-14 text-center">
+                                <Layers size={40} color="#cbd5e1" className="mx-auto mb-3 sm:w-12 sm:h-12" />
+                                <p className="text-slate-400 text-sm sm:text-[15px] m-0">
                                     {searchText
                                         ? 'Không tìm thấy ngành nghề phù hợp'
                                         : 'Chưa có ngành nghề nào'}
@@ -370,47 +235,28 @@ const CategoryManagement = () => {
                 />
             </Card>
 
-            {/* Modal Thêm / Sửa ngành nghề */}
+            {/* ── Modal Thêm / Sửa ──────────────────────────────────────────── */}
             <Modal
                 title={
-                    <div style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: 12,
-                    }}>
-                        <div style={{
-                            width: 40,
-                            height: 40,
-                            borderRadius: 12,
-                            background: editingCategory
-                                ? 'linear-gradient(135deg, #f59e0b, #f97316)'
-                                : 'linear-gradient(135deg, #6366f1, #8b5cf6)',
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                        }}>
-                            {editingCategory
-                                ? <Pencil size={20} color="#fff" />
-                                : <Plus size={20} color="#fff" />
-                            }
+                    <div className="flex items-center gap-3">
+                        <div
+                            className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl flex items-center justify-center"
+                            style={{
+                                background: editingCategory
+                                    ? 'linear-gradient(135deg,#f59e0b,#f97316)'
+                                    : 'linear-gradient(135deg,#6366f1,#8b5cf6)',
+                            }}
+                        >
+                            {editingCategory ? <Pencil size={18} color="#fff" /> : <Plus size={18} color="#fff" />}
                         </div>
                         <div>
-                            <div style={{
-                                fontSize: 17,
-                                fontWeight: 600,
-                                color: '#1e293b',
-                            }}>
+                            <div className="text-sm sm:text-base font-semibold text-slate-800 leading-tight">
                                 {editingCategory ? 'Chỉnh sửa ngành nghề' : 'Thêm ngành nghề mới'}
                             </div>
-                            <div style={{
-                                fontSize: 13,
-                                color: '#94a3b8',
-                                fontWeight: 400,
-                            }}>
+                            <div className="text-xs text-slate-400 font-normal leading-tight">
                                 {editingCategory
                                     ? `Đang chỉnh sửa: ${editingCategory.name}`
-                                    : 'Nhập tên ngành nghề mới để thêm vào hệ thống'
-                                }
+                                    : 'Nhập tên ngành nghề mới để thêm vào hệ thống'}
                             </div>
                         </div>
                     </div>
@@ -420,67 +266,35 @@ const CategoryManagement = () => {
                 footer={null}
                 destroyOnClose
                 centered
-                width={480}
+                /* sm: full width gần như; md+: 480px */
+                width="min(480px, calc(100vw - 32px))"
                 styles={{
-                    header: {
-                        padding: '24px 24px 16px',
-                        borderBottom: '1px solid #f1f5f9',
-                    },
-                    body: {
-                        padding: '24px',
-                    },
+                    header: { padding: '20px 20px 14px', borderBottom: '1px solid #f1f5f9' },
+                    body:   { padding: '20px' },
                 }}
             >
-                <Form
-                    form={form}
-                    layout="vertical"
-                    onFinish={handleSubmit}
-                    autoComplete="off"
-                >
+                <Form form={form} layout="vertical" onFinish={handleSubmit} autoComplete="off">
                     <Form.Item
-                        label={
-                            <span style={{
-                                fontWeight: 600,
-                                color: '#374151',
-                                fontSize: 14,
-                            }}>
-                                Tên ngành nghề
-                            </span>
-                        }
+                        label={<span className="font-semibold text-gray-700 text-sm">Tên ngành nghề</span>}
                         name="name"
                         rules={[
                             { required: true, message: 'Vui lòng nhập tên ngành nghề!' },
-                            { min: 2, message: 'Tên ngành nghề phải có ít nhất 2 ký tự!' },
-                            { max: 100, message: 'Tên ngành nghề không được quá 100 ký tự!' },
+                            { min: 2,         message: 'Tên ngành nghề phải có ít nhất 2 ký tự!' },
+                            { max: 100,       message: 'Tên ngành nghề không được quá 100 ký tự!' },
                         ]}
                     >
                         <Input
                             placeholder="Ví dụ: Frontend Developer, Data Analyst..."
                             size="large"
-                            prefix={<Layers size={16} color="#94a3b8" />}
-                            style={{
-                                borderRadius: 10,
-                                height: 46,
-                                border: '1px solid #e2e8f0',
-                            }}
+                            prefix={<Layers size={15} color="#94a3b8" />}
+                            className="!rounded-xl !h-11 !border-slate-200"
                         />
                     </Form.Item>
 
-                    <div style={{
-                        display: 'flex',
-                        justifyContent: 'flex-end',
-                        gap: 10,
-                        marginTop: 8,
-                    }}>
+                    <div className="flex justify-end gap-2 mt-2">
                         <Button
                             onClick={handleCloseModal}
-                            style={{
-                                borderRadius: 10,
-                                height: 42,
-                                paddingInline: 20,
-                                fontWeight: 500,
-                                border: '1px solid #e2e8f0',
-                            }}
+                            className="!rounded-xl !h-10 !font-medium !border-slate-200 !px-5"
                         >
                             Huỷ
                         </Button>
@@ -488,18 +302,14 @@ const CategoryManagement = () => {
                             type="primary"
                             htmlType="submit"
                             loading={submitting}
+                            className="!rounded-xl !h-10 !font-semibold !border-0 !px-6"
                             style={{
-                                borderRadius: 10,
-                                height: 42,
-                                paddingInline: 24,
-                                fontWeight: 600,
                                 background: editingCategory
-                                    ? 'linear-gradient(135deg, #f59e0b, #f97316)'
-                                    : 'linear-gradient(135deg, #6366f1, #8b5cf6)',
-                                border: 'none',
+                                    ? 'linear-gradient(135deg,#f59e0b,#f97316)'
+                                    : 'linear-gradient(135deg,#6366f1,#8b5cf6)',
                                 boxShadow: editingCategory
-                                    ? '0 4px 14px rgba(245, 158, 11, 0.35)'
-                                    : '0 4px 14px rgba(99, 102, 241, 0.35)',
+                                    ? '0 4px 14px rgba(245,158,11,0.35)'
+                                    : '0 4px 14px rgba(99,102,241,0.35)',
                             }}
                         >
                             {editingCategory ? 'Cập nhật' : 'Thêm mới'}
@@ -510,38 +320,21 @@ const CategoryManagement = () => {
 
             {/* Custom CSS */}
             <style>{`
-                .edit-action-btn:hover {
-                    background: #eef2ff !important;
-                    transform: scale(1.05);
-                }
-                .delete-action-btn:hover {
-                    background: #fef2f2 !important;
-                    transform: scale(1.05);
-                }
+                .edit-action-btn:hover   { background: #eef2ff !important; transform: scale(1.05); }
+                .delete-action-btn:hover { background: #fef2f2 !important; transform: scale(1.05); }
                 .ant-table-thead > tr > th {
                     background: #f8fafc !important;
                     font-weight: 600 !important;
                     color: #475569 !important;
-                    font-size: 13px !important;
+                    font-size: 12px !important;
                     text-transform: uppercase;
                     letter-spacing: 0.05em;
                     border-bottom: 1px solid #e2e8f0 !important;
-                    padding: 14px 16px !important;
+                    padding: 12px 14px !important;
                 }
-                .ant-table-tbody > tr > td {
-                    padding: 14px 16px !important;
-                    border-bottom: 1px solid #f1f5f9 !important;
-                }
-                .ant-table-tbody > tr:hover > td {
-                    background: #f8fafc !important;
-                }
-                .ant-table-tbody > tr {
-                    transition: all 0.15s ease;
-                }
-                .ant-modal-content {
-                    border-radius: 16px !important;
-                    overflow: hidden;
-                }
+                .ant-table-tbody > tr > td { padding: 12px 14px !important; border-bottom: 1px solid #f1f5f9 !important; }
+                .ant-table-tbody > tr:hover > td { background: #f8fafc !important; }
+                .ant-modal-content { border-radius: 16px !important; overflow: hidden; }
             `}</style>
         </div>
     );

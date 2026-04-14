@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using Recruitment.API.Models;
 
 namespace Recruitment.API.Data
@@ -22,6 +22,7 @@ namespace Recruitment.API.Data
         public DbSet<SavedJob> SavedJobs { get; set; }
         public DbSet<Comment> Comments { get; set; }
         public DbSet<Review> Reviews { get; set; }
+        public DbSet<UserRefreshToken> UserRefreshTokens { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
