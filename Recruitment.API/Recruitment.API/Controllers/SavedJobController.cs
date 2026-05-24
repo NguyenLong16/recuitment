@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Recruitment.API.Services.Interfaces;
@@ -33,6 +33,22 @@ namespace Recruitment.API.Controllers
                 saved = isSaved,
                 message = isSaved ? "Saved job" : "Unsaved job"
             });
+        }
+
+        // GET: api/saved-jobs
+        [HttpGet]
+        public async Task<IActionResult> GetMySavedJobs()
+        {
+            try
+            {
+                var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
+                var savedJobs = await _savedJobService.GetSavedJobsAsync(userId);
+                return Ok(savedJobs);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
         }
     }
 }

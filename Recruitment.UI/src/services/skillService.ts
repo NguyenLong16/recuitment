@@ -2,6 +2,11 @@ import axiosClient from "./axiosClient";
 import { Skill, CreateSkillRequest, UpdateSkillRequest } from "../types/skill";
 
 const SkillService = {
+    // GET: Lấy danh sách tất cả kỹ năng (Public - cho ứng viên chọn)
+    getAll: () => {
+        return axiosClient.get<Skill[]>('/Skill');
+    },
+
     // GET: Lấy danh sách tất cả kỹ năng (Admin)
     getAllSkills: () => {
         return axiosClient.get<Skill[]>('/Skill/admin');

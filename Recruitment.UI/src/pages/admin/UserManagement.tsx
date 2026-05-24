@@ -7,18 +7,18 @@ import useAdminUser from '../../hooks/useAdminUser';
 import dayjs from 'dayjs';
 
 const ROLE_OPTIONS = [
-    { label: 'Tất cả',        value: 0 },
-    { label: 'Admin',         value: 1 },
+    { label: 'Tất cả', value: 0 },
+    { label: 'Admin', value: 1 },
     { label: 'Employer (HR)', value: 2 },
-    { label: 'Candidate',     value: 3 },
+    { label: 'Candidate', value: 3 },
 ];
 
 const getRoleTag = (roleName: string) => {
     switch (roleName) {
-        case 'Admin':     return { color: '#f43f5e', bg: '#fff1f2', label: 'Admin' };
-        case 'Employer':  return { color: '#f59e0b', bg: '#fffbeb', label: 'Employer' };
+        case 'Admin': return { color: '#f43f5e', bg: '#fff1f2', label: 'Admin' };
+        case 'Employer': return { color: '#f59e0b', bg: '#fffbeb', label: 'Employer' };
         case 'Candidate': return { color: '#3b82f6', bg: '#eff6ff', label: 'Candidate' };
-        default:          return { color: '#64748b', bg: '#f1f5f9', label: roleName };
+        default: return { color: '#64748b', bg: '#f1f5f9', label: roleName };
     }
 };
 
@@ -48,19 +48,19 @@ const StatCard = ({
 const UserManagement = () => {
     const { users, loading, fetchUsers, toggleStatus } = useAdminUser();
     const [keyword, setKeyword] = useState('');
-    const [roleId, setRoleId]   = useState<number>(0);
+    const [roleId, setRoleId] = useState<number>(0);
 
     useEffect(() => {
         const filter: any = {};
         if (keyword.trim()) filter.keyword = keyword.trim();
-        if (roleId > 0)    filter.roleId = roleId;
+        if (roleId > 0) filter.roleId = roleId;
         fetchUsers(Object.keys(filter).length > 0 ? filter : undefined);
     }, [roleId]);
 
     const handleSearch = () => {
         const filter: any = {};
         if (keyword.trim()) filter.keyword = keyword.trim();
-        if (roleId > 0)    filter.roleId = roleId;
+        if (roleId > 0) filter.roleId = roleId;
         fetchUsers(Object.keys(filter).length > 0 ? filter : undefined);
     };
 
@@ -170,7 +170,7 @@ const UserManagement = () => {
             width: 110,
             align: 'center',
             render: (isActive: boolean) => {
-                const isUserActive = !isActive;
+                const isUserActive = isActive;
                 return (
                     <span
                         className="inline-flex items-center gap-1.5 px-2 sm:px-3 py-1 rounded-full
@@ -181,7 +181,7 @@ const UserManagement = () => {
                         }}
                     >
                         <span className="w-1.5 h-1.5 rounded-full flex-shrink-0"
-                              style={{ background: isUserActive ? '#10b981' : '#ef4444' }} />
+                            style={{ background: isUserActive ? '#10b981' : '#ef4444' }} />
                         {isUserActive ? 'Hoạt động' : 'Đã khoá'}
                     </span>
                 );
@@ -194,7 +194,7 @@ const UserManagement = () => {
             align: 'center',
             render: (_: any, record: AdminUser) => {
                 const isUserActive = !record.isActive;
-                const isAdmin      = record.roleName === 'Admin';
+                const isAdmin = record.roleName === 'Admin';
 
                 return (
                     <Popconfirm

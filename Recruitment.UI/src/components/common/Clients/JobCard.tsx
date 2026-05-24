@@ -1,20 +1,23 @@
 import { message } from "antd";
 import { JobCardProps } from "../../../types/application";
 import dayjs from "dayjs";
-import { Clock, DollarSign, MapPin, Flame, User, Bookmark } from 'lucide-react';
+import { Clock, DollarSign, MapPin, Flame, User, Bookmark, Briefcase, Star, MessageCircle } from 'lucide-react';
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { useSelector } from "react-redux";
-import { RootState } from "../../../redux/store";
+import { useDispatch, useSelector } from "react-redux";
+import { AppDispatch, RootState } from "../../../redux/store";
 import savedJobService from "../../../services/savedJobService";
+import { addSavedId, removeSavedId } from "../../../redux/slices/savedJobSlice";
 
 const PLACEHOLDER = 'https://via.placeholder.com/80x80?text=Logo';
 
 const JobCard = ({ job }: JobCardProps) => {
     const navigate = useNavigate();
+    const dispatch = useDispatch<AppDispatch>();
     const user = useSelector((state: RootState) => state.auth.user);
+    const savedIds = useSelector((state: RootState) => state.savedJobs.ids);
 
-    const [isSaved, setIsSaved] = useState(job.isSaved || false);
+    const isSaved = savedIds.includes(job.id);
     const [saving, setSaving] = useState(false);
 
     const handleToggleSave = async (e: React.MouseEvent) => {
@@ -23,7 +26,11 @@ const JobCard = ({ job }: JobCardProps) => {
         setSaving(true);
         try {
             const response = await savedJobService.toggleSavedJob(job.id);
-            setIsSaved(!isSaved);
+            if (isSaved) {
+                dispatch(removeSavedId(job.id));
+            } else {
+                dispatch(addSavedId(job.id));
+            }
             message.success(response.data.message);
         } catch {
             message.error('Có lỗi xảy ra');
@@ -46,9 +53,21 @@ const JobCard = ({ job }: JobCardProps) => {
 
     const isNew = dayjs().diff(dayjs(job.createdDate), 'day') <= 3;
     const isHot = (job.salaryMin && job.salaryMin >= 20_000_000) ||
-                  (job.salaryMax && job.salaryMax >= 30_000_000);
+        (job.salaryMax && job.salaryMax >= 30_000_000);
 
-    const daysLeft = dayjs(job.deadline).diff(dayjs(), 'day');
+    const deadlineValid = job.deadline && dayjs(job.deadline).isValid();
+    const daysLeft = deadlineValid ? dayjs(job.deadline).diff(dayjs(), 'day') : null;
+
+    const jobTypeLabel = (type: string) => {
+        const map: Record<string, { label: string; bg: string; text: string }> = {
+            FullTime: { label: 'Toàn thời gian', bg: 'bg-blue-50', text: 'text-blue-600' },
+            PartTime: { label: 'Bán thời gian', bg: 'bg-purple-50', text: 'text-purple-600' },
+            Remote: { label: 'Remote', bg: 'bg-indigo-50', text: 'text-indigo-600' },
+            Internship: { label: 'Thực tập', bg: 'bg-pink-50', text: 'text-pink-600' },
+            Contract: { label: 'Hợp đồng', bg: 'bg-teal-50', text: 'text-teal-600' },
+        };
+        return map[type] ?? { label: type, bg: 'bg-gray-100', text: 'text-gray-600' };
+    };
 
     return (
         <div
@@ -137,6 +156,18 @@ const JobCard = ({ job }: JobCardProps) => {
                             <span className="max-w-[80px] sm:max-w-none truncate">{job.locationName}</span>
                         </span>
 
+                        {/* Hình thức làm việc */}
+                        {job.jobType && (() => {
+                            const jt = jobTypeLabel(job.jobType);
+                            return (
+                                <span className={`inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded
+                                                  ${jt.bg} ${jt.text} text-[10px] sm:text-xs font-medium`}>
+                                    <Briefcase className="w-2.5 h-2.5 flex-shrink-0" />
+                                    {jt.label}
+                                </span>
+                            );
+                        })()}
+
                         {/* Ngành — ẩn trên sm */}
                         {job.categoryName && (
                             <span className="hidden sm:inline-flex items-center px-1.5 py-0.5 rounded
@@ -145,6 +176,24 @@ const JobCard = ({ job }: JobCardProps) => {
                             </span>
                         )}
                     </div>
+
+                    {/* Skills — hiện tối đa 3 tag */}
+                    {job.skillNames && job.skillNames.length > 0 && (
+                        <div className="flex flex-wrap gap-1 mt-1.5">
+                            {job.skillNames.slice(0, 3).map((skill, idx) => (
+                                <span key={idx} className="inline-flex items-center px-1.5 py-0.5 rounded
+                                                            bg-cyan-50 text-cyan-700 text-[10px] sm:text-xs">
+                                    {skill}
+                                </span>
+                            ))}
+                            {job.skillNames.length > 3 && (
+                                <span className="inline-flex items-center px-1.5 py-0.5 rounded
+                                                  bg-gray-100 text-gray-500 text-[10px] sm:text-xs">
+                                    +{job.skillNames.length - 3}
+                                </span>
+                            )}
+                        </div>
+                    )}
                 </div>
             </div>
 
@@ -168,13 +217,34 @@ const JobCard = ({ job }: JobCardProps) => {
                         </a>
                     )}
 
+                    {/* Rating + comments */}
+                    {(job.averageRating > 0 || job.totalComments > 0) && (
+                        <span className="inline-flex items-center gap-2 text-[10px] sm:text-xs text-gray-500">
+                            {job.averageRating > 0 && (
+                                <span className="inline-flex items-center gap-0.5 text-amber-500">
+                                    <Star className="w-3 h-3 fill-amber-400 stroke-amber-400" />
+                                    <span className="font-medium text-gray-700">{job.averageRating.toFixed(1)}</span>
+                                    <span className="text-gray-400">({job.totalReviews})</span>
+                                </span>
+                            )}
+                            {job.totalComments > 0 && (
+                                <span className="inline-flex items-center gap-0.5">
+                                    <MessageCircle className="w-3 h-3 flex-shrink-0" />
+                                    {job.totalComments}
+                                </span>
+                            )}
+                        </span>
+                    )}
+
                     {/* Deadline */}
-                    <span className={`inline-flex items-center gap-1
-                                      text-[10px] sm:text-xs font-medium
-                                      ${daysLeft <= 3 ? 'text-red-500' : 'text-gray-500'}`}>
-                        <Clock className="w-3 h-3 flex-shrink-0" />
-                        {daysLeft > 0 ? `Còn ${daysLeft} ngày` : 'Đã hết hạn'}
-                    </span>
+                    {daysLeft !== null && (
+                        <span className={`inline-flex items-center gap-1
+                                          text-[10px] sm:text-xs font-medium
+                                          ${daysLeft <= 3 ? 'text-red-500' : 'text-gray-500'}`}>
+                            <Clock className="w-3 h-3 flex-shrink-0" />
+                            {daysLeft > 0 ? `Còn ${daysLeft} ngày` : 'Đã hết hạn'}
+                        </span>
+                    )}
                 </div>
 
                 {/* Bookmark button */}
@@ -184,8 +254,8 @@ const JobCard = ({ job }: JobCardProps) => {
                     aria-label={isSaved ? 'Bỏ lưu' : 'Lưu việc làm'}
                     className={`p-1.5 rounded-lg transition-all
                                 ${isSaved
-                                    ? 'text-emerald-500 bg-emerald-50'
-                                    : 'text-gray-400 hover:text-emerald-500 hover:bg-emerald-50'}
+                            ? 'text-emerald-500 bg-emerald-50'
+                            : 'text-gray-400 hover:text-emerald-500 hover:bg-emerald-50'}
                                 ${saving ? 'opacity-50 pointer-events-none' : ''}`}
                 >
                     <Bookmark

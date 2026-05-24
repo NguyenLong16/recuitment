@@ -1,24 +1,33 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
     Avatar,
     Button,
     Card,
     Col,
+    DatePicker,
     Divider,
     Form,
     Input,
+    message,
     Modal,
+    Popconfirm,
     Row,
+    Select,
     Skeleton,
     Space,
+    Spin,
     Tag,
     Typography,
     Upload,
 } from "antd";
+import dayjs from "dayjs";
 import {
+    BookOutlined,
     BuildOutlined,
     CameraOutlined,
     CheckCircleOutlined,
+    CloseCircleOutlined,
+    DeleteOutlined,
     EditOutlined,
     EnvironmentOutlined,
     FileTextOutlined,
@@ -27,15 +36,25 @@ import {
     LinkedinOutlined,
     MailOutlined,
     PhoneOutlined,
+    PlusOutlined,
     SaveOutlined,
     TeamOutlined,
+    ToolOutlined,
+    TrophyOutlined,
     UploadOutlined,
 } from "@ant-design/icons";
 import useMyProfile from "../../hooks/useMyProfile";
 
 import { Role } from "../../types/auth";
 import { useAppSelector } from "../../hooks/hook";
-import { UpdateProfileRequest } from "../../types/profile";
+import { EducationDto, ExperienceDto, UpdateProfileRequest, UserSkillResponse } from "../../types/profile";
+import { Skill } from "../../types/skill";
+import SkillsSection from "../../components/common/Clients/SkillsSection";
+import JobSuggestions from "../../components/common/Clients/JobSuggestions";
+import UserSkillService from "../../services/userSkillService";
+import SkillService from "../../services/skillService";
+import EducationService from "../../services/educationService";
+import ExperienceService from "../../services/experienceService";
 
 const { Title, Text, Paragraph } = Typography;
 const { TextArea } = Input;
@@ -46,64 +65,265 @@ const MyProfilePage = () => {
     const { user } = useAppSelector((state) => state.auth);
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
     const [form] = Form.useForm();
-    
+
     // File states
     const [avatarFile, setAvatarFile] = useState<File | null>(null);
     const [coverFile, setCoverFile] = useState<File | null>(null);
     const [cvFile, setCvFile] = useState<File | null>(null);
-    
+
     // Preview states
     const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
     const [coverPreview, setCoverPreview] = useState<string | null>(null);
     const isCandidate = user?.role === Role.Candidate;
+
+    // Page-level live state (updated immediately when modal changes skills/edu/exp)
+    const [pageSkills, setPageSkills] = useState<UserSkillResponse[]>([]);
+    const [pageEducations, setPageEducations] = useState<EducationDto[]>([]);
+    const [pageExperiences, setPageExperiences] = useState<ExperienceDto[]>([]);
+
+    // Sync from profile on load / profile update
+    useEffect(() => {
+        if (profile) {
+            setPageSkills(profile.skills ?? []);
+            setPageEducations(profile.educations ?? []);
+            setPageExperiences(profile.experiences ?? []);
+        }
+    }, [profile]);
+
+    // Skills in modal
+    const [allSkills, setAllSkills] = useState<Skill[]>([]);
+    const [selectedSkillId, setSelectedSkillId] = useState<number | null>(null);
+    const [addingSkill, setAddingSkill] = useState(false);
+    const [removingSkillId, setRemovingSkillId] = useState<number | null>(null);
+
+    // Education in modal
+    const [showAddEdu, setShowAddEdu] = useState(false);
+    const [savingEdu, setSavingEdu] = useState(false);
+    const [deletingEduId, setDeletingEduId] = useState<number | null>(null);
+    const [newEdu, setNewEdu] = useState({ schoolName: '', major: '', startDate: '', endDate: '' });
+    const [editingEduId, setEditingEduId] = useState<number | null>(null);
+    const [editEduData, setEditEduData] = useState({ schoolName: '', major: '', startDate: '', endDate: '' });
+    const [updatingEduId, setUpdatingEduId] = useState<number | null>(null);
+
+    // Experience in modal
+    const [showAddExp, setShowAddExp] = useState(false);
+    const [savingExp, setSavingExp] = useState(false);
+    const [deletingExpId, setDeletingExpId] = useState<number | null>(null);
+    const [newExp, setNewExp] = useState({ companyName: '', position: '', description: '', startDate: '', endDate: '' });
+    const [editingExpId, setEditingExpId] = useState<number | null>(null);
+    const [editExpData, setEditExpData] = useState({ companyName: '', position: '', description: '', startDate: '', endDate: '' });
+    const [updatingExpId, setUpdatingExpId] = useState<number | null>(null);
 
     // Helper function to build image URL
     const buildImageUrl = (url?: string) => {
         if (!url) return undefined;
         return url.startsWith("http") ? url : `https://localhost:7016${url}`;
     };
-    
+
     const avatarUrl = avatarPreview || buildImageUrl(profile?.avatarUrl);
     const coverUrl =
         coverPreview ||
         buildImageUrl(profile?.coverImageUrl) ||
         "https://via.placeholder.com/1200x300?text=Cover+Image";
     const companyLogoUrl = buildImageUrl(profile?.company?.logoUrl);
-    
+
+    // Skills handlers in modal
+    const handleModalAddSkill = async () => {
+        if (!selectedSkillId) return;
+        setAddingSkill(true);
+        try {
+            await UserSkillService.addSkill(selectedSkillId);
+            const res = await UserSkillService.getMySkills();
+            setPageSkills(res.data);
+            setSelectedSkillId(null);
+        } catch (err: any) {
+            message.error(err?.response?.data?.message || 'Thêm kỹ năng thất bại');
+        } finally {
+            setAddingSkill(false);
+        }
+    };
+
+    const handleModalRemoveSkill = async (skillId: number) => {
+        setRemovingSkillId(skillId);
+        try {
+            await UserSkillService.removeSkill(skillId);
+            setPageSkills(prev => prev.filter(s => s.skillId !== skillId));
+        } catch (err: any) {
+            message.error(err?.response?.data?.message || 'Xóa kỹ năng thất bại');
+        } finally {
+            setRemovingSkillId(null);
+        }
+    };
+
+    // Education handlers in modal
+    const handleAddEducation = async () => {
+        if (!newEdu.schoolName || !newEdu.major || !newEdu.startDate) {
+            message.warning('Vui lòng điền đầy đủ thông tin học vấn');
+            return;
+        }
+        setSavingEdu(true);
+        try {
+            const res = await EducationService.add({
+                schoolName: newEdu.schoolName,
+                major: newEdu.major,
+                startDate: newEdu.startDate,
+                endDate: newEdu.endDate || undefined,
+            });
+            setPageEducations(prev => [...prev, res.data]);
+            setNewEdu({ schoolName: '', major: '', startDate: '', endDate: '' });
+            setShowAddEdu(false);
+            message.success('Thêm học vấn thành công');
+        } catch (err: any) {
+            message.error(err?.response?.data?.message || 'Thêm học vấn thất bại');
+        } finally {
+            setSavingEdu(false);
+        }
+    };
+
+    const handleDeleteEducation = async (id: number) => {
+        setDeletingEduId(id);
+        try {
+            await EducationService.delete(id);
+            setPageEducations(prev => prev.filter(e => e.id !== id));
+            message.success('Đã xóa học vấn');
+        } catch (err: any) {
+            message.error(err?.response?.data?.message || 'Xóa học vấn thất bại');
+        } finally {
+            setDeletingEduId(null);
+        }
+    };
+
+    // Experience handlers in modal
+    const handleAddExperience = async () => {
+        if (!newExp.companyName || !newExp.position || !newExp.startDate) {
+            message.warning('Vui lòng điền đầy đủ thông tin kinh nghiệm');
+            return;
+        }
+        setSavingExp(true);
+        try {
+            const res = await ExperienceService.add({
+                companyName: newExp.companyName,
+                position: newExp.position,
+                description: newExp.description || undefined,
+                startDate: newExp.startDate,
+                endDate: newExp.endDate || undefined,
+            });
+            setPageExperiences(prev => [...prev, res.data]);
+            setNewExp({ companyName: '', position: '', description: '', startDate: '', endDate: '' });
+            setShowAddExp(false);
+            message.success('Thêm kinh nghiệm thành công');
+        } catch (err: any) {
+            message.error(err?.response?.data?.message || 'Thêm kinh nghiệm thất bại');
+        } finally {
+            setSavingExp(false);
+        }
+    };
+
+    const handleDeleteExperience = async (id: number) => {
+        setDeletingExpId(id);
+        try {
+            await ExperienceService.delete(id);
+            setPageExperiences(prev => prev.filter(e => e.id !== id));
+            message.success('Đã xóa kinh nghiệm');
+        } catch (err: any) {
+            message.error(err?.response?.data?.message || 'Xóa kinh nghiệm thất bại');
+        } finally {
+            setDeletingExpId(null);
+        }
+    };
+
+    const handleUpdateEducation = async () => {
+        if (!editingEduId || !editEduData.schoolName || !editEduData.major || !editEduData.startDate) {
+            message.warning('Vui lòng điền đầy đủ thông tin học vấn');
+            return;
+        }
+        setUpdatingEduId(editingEduId);
+        try {
+            const res = await EducationService.update(editingEduId, {
+                schoolName: editEduData.schoolName,
+                major: editEduData.major,
+                startDate: editEduData.startDate,
+                endDate: editEduData.endDate || undefined,
+            });
+            setPageEducations(prev => prev.map(e => e.id === editingEduId ? res.data : e));
+            setEditingEduId(null);
+            message.success('Cập nhật học vấn thành công');
+        } catch (err: any) {
+            message.error(err?.response?.data?.message || 'Cập nhật học vấn thất bại');
+        } finally {
+            setUpdatingEduId(null);
+        }
+    };
+
+    const handleUpdateExperience = async () => {
+        if (!editingExpId || !editExpData.companyName || !editExpData.position || !editExpData.startDate) {
+            message.warning('Vui lòng điền đầy đủ thông tin kinh nghiệm');
+            return;
+        }
+        setUpdatingExpId(editingExpId);
+        try {
+            const res = await ExperienceService.update(editingExpId, {
+                companyName: editExpData.companyName,
+                position: editExpData.position,
+                description: editExpData.description || undefined,
+                startDate: editExpData.startDate,
+                endDate: editExpData.endDate || undefined,
+            });
+            setPageExperiences(prev => prev.map(e => e.id === editingExpId ? res.data : e));
+            setEditingExpId(null);
+            message.success('Cập nhật kinh nghiệm thành công');
+        } catch (err: any) {
+            message.error(err?.response?.data?.message || 'Cập nhật kinh nghiệm thất bại');
+        } finally {
+            setUpdatingExpId(null);
+        }
+    };
+
     // Open edit modal
     const handleOpenEdit = () => {
         form.setFieldsValue({
-            fullName:          profile?.fullName || "",
-            phoneNumber:       profile?.phoneNumber || "",
+            fullName: profile?.fullName || "",
+            phoneNumber: profile?.phoneNumber || "",
             professionalTitle: profile?.professionalTitle || "",
-            bio:               profile?.bio || "",
-            address:           profile?.address || "",
-            websiteUrl:        profile?.websiteUrl || "",
-            linkedInUrl:       profile?.linkedInUrl || "",
-            gitHubUrl:         profile?.gitHubUrl || "",
+            bio: profile?.bio || "",
+            address: profile?.address || "",
+            websiteUrl: profile?.websiteUrl || "",
+            linkedInUrl: profile?.linkedInUrl || "",
+            gitHubUrl: profile?.gitHubUrl || "",
         });
         setAvatarFile(null);
         setCoverFile(null);
         setCvFile(null);
         setAvatarPreview(null);
         setCoverPreview(null);
+        setShowAddEdu(false);
+        setShowAddExp(false);
+        setNewEdu({ schoolName: '', major: '', startDate: '', endDate: '' });
+        setNewExp({ companyName: '', position: '', description: '', startDate: '', endDate: '' });
+        setEditingEduId(null);
+        setEditingExpId(null);
+        setSelectedSkillId(null);
+        // Load all skills for dropdown if not yet loaded
+        if (allSkills.length === 0) {
+            SkillService.getAll().then(res => setAllSkills(res.data)).catch(() => { });
+        }
         setIsEditModalOpen(true);
     };
 
     // Handle form submit
     const handleSubmit = async (values: any) => {
         const payload: UpdateProfileRequest = {
-            fullName:          values.fullName,
-            phoneNumber:       values.phoneNumber || '',
+            fullName: values.fullName,
+            phoneNumber: values.phoneNumber || '',
             professionalTitle: values.professionalTitle || '',
-            bio:               values.bio || '',
-            address:           values.address || '',
-            websiteUrl:        values.websiteUrl || '',
-            linkedInUrl:       values.linkedInUrl || '',
-            gitHubUrl:         values.gitHubUrl || '',
-            avatarFile:        avatarFile ?? undefined,
-            coverFile:         coverFile ?? undefined,
-            cvFile:            cvFile ?? undefined,
+            bio: values.bio || '',
+            address: values.address || '',
+            websiteUrl: values.websiteUrl || '',
+            linkedInUrl: values.linkedInUrl || '',
+            gitHubUrl: values.gitHubUrl || '',
+            avatarFile: avatarFile ?? undefined,
+            coverFile: coverFile ?? undefined,
+            cvFile: cvFile ?? undefined,
         };
 
         const success = await updateProfile(payload);
@@ -126,7 +346,7 @@ const MyProfilePage = () => {
             </div>
         );
     }
-    
+
     if (!profile) {
         return (
             <div className="min-h-screen bg-gray-50 flex items-center justify-center">
@@ -147,7 +367,7 @@ const MyProfilePage = () => {
             >
                 <div className="absolute inset-0 bg-black/25"></div>
             </div>
-            
+
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10" style={{ marginTop: 'calc(-4rem - 3vw)' }}>
                 {/* ── Profile Header Card ────────────────────────────────────── */}
                 <Card
@@ -172,7 +392,7 @@ const MyProfilePage = () => {
                                     </div>
                                 </div>
                             </div>
-                            
+
                             {/* Info */}
                             <div className="flex-1 w-full">
                                 <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 lg:gap-6">
@@ -236,7 +456,7 @@ const MyProfilePage = () => {
                         </div>
                     </div>
                 </Card>
-                
+
                 <Row gutter={[24, 24]}>
                     {/* ==================== LEFT COLUMN - Contact Info ==================== */}
                     <Col xs={24} lg={8} xl={7}>
@@ -289,7 +509,7 @@ const MyProfilePage = () => {
                                         </div>
                                     </div>
                                 )}
-                                
+
                                 {/* Social Links */}
                                 {(profile.websiteUrl || profile.linkedInUrl || profile.gitHubUrl) && (
                                     <>
@@ -426,11 +646,11 @@ const MyProfilePage = () => {
                             </Card>
                         )}
                     </Col>
-                    
+
                     {/* ==================== RIGHT MAIN CONTENT ==================== */}
                     <Col xs={24} lg={16} xl={17}>
                         {/* Education - Only for Candidate */}
-                        {isCandidate && profile.educations && profile.educations.length > 0 && (
+                        {isCandidate && pageEducations.length > 0 && (
                             <Card
                                 title={
                                     <span className="text-base sm:text-lg font-bold text-gray-900 flex items-center gap-2">
@@ -442,7 +662,7 @@ const MyProfilePage = () => {
                                 styles={{ body: { padding: '16px sm:24px' } as any }}
                             >
                                 <Space direction="vertical" size={16} className="w-full">
-                                    {profile.educations.map((edu) => (
+                                    {pageEducations.map((edu) => (
                                         <div key={edu.id} className="border-l-[3px] sm:border-l-4 border-[#00B14F] pl-4 sm:pl-6 py-3 sm:py-4 hover:bg-green-50 rounded-r-xl transition-colors duration-200">
                                             <Title level={5} className="!m-0 !mb-0.5 sm:!mb-1 text-sm sm:text-base font-bold text-gray-900">
                                                 {edu.schoolName}
@@ -460,7 +680,7 @@ const MyProfilePage = () => {
                         )}
 
                         {/* Experience - Only for Candidate */}
-                        {isCandidate && profile.experiences && profile.experiences.length > 0 && (
+                        {isCandidate && pageExperiences.length > 0 && (
                             <Card
                                 title={
                                     <span className="text-base sm:text-lg font-bold text-gray-900 flex items-center gap-2">
@@ -472,7 +692,7 @@ const MyProfilePage = () => {
                                 styles={{ body: { padding: '16px sm:24px' } as any }}
                             >
                                 <Space direction="vertical" size={16} className="w-full">
-                                    {profile.experiences.map((exp) => (
+                                    {pageExperiences.map((exp) => (
                                         <div key={exp.id} className="border-l-[3px] sm:border-l-4 border-blue-500 pl-4 sm:pl-6 py-3 sm:py-4 hover:bg-blue-50 rounded-r-xl transition-colors duration-200">
                                             <Title level={5} className="!m-0 !mb-0.5 sm:!mb-1 text-sm sm:text-base font-bold text-gray-900">
                                                 {exp.position}
@@ -495,45 +715,57 @@ const MyProfilePage = () => {
                         )}
 
                         {/* Posted Jobs - Only for HR */}
-                        {!isCandidate && profile.postedJobs && profile.postedJobs.length > 0 && (
-                            <Card
-                                title={
-                                    <div className="flex items-center justify-between w-full">
-                                        <span className="text-base sm:text-lg font-bold text-gray-900 flex items-center gap-2">
-                                            <span className="text-xl sm:text-2xl">💼</span>
-                                            <span>Việc làm đã đăng</span>
-                                        </span>
-                                        <Tag color={PRIMARY_COLOR} className="!m-0 !px-2 sm:!px-3 !py-0.5 sm:!py-1 text-[11px] sm:text-[13px] font-semibold">
-                                            {profile.postedJobs.length} tin
+                        {!isCandidate && profile.postedJobs && profile.postedJobs.length > 0 && (<Card
+                            title={
+                                <div className="flex items-center justify-between w-full">
+                                    <span className="text-base sm:text-lg font-bold text-gray-900 flex items-center gap-2">
+                                        <span className="text-xl sm:text-2xl">💼</span>
+                                        <span>Việc làm đã đăng</span>
+                                    </span>
+                                    <Tag color={PRIMARY_COLOR} className="!m-0 !px-2 sm:!px-3 !py-0.5 sm:!py-1 text-[11px] sm:text-[13px] font-semibold">
+                                        {profile.postedJobs.length} tin
+                                    </Tag>
+                                </div>
+                            }
+                            className="shadow-md hover:shadow-lg rounded-2xl border-0 mb-6 transition-all duration-300 overflow-hidden"
+                            styles={{ body: { padding: '16px sm:24px' } as any }}
+                        >
+                            <Space direction="vertical" size={16} className="w-full">
+                                {profile.postedJobs.map((job) => (
+                                    <div key={job.id} className="flex flex-col sm:flex-row sm:justify-between items-start sm:items-center gap-3 sm:gap-4 p-4 sm:p-5 bg-gradient-to-br from-gray-50 to-gray-100 hover:from-gray-100 hover:to-gray-200 rounded-xl border border-gray-200 hover:border-[#00B14F] transition-all duration-200 cursor-pointer group">
+                                        <div className="flex-1 min-w-0 w-full">
+                                            <Text strong className="text-[15px] sm:text-base block mb-1 group-hover:text-[#00B14F] transition-colors leading-snug">
+                                                {job.title}
+                                            </Text>
+                                            <div className="flex items-center gap-1.5 text-gray-500">
+                                                <EnvironmentOutlined className="text-xs sm:text-sm" />
+                                                <Text type="secondary" className="text-xs sm:text-sm line-clamp-1">
+                                                    {job.locationName}
+                                                </Text>
+                                            </div>
+                                        </div>
+                                        <Tag color={PRIMARY_COLOR} className="!m-0 !px-3 !py-1 sm:!px-4 sm:!py-1.5 font-semibold text-xs sm:text-sm flex-shrink-0 rounded-lg">
+                                            {job.salaryMin && job.salaryMax
+                                                ? `${(job.salaryMin / 1000000).toFixed(0)} - ${(job.salaryMax / 1000000).toFixed(0)} triệu`
+                                                : "Thương lượng"}
                                         </Tag>
                                     </div>
-                                }
-                                className="shadow-md hover:shadow-lg rounded-2xl border-0 mb-6 transition-all duration-300 overflow-hidden"
-                                styles={{ body: { padding: '16px sm:24px' } as any }}
-                            >
-                                <Space direction="vertical" size={16} className="w-full">
-                                    {profile.postedJobs.map((job) => (
-                                        <div key={job.id} className="flex flex-col sm:flex-row sm:justify-between items-start sm:items-center gap-3 sm:gap-4 p-4 sm:p-5 bg-gradient-to-br from-gray-50 to-gray-100 hover:from-gray-100 hover:to-gray-200 rounded-xl border border-gray-200 hover:border-[#00B14F] transition-all duration-200 cursor-pointer group">
-                                            <div className="flex-1 min-w-0 w-full">
-                                                <Text strong className="text-[15px] sm:text-base block mb-1 group-hover:text-[#00B14F] transition-colors leading-snug">
-                                                    {job.title}
-                                                </Text>
-                                                <div className="flex items-center gap-1.5 text-gray-500">
-                                                    <EnvironmentOutlined className="text-xs sm:text-sm" />
-                                                    <Text type="secondary" className="text-xs sm:text-sm line-clamp-1">
-                                                        {job.locationName}
-                                                    </Text>
-                                                </div>
-                                            </div>
-                                            <Tag color={PRIMARY_COLOR} className="!m-0 !px-3 !py-1 sm:!px-4 sm:!py-1.5 font-semibold text-xs sm:text-sm flex-shrink-0 rounded-lg">
-                                                {job.salaryMin && job.salaryMax
-                                                    ? `${(job.salaryMin / 1000000).toFixed(0)} - ${(job.salaryMax / 1000000).toFixed(0)} triệu`
-                                                    : "Thương lượng"}
-                                            </Tag>
-                                        </div>
-                                    ))}
-                                </Space>
-                            </Card>
+                                ))}
+                            </Space>
+                        </Card>
+                        )}
+
+                        {/* Skills & Job Suggestions - Only for Candidate */}
+                        {isCandidate && (
+                            <>
+                                <SkillsSection
+                                    initialSkills={pageSkills}
+                                    readonly={false}
+                                />
+                                <JobSuggestions
+                                    hasSkills={pageSkills.length > 0}
+                                />
+                            </>
                         )}
                     </Col>
                 </Row>
@@ -574,10 +806,17 @@ const MyProfilePage = () => {
                                 Ảnh đại diện
                             </Text>
                             <input
-                                type="file" id="avatar-upload" accept="image/*" style={{ display: 'none' }}
+                                type="file" id="avatar-upload" accept="image/jpeg,image/jpg,image/png,image/webp,image/gif" style={{ display: 'none' }}
                                 onChange={(e) => {
                                     const file = e.target.files?.[0];
-                                    if (file) { setAvatarFile(file); setAvatarPreview(URL.createObjectURL(file)); }
+                                    if (!file) return;
+                                    const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'image/gif'];
+                                    if (!validTypes.includes(file.type)) {
+                                        message.error('Chỉ hỗ trợ ảnh JPG, PNG, WEBP, GIF. Vui lòng chuyển đổi ảnh HEIC trước khi tải lên.');
+                                        e.target.value = '';
+                                        return;
+                                    }
+                                    setAvatarFile(file); setAvatarPreview(URL.createObjectURL(file));
                                 }}
                             />
                             <label htmlFor="avatar-upload" className="cursor-pointer inline-block">
@@ -603,10 +842,17 @@ const MyProfilePage = () => {
                                 Ảnh bìa (Tối ưu: 1200x300 px)
                             </Text>
                             <input
-                                type="file" id="cover-upload" accept="image/*" style={{ display: 'none' }}
+                                type="file" id="cover-upload" accept="image/jpeg,image/jpg,image/png,image/webp,image/gif" style={{ display: 'none' }}
                                 onChange={(e) => {
                                     const file = e.target.files?.[0];
-                                    if (file) { setCoverFile(file); setCoverPreview(URL.createObjectURL(file)); }
+                                    if (!file) return;
+                                    const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'image/gif'];
+                                    if (!validTypes.includes(file.type)) {
+                                        message.error('Chỉ hỗ trợ ảnh JPG, PNG, WEBP, GIF. Vui lòng chuyển đổi ảnh HEIC trước khi tải lên.');
+                                        e.target.value = '';
+                                        return;
+                                    }
+                                    setCoverFile(file); setCoverPreview(URL.createObjectURL(file));
                                 }}
                             />
                             <label htmlFor="cover-upload" className="cursor-pointer block">
@@ -712,8 +958,349 @@ const MyProfilePage = () => {
                         </>
                     )}
 
+                    {/* ── Skills – Only for Candidate ──────────────────────── */}
+                    {isCandidate && (
+                        <>
+                            <Divider className="!my-6 sm:!my-8" />
+                            <div className="flex items-center justify-between mb-4">
+                                <Title level={5} className="!text-base sm:!text-lg !font-bold !m-0 !text-gray-900 flex items-center gap-2">
+                                    <ToolOutlined className="text-[#00B14F]" /><span>Kỹ năng</span>
+                                </Title>
+                            </div>
+                            {/* Current skills */}
+                            <div className="flex flex-wrap gap-2 mb-4 min-h-[36px]">
+                                {pageSkills.length === 0 ? (
+                                    <Text type="secondary" className="text-sm italic">Chưa có kỹ năng nào.</Text>
+                                ) : (
+                                    pageSkills.map(skill => (
+                                        <Tag
+                                            key={skill.skillId}
+                                            color="#00B14F"
+                                            className="!px-3 !py-1 text-sm font-medium rounded-full flex items-center gap-1"
+                                            closable
+                                            closeIcon={removingSkillId === skill.skillId ? <Spin size="small" /> : <CloseCircleOutlined />}
+                                            onClose={() => handleModalRemoveSkill(skill.skillId)}
+                                        >
+                                            {skill.skillName}
+                                        </Tag>
+                                    ))
+                                )}
+                            </div>
+                            {/* Add skill select */}
+                            <div className="flex gap-2">
+                                <Select
+                                    showSearch
+                                    placeholder="Tìm và chọn kỹ năng..."
+                                    optionFilterProp="label"
+                                    className="flex-1"
+                                    value={selectedSkillId}
+                                    onChange={(val) => setSelectedSkillId(val)}
+                                    options={allSkills.filter(s => !pageSkills.find(p => p.skillId === s.id)).map(s => ({ value: s.id, label: s.skillName }))}
+                                    notFoundContent={<Text type="secondary" className="text-sm">Không tìm thấy kỹ năng</Text>}
+                                />
+                                <Button
+                                    type="primary"
+                                    icon={<PlusOutlined />}
+                                    loading={addingSkill}
+                                    disabled={!selectedSkillId}
+                                    onClick={handleModalAddSkill}
+                                    className="!bg-[#00B14F] !border-0"
+                                >
+                                    Thêm
+                                </Button>
+                            </div>
+                        </>
+                    )}
+
+                    {/* ── Education – Only for Candidate ───────────────────── */}
+                    {isCandidate && (
+                        <>
+                            <Divider className="!my-6 sm:!my-8" />
+                            <div className="flex items-center justify-between mb-4">
+                                <Title level={5} className="!text-base sm:!text-lg !font-bold !m-0 !text-gray-900 flex items-center gap-2">
+                                    <BookOutlined className="text-[#00B14F]" /><span>Học vấn</span>
+                                </Title>
+                                {!showAddEdu && (
+                                    <Button size="small" icon={<PlusOutlined />} onClick={() => setShowAddEdu(true)} className="!rounded-lg">
+                                        Thêm
+                                    </Button>
+                                )}
+                            </div>
+                            {/* List */}
+                            <Space direction="vertical" size={10} className="w-full mb-3">
+                                {pageEducations.map(edu => (
+                                    editingEduId === edu.id ? (
+                                        <div key={edu.id} className="p-4 bg-green-50 border border-green-300 rounded-xl">
+                                            <Row gutter={[12, 0]}>
+                                                <Col xs={24} sm={12}>
+                                                    <div className="mb-3">
+                                                        <label className="text-xs font-semibold text-gray-600 block mb-1">Tên trường <span className="text-red-500">*</span></label>
+                                                        <Input value={editEduData.schoolName} onChange={e => setEditEduData(p => ({ ...p, schoolName: e.target.value }))} className="!rounded-lg" />
+                                                    </div>
+                                                </Col>
+                                                <Col xs={24} sm={12}>
+                                                    <div className="mb-3">
+                                                        <label className="text-xs font-semibold text-gray-600 block mb-1">Ngành học <span className="text-red-500">*</span></label>
+                                                        <Input value={editEduData.major} onChange={e => setEditEduData(p => ({ ...p, major: e.target.value }))} className="!rounded-lg" />
+                                                    </div>
+                                                </Col>
+                                                <Col xs={24} sm={12}>
+                                                    <div className="mb-3">
+                                                        <label className="text-xs font-semibold text-gray-600 block mb-1">Từ <span className="text-red-500">*</span></label>
+                                                        <DatePicker className="w-full !rounded-lg" placeholder="Ngày bắt đầu" value={editEduData.startDate ? dayjs(editEduData.startDate) : null} onChange={d => setEditEduData(p => ({ ...p, startDate: d ? d.toISOString() : '' }))} />
+                                                    </div>
+                                                </Col>
+                                                <Col xs={24} sm={12}>
+                                                    <div className="mb-3">
+                                                        <label className="text-xs font-semibold text-gray-600 block mb-1">Đến (để trống nếu đang học)</label>
+                                                        <DatePicker className="w-full !rounded-lg" placeholder="Ngày kết thúc" value={editEduData.endDate ? dayjs(editEduData.endDate) : null} onChange={d => setEditEduData(p => ({ ...p, endDate: d ? d.toISOString() : '' }))} />
+                                                    </div>
+                                                </Col>
+                                            </Row>
+                                            <div className="flex justify-end gap-2">
+                                                <Button size="small" onClick={() => setEditingEduId(null)}>Hủy</Button>
+                                                <Button size="small" type="primary" loading={updatingEduId === edu.id} onClick={handleUpdateEducation} className="!bg-[#00B14F] !border-0">Cập nhật</Button>
+                                            </div>
+                                        </div>
+                                    ) : (
+                                        <div key={edu.id} className="flex items-start justify-between gap-3 p-3 bg-green-50 border border-green-200 rounded-xl">
+                                            <div className="flex-1 min-w-0">
+                                                <Text strong className="block text-sm text-gray-900">{edu.schoolName}</Text>
+                                                <Text className="block text-xs text-gray-600">{edu.major}</Text>
+                                                <Text type="secondary" className="text-[11px]">
+                                                    {edu.startDate ? dayjs(edu.startDate).format('MM/YYYY') : ''} – {edu.endDate ? dayjs(edu.endDate).format('MM/YYYY') : 'Hiện tại'}
+                                                </Text>
+                                            </div>
+                                            <div className="flex gap-1 flex-shrink-0">
+                                                <Button
+                                                    type="text"
+                                                    size="small"
+                                                    icon={<EditOutlined />}
+                                                    onClick={() => { setEditingEduId(edu.id); setEditEduData({ schoolName: edu.schoolName, major: edu.major, startDate: edu.startDate, endDate: edu.endDate || '' }); }}
+                                                />
+                                                <Popconfirm
+                                                    title="Xóa học vấn này?"
+                                                    okText="Xóa"
+                                                    cancelText="Hủy"
+                                                    okButtonProps={{ danger: true }}
+                                                    onConfirm={() => handleDeleteEducation(edu.id)}
+                                                >
+                                                    <Button
+                                                        type="text"
+                                                        danger
+                                                        size="small"
+                                                        icon={deletingEduId === edu.id ? <Spin size="small" /> : <DeleteOutlined />}
+                                                        disabled={deletingEduId === edu.id}
+                                                    />
+                                                </Popconfirm>
+                                            </div>
+                                        </div>
+                                    )
+                                ))}
+                            </Space>
+                            {/* Add form */}
+                            {showAddEdu && (
+                                <div className="p-4 bg-gray-50 border border-gray-200 rounded-xl">
+                                    <Row gutter={[12, 0]}>
+                                        <Col xs={24} sm={12}>
+                                            <div className="mb-3">
+                                                <label className="text-xs font-semibold text-gray-600 block mb-1">Tên trường <span className="text-red-500">*</span></label>
+                                                <Input value={newEdu.schoolName} onChange={e => setNewEdu(p => ({ ...p, schoolName: e.target.value }))} placeholder="VD: Đại học Bách Khoa" className="!rounded-lg" />
+                                            </div>
+                                        </Col>
+                                        <Col xs={24} sm={12}>
+                                            <div className="mb-3">
+                                                <label className="text-xs font-semibold text-gray-600 block mb-1">Ngành học <span className="text-red-500">*</span></label>
+                                                <Input value={newEdu.major} onChange={e => setNewEdu(p => ({ ...p, major: e.target.value }))} placeholder="VD: Công nghệ thông tin" className="!rounded-lg" />
+                                            </div>
+                                        </Col>
+                                        <Col xs={24} sm={12}>
+                                            <div className="mb-3">
+                                                <label className="text-xs font-semibold text-gray-600 block mb-1">Từ <span className="text-red-500">*</span></label>
+                                                <DatePicker
+                                                    className="w-full !rounded-lg"
+                                                    placeholder="Chọn ngày bắt đầu"
+                                                    value={newEdu.startDate ? dayjs(newEdu.startDate) : null}
+                                                    onChange={(date) => setNewEdu(p => ({ ...p, startDate: date ? date.toISOString() : '' }))}
+                                                />
+                                            </div>
+                                        </Col>
+                                        <Col xs={24} sm={12}>
+                                            <div className="mb-3">
+                                                <label className="text-xs font-semibold text-gray-600 block mb-1">Đến (để trống nếu đang học)</label>
+                                                <DatePicker
+                                                    className="w-full !rounded-lg"
+                                                    placeholder="Chọn ngày kết thúc"
+                                                    value={newEdu.endDate ? dayjs(newEdu.endDate) : null}
+                                                    onChange={(date) => setNewEdu(p => ({ ...p, endDate: date ? date.toISOString() : '' }))}
+                                                />
+                                            </div>
+                                        </Col>
+                                    </Row>
+                                    <div className="flex justify-end gap-2 mt-1">
+                                        <Button size="small" onClick={() => { setShowAddEdu(false); setNewEdu({ schoolName: '', major: '', startDate: '', endDate: '' }); }}>Hủy</Button>
+                                        <Button size="small" type="primary" loading={savingEdu} onClick={handleAddEducation} className="!bg-[#00B14F] !border-0">Lưu</Button>
+                                    </div>
+                                </div>
+                            )}
+                        </>
+                    )}
+
+                    {/* ── Experience – Only for Candidate ──────────────────── */}
+                    {isCandidate && (
+                        <>
+                            <Divider className="!my-6 sm:!my-8" />
+                            <div className="flex items-center justify-between mb-4">
+                                <Title level={5} className="!text-base sm:!text-lg !font-bold !m-0 !text-gray-900 flex items-center gap-2">
+                                    <TrophyOutlined className="text-blue-500" /><span>Kinh nghiệm làm việc</span>
+                                </Title>
+                                {!showAddExp && (
+                                    <Button size="small" icon={<PlusOutlined />} onClick={() => setShowAddExp(true)} className="!rounded-lg">
+                                        Thêm
+                                    </Button>
+                                )}
+                            </div>
+                            {/* List */}
+                            <Space direction="vertical" size={10} className="w-full mb-3">
+                                {pageExperiences.map(exp => (
+                                    editingExpId === exp.id ? (
+                                        <div key={exp.id} className="p-4 bg-blue-50 border border-blue-300 rounded-xl">
+                                            <Row gutter={[12, 0]}>
+                                                <Col xs={24} sm={12}>
+                                                    <div className="mb-3">
+                                                        <label className="text-xs font-semibold text-gray-600 block mb-1">Công ty <span className="text-red-500">*</span></label>
+                                                        <Input value={editExpData.companyName} onChange={e => setEditExpData(p => ({ ...p, companyName: e.target.value }))} className="!rounded-lg" />
+                                                    </div>
+                                                </Col>
+                                                <Col xs={24} sm={12}>
+                                                    <div className="mb-3">
+                                                        <label className="text-xs font-semibold text-gray-600 block mb-1">Vị trí <span className="text-red-500">*</span></label>
+                                                        <Input value={editExpData.position} onChange={e => setEditExpData(p => ({ ...p, position: e.target.value }))} className="!rounded-lg" />
+                                                    </div>
+                                                </Col>
+                                                <Col xs={24} sm={12}>
+                                                    <div className="mb-3">
+                                                        <label className="text-xs font-semibold text-gray-600 block mb-1">Từ <span className="text-red-500">*</span></label>
+                                                        <DatePicker className="w-full !rounded-lg" placeholder="Ngày bắt đầu" value={editExpData.startDate ? dayjs(editExpData.startDate) : null} onChange={d => setEditExpData(p => ({ ...p, startDate: d ? d.toISOString() : '' }))} />
+                                                    </div>
+                                                </Col>
+                                                <Col xs={24} sm={12}>
+                                                    <div className="mb-3">
+                                                        <label className="text-xs font-semibold text-gray-600 block mb-1">Đến (để trống nếu đang làm)</label>
+                                                        <DatePicker className="w-full !rounded-lg" placeholder="Ngày kết thúc" value={editExpData.endDate ? dayjs(editExpData.endDate) : null} onChange={d => setEditExpData(p => ({ ...p, endDate: d ? d.toISOString() : '' }))} />
+                                                    </div>
+                                                </Col>
+                                                <Col xs={24}>
+                                                    <div className="mb-3">
+                                                        <label className="text-xs font-semibold text-gray-600 block mb-1">Mô tả</label>
+                                                        <Input.TextArea value={editExpData.description} onChange={e => setEditExpData(p => ({ ...p, description: e.target.value }))} rows={2} className="!rounded-lg" />
+                                                    </div>
+                                                </Col>
+                                            </Row>
+                                            <div className="flex justify-end gap-2">
+                                                <Button size="small" onClick={() => setEditingExpId(null)}>Hủy</Button>
+                                                <Button size="small" type="primary" loading={updatingExpId === exp.id} onClick={handleUpdateExperience} className="!bg-[#00B14F] !border-0">Cập nhật</Button>
+                                            </div>
+                                        </div>
+                                    ) : (
+                                        <div key={exp.id} className="flex items-start justify-between gap-3 p-3 bg-blue-50 border border-blue-200 rounded-xl">
+                                            <div className="flex-1 min-w-0">
+                                                <Text strong className="block text-sm text-gray-900">{exp.position}</Text>
+                                                <Text className="block text-xs text-gray-600 font-semibold">{exp.companyName}</Text>
+                                                <Text type="secondary" className="text-[11px]">
+                                                    {exp.startDate ? dayjs(exp.startDate).format('MM/YYYY') : ''} – {exp.endDate ? dayjs(exp.endDate).format('MM/YYYY') : 'Hiện tại'}
+                                                </Text>
+                                                {exp.description && <Text type="secondary" className="block text-xs mt-1 line-clamp-2">{exp.description}</Text>}
+                                            </div>
+                                            <div className="flex gap-1 flex-shrink-0">
+                                                <Button
+                                                    type="text"
+                                                    size="small"
+                                                    icon={<EditOutlined />}
+                                                    onClick={() => { setEditingExpId(exp.id); setEditExpData({ companyName: exp.companyName, position: exp.position, description: exp.description || '', startDate: exp.startDate, endDate: exp.endDate || '' }); }}
+                                                />
+                                                <Popconfirm
+                                                    title="Xóa kinh nghiệm này?"
+                                                    okText="Xóa"
+                                                    cancelText="Hủy"
+                                                    okButtonProps={{ danger: true }}
+                                                    onConfirm={() => handleDeleteExperience(exp.id)}
+                                                >
+                                                    <Button
+                                                        type="text"
+                                                        danger
+                                                        size="small"
+                                                        icon={deletingExpId === exp.id ? <Spin size="small" /> : <DeleteOutlined />}
+                                                        disabled={deletingExpId === exp.id}
+                                                    />
+                                                </Popconfirm>
+                                            </div>
+                                        </div>
+                                    )
+                                ))}
+                            </Space>
+                            {/* Add form */}
+                            {showAddExp && (
+                                <div className="p-4 bg-gray-50 border border-gray-200 rounded-xl">
+                                    <Row gutter={[12, 0]}>
+                                        <Col xs={24} sm={12}>
+                                            <div className="mb-3">
+                                                <label className="text-xs font-semibold text-gray-600 block mb-1">Công ty <span className="text-red-500">*</span></label>
+                                                <Input value={newExp.companyName} onChange={e => setNewExp(p => ({ ...p, companyName: e.target.value }))} placeholder="VD: Google" className="!rounded-lg" />
+                                            </div>
+                                        </Col>
+                                        <Col xs={24} sm={12}>
+                                            <div className="mb-3">
+                                                <label className="text-xs font-semibold text-gray-600 block mb-1">Vị trí <span className="text-red-500">*</span></label>
+                                                <Input value={newExp.position} onChange={e => setNewExp(p => ({ ...p, position: e.target.value }))} placeholder="VD: Frontend Developer" className="!rounded-lg" />
+                                            </div>
+                                        </Col>
+                                        <Col xs={24} sm={12}>
+                                            <div className="mb-3">
+                                                <label className="text-xs font-semibold text-gray-600 block mb-1">Từ <span className="text-red-500">*</span></label>
+                                                <DatePicker
+                                                    className="w-full !rounded-lg"
+                                                    placeholder="Chọn ngày bắt đầu"
+                                                    value={newExp.startDate ? dayjs(newExp.startDate) : null}
+                                                    onChange={(date) => setNewExp(p => ({ ...p, startDate: date ? date.toISOString() : '' }))}
+                                                />
+                                            </div>
+                                        </Col>
+                                        <Col xs={24} sm={12}>
+                                            <div className="mb-3">
+                                                <label className="text-xs font-semibold text-gray-600 block mb-1">Đến (để trống nếu đang làm)</label>
+                                                <DatePicker
+                                                    className="w-full !rounded-lg"
+                                                    placeholder="Chọn ngày kết thúc"
+                                                    value={newExp.endDate ? dayjs(newExp.endDate) : null}
+                                                    onChange={(date) => setNewExp(p => ({ ...p, endDate: date ? date.toISOString() : '' }))}
+                                                />
+                                            </div>
+                                        </Col>
+                                        <Col xs={24}>
+                                            <div className="mb-3">
+                                                <label className="text-xs font-semibold text-gray-600 block mb-1">Mô tả</label>
+                                                <Input.TextArea
+                                                    value={newExp.description}
+                                                    onChange={e => setNewExp(p => ({ ...p, description: e.target.value }))}
+                                                    placeholder="Mô tả công việc, thành tích..."
+                                                    rows={3}
+                                                    className="!rounded-lg"
+                                                />
+                                            </div>
+                                        </Col>
+                                    </Row>
+                                    <div className="flex justify-end gap-2 mt-1">
+                                        <Button size="small" onClick={() => { setShowAddExp(false); setNewExp({ companyName: '', position: '', description: '', startDate: '', endDate: '' }); }}>Hủy</Button>
+                                        <Button size="small" type="primary" loading={savingExp} onClick={handleAddExperience} className="!bg-[#00B14F] !border-0">Lưu</Button>
+                                    </div>
+                                </div>
+                            )}
+                        </>
+                    )}
+
                     <Divider className="!border-dashed !my-6 sm:!my-8" />
-                    
+
                     <div className="flex justify-end gap-3 sm:gap-4 mt-2">
                         <Button onClick={() => setIsEditModalOpen(false)} className="!rounded-lg !font-semibold text-xs sm:text-sm h-9 sm:h-10 px-4 sm:px-8">
                             Hủy

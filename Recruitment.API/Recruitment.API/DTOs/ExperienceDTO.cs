@@ -1,5 +1,4 @@
-﻿using Recruitment.API.Models;
-using System.ComponentModel.DataAnnotations.Schema;
+﻿using System.ComponentModel.DataAnnotations;
 
 namespace Recruitment.API.DTOs
 {
@@ -11,5 +10,17 @@ namespace Recruitment.API.DTOs
         public string? description { get; set; }
         public DateTime startDate { get; set; }
         public DateTime? endDate { get; set; }
+    }
+
+    public class ExperienceRequest
+    {
+        [Required]
+        public string CompanyName { get; set; } = string.Empty;
+        [Required]
+        public string Position { get; set; } = string.Empty;
+        public string? Description { get; set; }
+        [Required]
+        public DateTime StartDate { get; set; }
+        public DateTime? EndDate { get; set; }
     }
 }

@@ -23,6 +23,7 @@ namespace Recruitment.API.Data
         public DbSet<Comment> Comments { get; set; }
         public DbSet<Review> Reviews { get; set; }
         public DbSet<UserRefreshToken> UserRefreshTokens { get; set; }
+        public DbSet<UserSkill> UserSkills { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
@@ -107,6 +108,22 @@ namespace Recruitment.API.Data
                 .HasOne(r => r.job)
                 .WithMany()
                 .HasForeignKey(r => r.jobId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            // Cấu hình UserSkill (Composite Key)
+            modelBuilder.Entity<UserSkill>()
+                .HasKey(us => new { us.userId, us.skillId });
+
+            modelBuilder.Entity<UserSkill>()
+                .HasOne(us => us.user)
+                .WithMany(u => u.userSkills)
+                .HasForeignKey(us => us.userId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<UserSkill>()
+                .HasOne(us => us.skill)
+                .WithMany(s => s.userSkills)
+                .HasForeignKey(us => us.skillId)
                 .OnDelete(DeleteBehavior.Restrict);
         }
     }

@@ -30,6 +30,7 @@ const ApplicationHistoryPage = lazy(() => import("../pages/client/ApplicationHis
 const HRProfilePage = lazy(() => import("../pages/HR/HRProfilePage"));
 const CandidateProfilePage = lazy(() => import("../pages/client/CandidateProfilePage"));
 const HRMyProfilePage = lazy(() => import("../pages/HR/HRMyProfilePage"));
+const SavedJobsPage = lazy(() => import("../pages/client/SavedJobsPage"));
 
 // Component để redirect dựa trên role của user
 const RoleBasedRedirect = () => {
@@ -78,6 +79,7 @@ const AppRoutes = () => {
                     {/* PROTECTED: Các route cần đăng nhập */}
                     <Route element={<ProtectedRoute allowedRoles={[Role.Candidate]} />}>
                         <Route path="/my-applications" element={<ApplicationHistoryPage />} />
+                        <Route path="/saved-jobs" element={<SavedJobsPage />} />
                         <Route path="/profile/:id" element={<HRProfilePage />} />
                         <Route path="/my-profile" element={<CandidateProfilePage />} />
                     </Route>
@@ -116,8 +118,11 @@ const AppRoutes = () => {
                     </Route>
                 </Route>
 
-                {/* Catch all - Chuyển về 404 */}
-                <Route path="*" element={<Navigate to="/404" replace />} />
+                {/* Unauthorized & 404 fallback */}
+                <Route path="/unauthorized" element={<Navigate to="/" replace />} />
+                <Route path="/404" element={<Navigate to="/" replace />} />
+                {/* Catch all */}
+                <Route path="*" element={<Navigate to="/" replace />} />
             </Routes>
         </Suspense>
     );

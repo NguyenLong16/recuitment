@@ -24,6 +24,8 @@ namespace Recruitment.API.Repositories
                 .Include(u => u.experiences) // Kinh nghiệm làm việc
                 .Include(u => u.postedJobs) // Các tin đã đăng (nếu là HR)
                 .Include(u => u.followers) // Danh sách người theo dõi
+                .Include(u => u.userSkills)
+                    .ThenInclude(us => us.skill) // Kỹ năng của ứng viên
                 .FirstOrDefaultAsync(u => u.id == userId);
         }
 

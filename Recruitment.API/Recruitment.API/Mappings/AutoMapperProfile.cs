@@ -61,7 +61,13 @@ public class AutoMapperProfile : Profile
             .ForMember(dest => dest.WebsiteUrl, opt => opt.MapFrom(src => src.websiteUrl))
             .ForMember(dest => dest.LinkedInUrl, opt => opt.MapFrom(src => src.linkedInUrl))
             .ForMember(dest => dest.Company, opt => opt.MapFrom(src => src.company))
-            .ForMember(dest => dest.GitHubUrl, opt => opt.MapFrom(src => src.githubUrl));
+            .ForMember(dest => dest.GitHubUrl, opt => opt.MapFrom(src => src.githubUrl))
+            .ForMember(dest => dest.Skills, opt => opt.MapFrom(src =>
+                src.userSkills.Select(us => new UserSkillResponse
+                {
+                    skillId = us.skillId,
+                    skillName = us.skill.skillName
+                }).ToList()));
 
         CreateMap<ProfileUpdateRequest, User>()
             .ForMember(dest => dest.AvatarUrl, opt => opt.Ignore())
@@ -69,8 +75,29 @@ public class AutoMapperProfile : Profile
             .ForMember(dest => dest.defaultCvUrl, opt => opt.Ignore())
             .ForAllMembers(opts => opts.Condition((src, dest, srcMember) => srcMember != null));
 
-        CreateMap<Education, EducationDto>();
+        CreateMap<Education, EducationDto>()
+            .ForMember(dest => dest.endDate, opt => opt.MapFrom(src =>
+                src.endDate == DateTime.MaxValue ? (DateTime?)null : src.endDate));
+        CreateMap<EducationRequest, Education>()
+            .ForMember(dest => dest.userId, opt => opt.Ignore())
+            .ForMember(dest => dest.id, opt => opt.Ignore())
+            .ForMember(dest => dest.user, opt => opt.Ignore())
+            .ForMember(dest => dest.schoolName, opt => opt.MapFrom(src => src.SchoolName))
+            .ForMember(dest => dest.major, opt => opt.MapFrom(src => src.Major))
+            .ForMember(dest => dest.startDate, opt => opt.MapFrom(src => src.StartDate))
+            .ForMember(dest => dest.endDate, opt => opt.MapFrom(src => src.EndDate ?? DateTime.MaxValue));
+
         CreateMap<Experience, ExperienceDTO>();
+        CreateMap<ExperienceRequest, Experience>()
+            .ForMember(dest => dest.userId, opt => opt.Ignore())
+            .ForMember(dest => dest.id, opt => opt.Ignore())
+            .ForMember(dest => dest.user, opt => opt.Ignore())
+            .ForMember(dest => dest.companyName, opt => opt.MapFrom(src => src.CompanyName))
+            .ForMember(dest => dest.position, opt => opt.MapFrom(src => src.Position))
+            .ForMember(dest => dest.description, opt => opt.MapFrom(src => src.Description))
+            .ForMember(dest => dest.startDate, opt => opt.MapFrom(src => src.StartDate))
+            .ForMember(dest => dest.endDate, opt => opt.MapFrom(src => src.EndDate));
+
         CreateMap<Company, CompanyResponse>();
 
         CreateMap<Comment, CommentResponse>()

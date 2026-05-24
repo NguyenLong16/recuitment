@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using Recruitment.API.Data;
 using Recruitment.API.Models;
 using Recruitment.API.Repositories.Interfaces;
@@ -33,6 +33,23 @@ namespace Recruitment.API.Repositories
         {
             return await _context.SavedJobs
                 .AnyAsync(sj => sj.userId == userId && sj.jobId == jobId);
+        }
+
+        public async Task<IEnumerable<Recruitment.API.DTOs.SavedJobResponse>> GetSavedJobsAsync(int userId)
+        {
+            return await _context.SavedJobs
+                .Where(sj => sj.userId == userId)
+                .Include(sj => sj.job)
+                .ThenInclude(j => j.company)
+                .Select(sj => new Recruitment.API.DTOs.SavedJobResponse
+                {
+                    JobId = sj.jobId,
+                    JobTitle = sj.job.title,
+                    CompanyName = sj.job.company != null ? sj.job.company.companyName : "N/A",
+                    ImageUrl = sj.job.company != null ? sj.job.company.logoUrl : null,
+                    SavedDate = sj.savedDate
+                })
+                .ToListAsync();
         }
 
     }

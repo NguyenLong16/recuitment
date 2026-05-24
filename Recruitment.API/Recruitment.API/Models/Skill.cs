@@ -9,5 +9,6 @@ namespace Recruitment.API.Models
         [Required]
         public string skillName { get; set; }
         public virtual ICollection<JobSkill> jobSkills { get; set; }
+        public virtual ICollection<UserSkill> userSkills { get; set; } = new List<UserSkill>();
     }
 }

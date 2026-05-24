@@ -31,7 +31,7 @@ namespace Recruitment.API.Helpers
                 issuer: _configuration["Jwt:Issuer"],
                 audience: _configuration["Jwt:Audience"],
                 claims: claims,
-                expires: DateTime.UtcNow.AddSeconds(15),     // AccessToken ngắn hạn 15 phút
+                expires: DateTime.UtcNow.AddHours(1),        // AccessToken 1 giờ
                 signingCredentials: creds
                 );
 

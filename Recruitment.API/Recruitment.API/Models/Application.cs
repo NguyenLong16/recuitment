@@ -1,4 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using static Recruitment.API.Data.Enums;
 
@@ -19,6 +19,9 @@ namespace Recruitment.API.Models
         public string coverLetter { get; set; } //Thư giới thiệu (Optional)
         public DateTime appliedDate { get; set; } = DateTime.Now;
         public ApplicationStatus status { get; set; } = ApplicationStatus.Submitted; // Mặc định là "Đã nộp"
+        
+        // Cờ lưu hồ sơ ứng tuyển của nhà tuyển dụng
+        public bool isSaved { get; set; } = false;
         // --- Foreign Keys ---
 
     }

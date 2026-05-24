@@ -44,6 +44,9 @@ namespace Recruitment.API.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<bool>("isSaved")
+                        .HasColumnType("bit");
+
                     b.Property<int>("jobId")
                         .HasColumnType("int");
 
@@ -562,6 +565,21 @@ namespace Recruitment.API.Migrations
                     b.ToTable("UserRefreshTokens");
                 });
 
+            modelBuilder.Entity("Recruitment.API.Models.UserSkill", b =>
+                {
+                    b.Property<int>("userId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("skillId")
+                        .HasColumnType("int");
+
+                    b.HasKey("userId", "skillId");
+
+                    b.HasIndex("skillId");
+
+                    b.ToTable("UserSkills");
+                });
+
             modelBuilder.Entity("Recruitment.API.Models.Application", b =>
                 {
                     b.HasOne("Recruitment.API.Models.User", "candidate")
@@ -778,6 +796,25 @@ namespace Recruitment.API.Migrations
                     b.Navigation("user");
                 });
 
+            modelBuilder.Entity("Recruitment.API.Models.UserSkill", b =>
+                {
+                    b.HasOne("Recruitment.API.Models.Skill", "skill")
+                        .WithMany("userSkills")
+                        .HasForeignKey("skillId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("Recruitment.API.Models.User", "user")
+                        .WithMany("userSkills")
+                        .HasForeignKey("userId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("skill");
+
+                    b.Navigation("user");
+                });
+
             modelBuilder.Entity("Recruitment.API.Models.Category", b =>
                 {
                     b.Navigation("jobs");
@@ -813,6 +850,8 @@ namespace Recruitment.API.Migrations
             modelBuilder.Entity("Recruitment.API.Models.Skill", b =>
                 {
                     b.Navigation("jobSkills");
+
+                    b.Navigation("userSkills");
                 });
 
             modelBuilder.Entity("Recruitment.API.Models.User", b =>
@@ -828,6 +867,8 @@ namespace Recruitment.API.Migrations
                     b.Navigation("following");
 
                     b.Navigation("postedJobs");
+
+                    b.Navigation("userSkills");
                 });
 #pragma warning restore 612, 618
         }

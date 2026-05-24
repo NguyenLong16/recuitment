@@ -72,6 +72,9 @@ const HRMyProfilePage = () => {
             websiteUrl: profile?.websiteUrl || "",
             linkedInUrl: profile?.linkedInUrl || "",
             gitHubUrl: profile?.gitHubUrl || "",
+            companyName: profile?.company?.companyName || "",
+            companyWebsite: profile?.company?.websiteLink || "",
+            companyAddress: profile?.company?.address || "",
         });
         setAvatarFile(null);
         setCoverFile(null);
@@ -93,6 +96,10 @@ const HRMyProfilePage = () => {
             gitHubUrl: values.gitHubUrl || '',
             avatarFile: avatarFile ?? undefined,
             coverFile: coverFile ?? undefined,
+            companyId: profile?.company?.id || 0,
+            newCompanyName: values.companyName || '',
+            companyWebsite: values.companyWebsite || '',
+            companyAddress: values.companyAddress || '',
         };
 
         const success = await updateProfile(payload);
@@ -329,7 +336,7 @@ const HRMyProfilePage = () => {
                         </Card>
 
                         {/* Company Info */}
-                        {profile.company && (
+                        {profile.company ? (
                             <Card
                                 title={
                                     <span className="text-lg font-bold text-gray-900 flex items-center gap-2">
@@ -390,6 +397,32 @@ const HRMyProfilePage = () => {
                                         </div>
                                     )}
                                 </Space>
+                            </Card>
+                        ) : (
+                            <Card
+                                className="shadow-lg rounded-2xl border-0 mb-6 overflow-hidden border-l-4 !border-l-orange-400"
+                                styles={{ body: { padding: '24px' } }}
+                            >
+                                <div className="flex items-start gap-4">
+                                    <div className="w-12 h-12 rounded-full bg-orange-100 flex items-center justify-center flex-shrink-0">
+                                        <BuildOutlined className="text-xl text-orange-500" />
+                                    </div>
+                                    <div className="flex-1">
+                                        <Text strong className="text-base block mb-1">Chưa có thông tin công ty</Text>
+                                        <Text type="secondary" className="text-sm block mb-3">
+                                            Vui lòng cập nhật tên công ty trong hồ sơ để có thể đăng tin tuyển dụng.
+                                        </Text>
+                                        <Button
+                                            type="primary"
+                                            size="small"
+                                            icon={<EditOutlined />}
+                                            onClick={handleOpenEdit}
+                                            className="!bg-[#00B14F] hover:!bg-[#00a347] !border-0 !rounded-lg"
+                                        >
+                                            Cập nhật ngay
+                                        </Button>
+                                    </div>
+                                </div>
                             </Card>
                         )}
                     </Col>
@@ -590,6 +623,28 @@ const HRMyProfilePage = () => {
                     </div>
 
                     <Divider className="!my-8" />
+
+                    <div className="mb-8">
+                        <Title level={5} className="!text-lg !font-bold !mb-6 !text-gray-900 flex items-center gap-2">
+                            <span>🏢</span>
+                            <span>Thông tin công ty</span>
+                        </Title>
+                        <Form.Item label={<span className="font-semibold text-gray-700">Tên công ty</span>} name="companyName" rules={[{ required: true, message: 'Vui lòng nhập tên công ty' }]}>
+                            <Input placeholder="VD: Công ty TNHH ABC" size="large" className="!rounded-lg" />
+                        </Form.Item>
+                        <Row gutter={[16, 16]}>
+                            <Col xs={24} sm={12}>
+                                <Form.Item label={<span className="font-semibold text-gray-700">Website công ty</span>} name="companyWebsite">
+                                    <Input prefix={<GlobalOutlined className="text-[#00B14F]" />} placeholder="https://company.com" size="large" className="!rounded-lg" />
+                                </Form.Item>
+                            </Col>
+                            <Col xs={24} sm={12}>
+                                <Form.Item label={<span className="font-semibold text-gray-700">Địa chỉ công ty</span>} name="companyAddress">
+                                    <Input prefix={<EnvironmentOutlined className="text-[#00B14F]" />} placeholder="VD: 123 Nguyễn Huệ, Q1, TP.HCM" size="large" className="!rounded-lg" />
+                                </Form.Item>
+                            </Col>
+                        </Row>
+                    </div>
 
                     <div className="mb-8">
                         <Title level={5} className="!text-lg !font-bold !mb-6 !text-gray-900 flex items-center gap-2">

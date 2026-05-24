@@ -1,4 +1,4 @@
-﻿using AutoMapper;
+using AutoMapper;
 using CloudinaryDotNet;
 using CloudinaryDotNet.Actions;
 using Microsoft.EntityFrameworkCore;
@@ -210,6 +210,36 @@ namespace Recruitment.API.Services
                 ApplicationStatus.Accepted => "Trúng tuyển",
                 _ => status.ToString()
             };
+        }
+
+        public async Task<bool> ToggleSaveApplicationAsync(int applicationId, int employerId)
+        {
+            var application = await _context.Applications
+                .Include(a => a.job)
+                .FirstOrDefaultAsync(a => a.id == applicationId)
+                ?? throw new Exception("Không tìm thấy đơn ứng tuyển");
+
+            if (application.job.employerId != employerId)
+                throw new Exception("Bạn không có quyền thao tác trên đơn này");
+
+            application.isSaved = !application.isSaved;
+
+            _context.Applications.Update(application);
+            await _context.SaveChangesAsync();
+
+            return application.isSaved;
+        }
+
+        public async Task<IEnumerable<ApplicationResponse>> GetSavedApplicationsByEmployerAsync(int employerId)
+        {
+            var applications = await _context.Applications
+                .Include(a => a.candidate)
+                .Include(a => a.job)
+                .Where(a => a.job.employerId == employerId && a.isSaved)
+                .OrderByDescending(a => a.appliedDate)
+                .ToListAsync();
+
+            return _mapper.Map<IEnumerable<ApplicationResponse>>(applications);
         }
 
         private async Task<string> UploadCvAsync(IFormFile file)

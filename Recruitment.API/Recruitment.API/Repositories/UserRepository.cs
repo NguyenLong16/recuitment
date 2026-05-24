@@ -38,6 +38,8 @@ namespace Recruitment.API.Repositories
                 .Include(u => u.company)
                 .Include(u => u.educations)
                 .Include(u => u.experiences)
+                .Include(u => u.userSkills)
+                    .ThenInclude(us => us.skill)
                 .FirstOrDefaultAsync(u => u.id == id);
         }
 

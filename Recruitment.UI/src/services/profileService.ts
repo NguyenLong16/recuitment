@@ -23,6 +23,20 @@ const ProfileService = {
         formData.append('LinkedInUrl', data.linkedInUrl ?? '');
         formData.append('GitHubUrl', data.gitHubUrl ?? '');
 
+        // Company fields cho HR
+        if (data.companyId !== undefined && data.companyId !== null) {
+            formData.append('CompanyId', data.companyId.toString());
+        }
+        if (data.newCompanyName) {
+            formData.append('NewCompanyName', data.newCompanyName);
+        }
+        if (data.companyWebsite) {
+            formData.append('CompanyWebsite', data.companyWebsite);
+        }
+        if (data.companyAddress) {
+            formData.append('CompanyAddress', data.companyAddress);
+        }
+
         // Chỉ append file nếu có chọn
         if (data.avatarFile) formData.append('AvatarFile', data.avatarFile);
         if (data.coverFile) formData.append('CoverFile', data.coverFile);

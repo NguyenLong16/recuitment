@@ -11,10 +11,10 @@ const CategoryManagement = () => {
         refetch, createCategory, updateCategory, deleteCategory,
     } = useCategory();
 
-    const [searchText, setSearchText]           = useState('');
-    const [isModalOpen, setIsModalOpen]         = useState(false);
+    const [searchText, setSearchText] = useState('');
+    const [isModalOpen, setIsModalOpen] = useState(false);
     const [editingCategory, setEditingCategory] = useState<Category | null>(null);
-    const [form]                                = Form.useForm();
+    const [form] = Form.useForm();
 
     const handleOpenAddModal = () => {
         setEditingCategory(null); form.resetFields(); setIsModalOpen(true);
@@ -126,7 +126,7 @@ const CategoryManagement = () => {
                 <div>
                     <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-slate-800
                                    tracking-tight leading-tight m-0">
-                        Quản lý Ngành nghề
+                        Quản lý vị trí công việc
                     </h1>
                     {/* Subtitle: ẩn trên sm để tiết kiệm chỗ */}
                     <p className="hidden sm:block text-slate-400 text-sm md:text-[15px] mt-1 m-0">
@@ -270,7 +270,7 @@ const CategoryManagement = () => {
                 width="min(480px, calc(100vw - 32px))"
                 styles={{
                     header: { padding: '20px 20px 14px', borderBottom: '1px solid #f1f5f9' },
-                    body:   { padding: '20px' },
+                    body: { padding: '20px' },
                 }}
             >
                 <Form form={form} layout="vertical" onFinish={handleSubmit} autoComplete="off">
@@ -279,8 +279,8 @@ const CategoryManagement = () => {
                         name="name"
                         rules={[
                             { required: true, message: 'Vui lòng nhập tên ngành nghề!' },
-                            { min: 2,         message: 'Tên ngành nghề phải có ít nhất 2 ký tự!' },
-                            { max: 100,       message: 'Tên ngành nghề không được quá 100 ký tự!' },
+                            { min: 2, message: 'Tên ngành nghề phải có ít nhất 2 ký tự!' },
+                            { max: 100, message: 'Tên ngành nghề không được quá 100 ký tự!' },
                         ]}
                     >
                         <Input

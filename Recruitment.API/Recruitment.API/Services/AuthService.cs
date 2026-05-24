@@ -32,12 +32,20 @@ namespace Recruitment.API.Services
                 throw new Exception("Tài khoản hoặc mật khẩu không đúng");
 
             // Verify mật khẩu
-            bool isPasswordValid = BCrypt.Net.BCrypt.Verify(request.password, user.passwordHash);
+            bool isPasswordValid;
+            try
+            {
+                isPasswordValid = BCrypt.Net.BCrypt.Verify(request.password, user.passwordHash);
+            }
+            catch
+            {
+                throw new Exception("Tài khoản hoặc mật khẩu không đúng");
+            }
             if (!isPasswordValid)
                 throw new Exception("Tài khoản hoặc mật khẩu không đúng");
 
             // Tài khoản bị khóa
-            if (user.isActive)
+            if (!user.isActive)
                 throw new Exception("Tài khoản của bạn đã bị khóa. Vui lòng liên hệ Admin để biết thêm chi tiết.");
 
             // Tạo access token
@@ -137,7 +145,7 @@ namespace Recruitment.API.Services
             {
                 token = refreshToken,
                 userId = userId,
-                expiresAt = DateTime.UtcNow.AddSeconds(45),    // Refresh token sống 7 ngày
+                expiresAt = DateTime.UtcNow.AddDays(7),        // Refresh token sống 7 ngày
                 createdAt = DateTime.UtcNow,
                 isRevoked = false
             };

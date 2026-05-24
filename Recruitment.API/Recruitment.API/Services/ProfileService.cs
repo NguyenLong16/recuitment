@@ -134,17 +134,9 @@ namespace Recruitment.API.Services
 
             await _userRepository.UpdateAsync(user);
 
-            var response = _mapper.Map<UserProfileResponse>(user);
-            response.DefaultCvUrl = user.defaultCvUrl;
-
-            if (user.companyId.HasValue)
-            {
-                // Load lại company để trả về response đầy đủ nhất (vì vừa có thể bị sửa link website)
-                var company = await _context.Companies.FindAsync(user.companyId.Value);
-                response.Company = _mapper.Map<CompanyResponse>(company);
-            }
-
-            return response;
+            // Reload lại toàn bộ profile để tránh lỗi NullReference trên các navigation property
+            // chưa được eager-load (followers, userSkills, postedJobs...)
+            return await GetProfileAsync(id);
 
         }
 

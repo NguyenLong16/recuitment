@@ -1,4 +1,4 @@
-﻿using Recruitment.API.Repositories.Interfaces;
+using Recruitment.API.Repositories.Interfaces;
 using Recruitment.API.Services.Interfaces;
 
 namespace Recruitment.API.Services
@@ -14,6 +14,11 @@ namespace Recruitment.API.Services
         public async Task<bool> ToggleSaveJobAsync(int userId, int jobId)
         {
             return await _repository.ToggleSaveJobAsync(userId, jobId);
+        }
+
+        public async Task<IEnumerable<Recruitment.API.DTOs.SavedJobResponse>> GetSavedJobsAsync(int userId)
+        {
+            return await _repository.GetSavedJobsAsync(userId);
         }
     }
 }

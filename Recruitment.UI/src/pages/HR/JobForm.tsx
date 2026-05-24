@@ -98,7 +98,6 @@ const JobForm = () => {
                 locationId = locations.find(l => normalizeName(l.name) === normalizeName(locationName))?.id;
             }
 
-            // Ngành nghề
             let categoryId: number | undefined;
             if (job.categoryId && typeof job.categoryId === 'number') {
                 categoryId = job.categoryId;
@@ -161,7 +160,7 @@ const JobForm = () => {
             // Warnings
             const warnings: string[] = [];
             if (!locationId) warnings.push(`Không tìm địa điểm: "${job.locationName ?? 'undefined'}"`);
-            if (!categoryId) warnings.push(`Không tìm ngành nghề: "${job.categoryName ?? 'undefined'}"`);
+            if (!categoryId) warnings.push(`Không tìm vị trí tuyển dụng: "${job.categoryName ?? 'undefined'}"`);
             if (skillIds.length === 0 && (Array.isArray(skillNames) ? skillNames.length : 0) > 0) {
                 warnings.push(`Không match kỹ năng: ${skillMatches.join(', ')}`);
             }
@@ -338,12 +337,12 @@ const JobForm = () => {
 
     return (
         <div className="p-4 sm:p-6 lg:p-8 max-w-[1200px] mx-auto bg-gray-50 min-h-screen">
-            
+
             {/* Header / Nút Back */}
             <div className="mb-6">
-                <Button 
-                    type="text" 
-                    icon={<ArrowLeftOutlined />} 
+                <Button
+                    type="text"
+                    icon={<ArrowLeftOutlined />}
                     onClick={() => navigate("/hr/jobs-management")}
                     className="hover:bg-gray-200 mb-4"
                 >
@@ -381,23 +380,23 @@ const JobForm = () => {
                     />
                 )}
 
-                <Form 
-                    form={form} 
-                    layout="vertical" 
-                    onFinish={onFinish} 
+                <Form
+                    form={form}
+                    layout="vertical"
+                    onFinish={onFinish}
                     initialValues={{ jobType: [JobType.FullTime] }}
                     className="job-form-responsive"
                 >
                     <div className="bg-white rounded-xl mb-6">
                         <h3 className="text-lg font-bold text-gray-800 mb-4 pb-2 border-b border-gray-100">Thông tin chung</h3>
-                        
+
                         <Form.Item name="title" label={<span className="font-medium text-gray-700">Tiêu đề công việc</span>} rules={[{ required: true, message: 'Vui lòng nhập tiêu đề' }]}>
                             <Input placeholder="Ví dụ: Senior React Developer" size="large" className="rounded-lg" />
                         </Form.Item>
 
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-0 md:gap-6">
-                            <Form.Item name="categoryId" label={<span className="font-medium text-gray-700">Ngành nghề</span>} rules={[{ required: true, message: 'Chọn ngành nghề' }]}>
-                                <Select placeholder="Chọn ngành nghề" disabled={categories.length === 0} size="large" className="rounded-lg">
+                            <Form.Item name="categoryId" label={<span className="font-medium text-gray-700">Vị trí tuyển dụng</span>} rules={[{ required: true, message: 'Chọn vị trí tuyển dụng' }]}>
+                                <Select placeholder="Chọn vị trí tuyển dụng" disabled={categories.length === 0} size="large" className="rounded-lg">
                                     {categories.map(c => (
                                         <Option key={c.id} value={c.id}>{c.name}</Option>
                                     ))}
@@ -506,7 +505,7 @@ const JobForm = () => {
 
                     <div className="bg-white rounded-xl mb-8">
                         <h3 className="text-lg font-bold text-gray-800 mb-4 pb-2 border-b border-gray-100 mt-8">Nội dung chi tiết</h3>
-                        
+
                         <Form.Item name="description" label={<span className="font-medium text-gray-700">Mô tả công việc</span>} rules={[{ required: true, message: 'Nhập mô tả' }]}>
                             <Input.TextArea rows={5} placeholder="Mô tả chi tiết công việc, nhiệm vụ chính..." className="rounded-lg" />
                         </Form.Item>

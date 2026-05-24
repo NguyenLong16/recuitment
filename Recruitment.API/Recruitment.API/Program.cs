@@ -8,8 +8,7 @@ using Recruitment.API.Models;
 using Recruitment.API.Repositories;
 using Recruitment.API.Repositories.Interfaces;
 using Recruitment.API.Services;
-using Recruitment.API.Services.Interfaces;
-using System.Text;
+using Recruitment.API.Services.Interfaces;using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -75,6 +74,15 @@ builder.Services.AddScoped<IAdminCompanyService, AdminCompanyService>();
 
 builder.Services.AddScoped<IAdminDashboardRepository, AdminDashboardRepository>();
 builder.Services.AddScoped<IAdminDashboardService, AdminDashboardService>();
+
+builder.Services.AddScoped<IUserSkillRepository, UserSkillRepository>();
+builder.Services.AddScoped<IUserSkillService, UserSkillService>();
+
+builder.Services.AddScoped<IEducationRepository, EducationRepository>();
+builder.Services.AddScoped<IEducationService, EducationService>();
+
+builder.Services.AddScoped<IExperienceRepository, ExperienceRepository>();
+builder.Services.AddScoped<IExperienceService, ExperienceService>();
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();

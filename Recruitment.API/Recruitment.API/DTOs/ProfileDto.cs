@@ -18,6 +18,7 @@
         public string? GitHubUrl { get; set; }
         public List<EducationDto>? Educations { get; set; }
         public List<ExperienceDTO>? Experiences { get; set; }
+        public List<UserSkillResponse>? Skills { get; set; }
         public string? DefaultCvUrl { get; set; }
         // Dành cho HR
         public CompanyResponse? Company { get; set; }

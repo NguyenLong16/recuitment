@@ -1,4 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations;
 using static Recruitment.API.Data.Enums;
 
 namespace Recruitment.API.DTOs
@@ -22,6 +22,7 @@ namespace Recruitment.API.DTOs
         public string? coverLetter { get; set; }
         public DateTime appliedDate { get; set; }
         public string status { get; set; } = string.Empty;
+        public bool isSaved { get; set; }
     }
 
     public class UpdateStatusRequest

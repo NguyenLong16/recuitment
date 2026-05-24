@@ -1,24 +1,32 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
     Avatar,
     Button,
     Card,
     Col,
+    DatePicker,
     Divider,
     Form,
     Input,
+    message,
     Modal,
+    Popconfirm,
     Row,
+    Select,
     Skeleton,
     Space,
+    Spin,
     Tabs,
     Tag,
     Typography,
     Upload,
 } from "antd";
+import dayjs from "dayjs";
 import {
     CameraOutlined,
     CheckCircleOutlined,
+    CloseCircleOutlined,
+    DeleteOutlined,
     DownloadOutlined,
     EditOutlined,
     EnvironmentOutlined,
@@ -28,15 +36,22 @@ import {
     LinkedinOutlined,
     MailOutlined,
     PhoneOutlined,
+    PlusOutlined,
     SaveOutlined,
     TeamOutlined,
+    ToolOutlined,
+    TrophyOutlined,
     UploadOutlined,
     BookOutlined,
-    TrophyOutlined,
     IdcardOutlined,
 } from "@ant-design/icons";
 import useMyProfile from "../../hooks/useMyProfile";
-import { UpdateProfileRequest } from "../../types/profile";
+import { EducationDto, ExperienceDto, UpdateProfileRequest, UserSkillResponse } from "../../types/profile";
+import { Skill } from "../../types/skill";
+import EducationService from "../../services/educationService";
+import ExperienceService from "../../services/experienceService";
+import UserSkillService from "../../services/userSkillService";
+import SkillService from "../../services/skillService";
 
 const { Title, Text, Paragraph } = Typography;
 const { TextArea } = Input;
@@ -46,15 +61,53 @@ const CandidateProfilePage = () => {
     const { profile, loading, updating, updateProfile } = useMyProfile();
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
     const [form] = Form.useForm();
-    
+
     // File states
     const [avatarFile, setAvatarFile] = useState<File | null>(null);
-    const [coverFile, setCoverFile]   = useState<File | null>(null);
-    const [cvFile, setCvFile]         = useState<File | null>(null);
-    
+    const [coverFile, setCoverFile] = useState<File | null>(null);
+    const [cvFile, setCvFile] = useState<File | null>(null);
+
     // Preview states
     const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
-    const [coverPreview, setCoverPreview]   = useState<string | null>(null);
+    const [coverPreview, setCoverPreview] = useState<string | null>(null);
+
+    // Page-level live state
+    const [pageSkills, setPageSkills] = useState<UserSkillResponse[]>([]);
+    const [pageEducations, setPageEducations] = useState<EducationDto[]>([]);
+    const [pageExperiences, setPageExperiences] = useState<ExperienceDto[]>([]);
+
+    // Sync page state when profile loads/changes
+    useEffect(() => {
+        if (profile) {
+            setPageSkills(profile.skills ?? []);
+            setPageEducations(profile.educations ?? []);
+            setPageExperiences(profile.experiences ?? []);
+        }
+    }, [profile]);
+
+    // Skills in modal
+    const [allSkills, setAllSkills] = useState<Skill[]>([]);
+    const [selectedSkillIds, setSelectedSkillIds] = useState<number[]>([]);
+    const [addingSkill, setAddingSkill] = useState(false);
+    const [removingSkillId, setRemovingSkillId] = useState<number | null>(null);
+
+    // Education in modal
+    const [showAddEdu, setShowAddEdu] = useState(false);
+    const [savingEdu, setSavingEdu] = useState(false);
+    const [deletingEduId, setDeletingEduId] = useState<number | null>(null);
+    const [newEdu, setNewEdu] = useState({ schoolName: '', major: '', startDate: '', endDate: '' });
+    const [editingEduId, setEditingEduId] = useState<number | null>(null);
+    const [editEduData, setEditEduData] = useState({ schoolName: '', major: '', startDate: '', endDate: '' });
+    const [updatingEduId, setUpdatingEduId] = useState<number | null>(null);
+
+    // Experience in modal
+    const [showAddExp, setShowAddExp] = useState(false);
+    const [savingExp, setSavingExp] = useState(false);
+    const [deletingExpId, setDeletingExpId] = useState<number | null>(null);
+    const [newExp, setNewExp] = useState({ companyName: '', position: '', description: '', startDate: '', endDate: '' });
+    const [editingExpId, setEditingExpId] = useState<number | null>(null);
+    const [editExpData, setEditExpData] = useState({ companyName: '', position: '', description: '', startDate: '', endDate: '' });
+    const [updatingExpId, setUpdatingExpId] = useState<number | null>(null);
 
     // Helper function to build image URL
     const buildImageUrl = (url?: string) => {
@@ -69,39 +122,180 @@ const CandidateProfilePage = () => {
         "https://via.placeholder.com/1200x300?text=Cover+Image";
 
     // Open edit modal
-    const handleOpenEdit = () => {
+    const handleOpenEdit = async () => {
         form.setFieldsValue({
-            fullName:          profile?.fullName || "",
-            phoneNumber:       profile?.phoneNumber || "",
+            fullName: profile?.fullName || "",
+            phoneNumber: profile?.phoneNumber || "",
             professionalTitle: profile?.professionalTitle || "",
-            bio:               profile?.bio || "",
-            address:           profile?.address || "",
-            websiteUrl:        profile?.websiteUrl || "",
-            linkedInUrl:       profile?.linkedInUrl || "",
-            gitHubUrl:         profile?.gitHubUrl || "",
+            bio: profile?.bio || "",
+            address: profile?.address || "",
+            websiteUrl: profile?.websiteUrl || "",
+            linkedInUrl: profile?.linkedInUrl || "",
+            gitHubUrl: profile?.gitHubUrl || "",
         });
         setAvatarFile(null);
         setCoverFile(null);
         setCvFile(null);
         setAvatarPreview(null);
         setCoverPreview(null);
+        // Reset edu/exp/skill add-form states
+        setShowAddEdu(false);
+        setShowAddExp(false);
+        setEditingEduId(null);
+        setEditingExpId(null);
+        setSelectedSkillIds([]);
+        setNewEdu({ schoolName: '', major: '', startDate: '', endDate: '' });
+        setNewExp({ companyName: '', position: '', description: '', startDate: '', endDate: '' });
+        // Load latest edu/exp/skills from API
+        try {
+            const [edus, exps, skills] = await Promise.all([
+                EducationService.getMyEducations(),
+                ExperienceService.getMyExperiences(),
+                SkillService.getAll(),
+            ]);
+            setPageEducations(edus.data ?? []);
+            setPageExperiences(exps.data ?? []);
+            setAllSkills(skills.data ?? []);
+        } catch { /* silently ignore – modal still opens */ }
         setIsEditModalOpen(true);
+    };
+
+    // ---------- Skills handlers ----------
+    const handleModalAddSkill = async () => {
+        if (!selectedSkillIds.length) return;
+        setAddingSkill(true);
+        try {
+            await Promise.all(selectedSkillIds.map(id => UserSkillService.addSkill(id)));
+            const updated = await UserSkillService.getMySkills();
+            setPageSkills(updated.data ?? []);
+            setSelectedSkillIds([]);
+        } catch { message.error('Không thể thêm kỹ năng'); }
+        finally { setAddingSkill(false); }
+    };
+
+    const handleModalRemoveSkill = async (skillId: number) => {
+        setRemovingSkillId(skillId);
+        try {
+            await UserSkillService.removeSkill(skillId);
+            setPageSkills(prev => prev.filter(s => s.skillId !== skillId));
+        } catch { message.error('Không thể xoá kỹ năng'); }
+        finally { setRemovingSkillId(null); }
+    };
+
+    // ---------- Education handlers ----------
+    const handleAddEducation = async () => {
+        if (!newEdu.schoolName || !newEdu.major || !newEdu.startDate) {
+            message.warning('Vui lòng điền đủ trường bắt buộc'); return;
+        }
+        setSavingEdu(true);
+        try {
+            await EducationService.add({
+                schoolName: newEdu.schoolName,
+                major: newEdu.major,
+                startDate: newEdu.startDate,
+                endDate: newEdu.endDate || undefined,
+            });
+            const updated = await EducationService.getMyEducations();
+            setPageEducations(updated.data ?? []);
+            setNewEdu({ schoolName: '', major: '', startDate: '', endDate: '' });
+            setShowAddEdu(false);
+        } catch { message.error('Không thể thêm học vấn'); }
+        finally { setSavingEdu(false); }
+    };
+
+    const handleDeleteEducation = async (id: number) => {
+        setDeletingEduId(id);
+        try {
+            await EducationService.delete(id);
+            setPageEducations(prev => prev.filter(e => e.id !== id));
+        } catch { message.error('Không thể xoá học vấn'); }
+        finally { setDeletingEduId(null); }
+    };
+
+    const handleUpdateEducation = async (id: number) => {
+        if (!editEduData.schoolName || !editEduData.major || !editEduData.startDate) {
+            message.warning('Vui lòng điền đủ trường bắt buộc'); return;
+        }
+        setUpdatingEduId(id);
+        try {
+            await EducationService.update(id, {
+                schoolName: editEduData.schoolName,
+                major: editEduData.major,
+                startDate: editEduData.startDate,
+                endDate: editEduData.endDate || undefined,
+            });
+            const updated = await EducationService.getMyEducations();
+            setPageEducations(updated.data ?? []);
+            setEditingEduId(null);
+        } catch { message.error('Không thể cập nhật học vấn'); }
+        finally { setUpdatingEduId(null); }
+    };
+
+    // ---------- Experience handlers ----------
+    const handleAddExperience = async () => {
+        if (!newExp.companyName || !newExp.position || !newExp.startDate) {
+            message.warning('Vui lòng điền đủ trường bắt buộc'); return;
+        }
+        setSavingExp(true);
+        try {
+            await ExperienceService.add({
+                companyName: newExp.companyName,
+                position: newExp.position,
+                description: newExp.description || undefined,
+                startDate: newExp.startDate,
+                endDate: newExp.endDate || undefined,
+            });
+            const updated = await ExperienceService.getMyExperiences();
+            setPageExperiences(updated.data ?? []);
+            setNewExp({ companyName: '', position: '', description: '', startDate: '', endDate: '' });
+            setShowAddExp(false);
+        } catch { message.error('Không thể thêm kinh nghiệm'); }
+        finally { setSavingExp(false); }
+    };
+
+    const handleDeleteExperience = async (id: number) => {
+        setDeletingExpId(id);
+        try {
+            await ExperienceService.delete(id);
+            setPageExperiences(prev => prev.filter(e => e.id !== id));
+        } catch { message.error('Không thể xoá kinh nghiệm'); }
+        finally { setDeletingExpId(null); }
+    };
+
+    const handleUpdateExperience = async (id: number) => {
+        if (!editExpData.companyName || !editExpData.position || !editExpData.startDate) {
+            message.warning('Vui lòng điền đủ trường bắt buộc'); return;
+        }
+        setUpdatingExpId(id);
+        try {
+            await ExperienceService.update(id, {
+                companyName: editExpData.companyName,
+                position: editExpData.position,
+                description: editExpData.description || undefined,
+                startDate: editExpData.startDate,
+                endDate: editExpData.endDate || undefined,
+            });
+            const updated = await ExperienceService.getMyExperiences();
+            setPageExperiences(updated.data ?? []);
+            setEditingExpId(null);
+        } catch { message.error('Không thể cập nhật kinh nghiệm'); }
+        finally { setUpdatingExpId(null); }
     };
 
     // Handle form submit
     const handleSubmit = async (values: any) => {
         const payload: UpdateProfileRequest = {
-            fullName:          values.fullName,
-            phoneNumber:       values.phoneNumber || '',
+            fullName: values.fullName,
+            phoneNumber: values.phoneNumber || '',
             professionalTitle: values.professionalTitle || '',
-            bio:               values.bio || '',
-            address:           values.address || '',
-            websiteUrl:        values.websiteUrl || '',
-            linkedInUrl:       values.linkedInUrl || '',
-            gitHubUrl:         values.gitHubUrl || '',
-            avatarFile:        avatarFile ?? undefined,
-            coverFile:         coverFile ?? undefined,
-            cvFile:            cvFile ?? undefined,
+            bio: values.bio || '',
+            address: values.address || '',
+            websiteUrl: values.websiteUrl || '',
+            linkedInUrl: values.linkedInUrl || '',
+            gitHubUrl: values.gitHubUrl || '',
+            avatarFile: avatarFile ?? undefined,
+            coverFile: coverFile ?? undefined,
+            cvFile: cvFile ?? undefined,
         };
 
         const success = await updateProfile(payload);
@@ -150,7 +344,7 @@ const CandidateProfilePage = () => {
 
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <Row gutter={[24, 24]}>
-                    
+
                     {/* ==================== LEFT SIDEBAR ==================== */}
                     <Col xs={24} lg={8} xl={7}>
                         {/* Profile Card */}
@@ -161,7 +355,7 @@ const CandidateProfilePage = () => {
                         >
                             {/* Avatar & Name Section */}
                             <div className="flex flex-col items-center pt-6 sm:pt-8 pb-5 sm:pb-6 px-4 sm:px-6"
-                                 style={{ background: 'linear-gradient(180deg, #f0fdf4 0%, #ffffff 100%)' }}>
+                                style={{ background: 'linear-gradient(180deg, #f0fdf4 0%, #ffffff 100%)' }}>
                                 <div className="relative mb-3 sm:mb-4">
                                     <Avatar
                                         size={{ xs: 90, sm: 100, md: 110, lg: 120 }}
@@ -338,7 +532,7 @@ const CandidateProfilePage = () => {
                     {/* ==================== RIGHT MAIN CONTENT ==================== */}
                     <Col xs={24} lg={16} xl={17}>
                         <div className="flex flex-col gap-4 sm:gap-6 lg:mt-[calc(-4rem-2vw)]">
-                            
+
                             {/* Bio Section */}
                             <Card
                                 className="shadow-md hover:shadow-lg rounded-2xl border-0 overflow-hidden relative z-10 transition-all duration-300"
@@ -381,22 +575,22 @@ const CandidateProfilePage = () => {
                                                 <span className="flex items-center gap-1.5 sm:gap-2 font-semibold text-xs sm:text-sm lg:text-base px-2 py-1 sm:p-2">
                                                     <BookOutlined />
                                                     Học vấn
-                                                    {profile.educations && profile.educations.length > 0 && (
+                                                    {pageEducations.length > 0 && (
                                                         <Tag color={PRIMARY_COLOR} className="!m-0 !ml-1 !px-1.5 sm:!px-2 !py-0 text-[10px] sm:text-xs font-bold">
-                                                            {profile.educations.length}
+                                                            {pageEducations.length}
                                                         </Tag>
                                                     )}
                                                 </span>
                                             ),
                                             children: (
                                                 <div className="mt-2 sm:mt-4">
-                                                    {profile.educations && profile.educations.length > 0 ? (
+                                                    {pageEducations.length > 0 ? (
                                                         <div className="space-y-4 sm:space-y-6">
-                                                            {profile.educations.map((edu, index) => (
+                                                            {pageEducations.map((edu, index) => (
                                                                 <div key={edu.id} className="relative pl-6 sm:pl-8 pb-4">
                                                                     {/* Timeline dot & line */}
                                                                     <div className="absolute left-0 top-1 w-3 h-3 sm:w-4 sm:h-4 rounded-full bg-[#00B14F] border-[3px] sm:border-4 border-green-100 z-10"></div>
-                                                                    {index < (profile.educations?.length ?? 0) - 1 && (
+                                                                    {index < pageEducations.length - 1 && (
                                                                         <div className="absolute left-[5px] sm:left-[7px] top-4 sm:top-5 w-[2px] h-full bg-green-100"></div>
                                                                     )}
                                                                     <div className="bg-gradient-to-r from-green-50 to-transparent p-3 sm:p-4 lg:p-5 rounded-xl hover:from-green-100 transition-all duration-200">
@@ -407,7 +601,7 @@ const CandidateProfilePage = () => {
                                                                             {edu.major}
                                                                         </Text>
                                                                         <Tag color="green" className="!px-2 sm:!px-3 !py-0.5 text-[10px] sm:text-xs font-semibold !m-0">
-                                                                            {edu.startDate} — {edu.endDate || "Hiện tại"}
+                                                                            {dayjs(edu.startDate).format('MM/YYYY')} — {edu.endDate ? dayjs(edu.endDate).format('MM/YYYY') : "Hiện tại"}
                                                                         </Tag>
                                                                     </div>
                                                                 </div>
@@ -428,22 +622,22 @@ const CandidateProfilePage = () => {
                                                 <span className="flex items-center gap-1.5 sm:gap-2 font-semibold text-xs sm:text-sm lg:text-base px-2 py-1 sm:p-2">
                                                     <TrophyOutlined />
                                                     Kinh nghiệm
-                                                    {profile.experiences && profile.experiences.length > 0 && (
+                                                    {pageExperiences.length > 0 && (
                                                         <Tag color="blue" className="!m-0 !ml-1 !px-1.5 sm:!px-2 !py-0 text-[10px] sm:text-xs font-bold">
-                                                            {profile.experiences.length}
+                                                            {pageExperiences.length}
                                                         </Tag>
                                                     )}
                                                 </span>
                                             ),
                                             children: (
                                                 <div className="mt-2 sm:mt-4">
-                                                    {profile.experiences && profile.experiences.length > 0 ? (
+                                                    {pageExperiences.length > 0 ? (
                                                         <div className="space-y-4 sm:space-y-6">
-                                                            {profile.experiences.map((exp, index) => (
+                                                            {pageExperiences.map((exp, index) => (
                                                                 <div key={exp.id} className="relative pl-6 sm:pl-8 pb-4">
                                                                     {/* Timeline dot & line */}
                                                                     <div className="absolute left-0 top-1 w-3 h-3 sm:w-4 sm:h-4 rounded-full bg-blue-500 border-[3px] sm:border-4 border-blue-100 z-10"></div>
-                                                                    {index < (profile.experiences?.length ?? 0) - 1 && (
+                                                                    {index < pageExperiences.length - 1 && (
                                                                         <div className="absolute left-[5px] sm:left-[7px] top-4 sm:top-5 w-[2px] h-full bg-blue-100"></div>
                                                                     )}
                                                                     <div className="bg-gradient-to-r from-blue-50 to-transparent p-3 sm:p-4 lg:p-5 rounded-xl hover:from-blue-100 transition-all duration-200">
@@ -451,10 +645,10 @@ const CandidateProfilePage = () => {
                                                                             {exp.position}
                                                                         </Title>
                                                                         <Text className="text-gray-600 block font-semibold text-xs sm:text-sm mb-2">
-                                                                            {exp.company}
+                                                                            {exp.companyName}
                                                                         </Text>
                                                                         <Tag color="blue" className="!px-2 sm:!px-3 !py-0.5 text-[10px] sm:text-xs font-semibold mb-2 !m-0">
-                                                                            {exp.startDate} — {exp.endDate || "Hiện tại"}
+                                                                            {dayjs(exp.startDate).format('MM/YYYY')} — {exp.endDate ? dayjs(exp.endDate).format('MM/YYYY') : "Hiện tại"}
                                                                         </Tag>
                                                                         {exp.description && (
                                                                             <Paragraph className="!mt-2 !mb-0 text-gray-500 text-[11px] sm:text-xs md:text-sm leading-relaxed whitespace-pre-wrap">
@@ -469,6 +663,42 @@ const CandidateProfilePage = () => {
                                                         <div className="text-center py-8 sm:py-12">
                                                             <TrophyOutlined className="text-4xl sm:text-5xl text-gray-200 mb-2 sm:mb-3" />
                                                             <Text type="secondary" className="block text-sm sm:text-base">Chưa có kinh nghiệm làm việc</Text>
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            ),
+                                        },
+                                        {
+                                            key: 'skills',
+                                            label: (
+                                                <span className="flex items-center gap-1.5 sm:gap-2 font-semibold text-xs sm:text-sm lg:text-base px-2 py-1 sm:p-2">
+                                                    <ToolOutlined />
+                                                    Kỹ năng
+                                                    {pageSkills.length > 0 && (
+                                                        <Tag color="orange" className="!m-0 !ml-1 !px-1.5 sm:!px-2 !py-0 text-[10px] sm:text-xs font-bold">
+                                                            {pageSkills.length}
+                                                        </Tag>
+                                                    )}
+                                                </span>
+                                            ),
+                                            children: (
+                                                <div className="mt-2 sm:mt-4">
+                                                    {pageSkills.length > 0 ? (
+                                                        <div className="flex flex-wrap gap-2 sm:gap-3">
+                                                            {pageSkills.map(s => (
+                                                                <Tag
+                                                                    key={s.skillId}
+                                                                    color="green"
+                                                                    className="!px-3 sm:!px-4 !py-1 sm:!py-1.5 !text-xs sm:!text-sm !rounded-full !font-medium"
+                                                                >
+                                                                    {s.skillName}
+                                                                </Tag>
+                                                            ))}
+                                                        </div>
+                                                    ) : (
+                                                        <div className="text-center py-8 sm:py-12">
+                                                            <ToolOutlined className="text-4xl sm:text-5xl text-gray-200 mb-2 sm:mb-3" />
+                                                            <Text type="secondary" className="block text-sm sm:text-base">Chưa có kỹ năng nào</Text>
                                                         </div>
                                                     )}
                                                 </div>
@@ -614,9 +844,9 @@ const CandidateProfilePage = () => {
                                 </Form.Item>
                             </Col>
                             <Col xs={24} sm={12}>
-                                <Form.Item 
-                                    label={<span className="font-semibold text-gray-700 text-xs sm:text-sm">Số điện thoại</span>} 
-                                    name="phoneNumber" 
+                                <Form.Item
+                                    label={<span className="font-semibold text-gray-700 text-xs sm:text-sm">Số điện thoại</span>}
+                                    name="phoneNumber"
                                     rules={[{ required: true, message: 'Vui lòng nhập số điện thoại' }, { pattern: /^(0[0-9]{9,10})$/, message: 'Số điện thoại không hợp lệ' }]}
                                     className="mb-3 sm:mb-6"
                                 >
@@ -625,9 +855,9 @@ const CandidateProfilePage = () => {
                             </Col>
                         </Row>
 
-                        <Form.Item 
-                            label={<span className="font-semibold text-gray-700 text-xs sm:text-sm">Chức danh / Nghề nghiệp</span>} 
-                            name="professionalTitle" 
+                        <Form.Item
+                            label={<span className="font-semibold text-gray-700 text-xs sm:text-sm">Chức danh / Nghề nghiệp</span>}
+                            name="professionalTitle"
                             rules={[{ required: true, message: 'Vui lòng nhập chức danh / nghề nghiệp' }]}
                             className="mb-3 sm:mb-6"
                         >
@@ -685,6 +915,249 @@ const CandidateProfilePage = () => {
 
                     {/* CV Upload */}
                     <Divider className="!my-6 sm:!my-8" />
+                    {/* ──────────── KỸ NĂNG ──────────── */}
+                    <div className="mb-6 sm:mb-8">
+                        <Title level={5} className="!text-base sm:!text-lg !font-bold !mb-4 !text-gray-900 flex items-center gap-2">
+                            <ToolOutlined className="text-[#00B14F]" />
+                            <span>Kỹ năng</span>
+                        </Title>
+                        <div className="flex flex-wrap gap-2 mb-3">
+                            {pageSkills.map(s => (
+                                <Tag
+                                    key={s.skillId}
+                                    closable
+                                    closeIcon={removingSkillId === s.skillId ? <Spin size="small" /> : <CloseCircleOutlined />}
+                                    onClose={() => handleModalRemoveSkill(s.skillId)}
+                                    className="!text-sm !px-3 !py-1 !rounded-full"
+                                    color="green"
+                                >
+                                    {s.skillName}
+                                </Tag>
+                            ))}
+                            {pageSkills.length === 0 && <Text type="secondary" className="text-xs">Chưa có kỹ năng nào</Text>}
+                        </div>
+                        <div className="flex gap-2 items-start">
+                            <Select
+                                mode="multiple"
+                                className="flex-1"
+                                placeholder="Chọn một hoặc nhiều kỹ năng..."
+                                showSearch
+                                optionFilterProp="label"
+                                value={selectedSkillIds}
+                                onChange={(v: number[]) => setSelectedSkillIds(v)}
+                                options={allSkills
+                                    .filter(sk => !pageSkills.some(ps => ps.skillId === sk.id))
+                                    .map(sk => ({ value: sk.id, label: sk.skillName }))}
+                                maxTagCount="responsive"
+                            />
+                            <Button
+                                type="primary"
+                                icon={<PlusOutlined />}
+                                loading={addingSkill}
+                                disabled={!selectedSkillIds.length}
+                                onClick={handleModalAddSkill}
+                                className="!bg-[#00B14F] !border-0 !rounded-lg flex-shrink-0"
+                            >
+                                Thêm
+                            </Button>
+                        </div>
+                    </div>
+
+                    {/* ──────────── HỌC VẤN ──────────── */}
+                    <Divider className="!my-6 sm:!my-8" />
+                    <div className="mb-6 sm:mb-8">
+                        <div className="flex justify-between items-center mb-4">
+                            <Title level={5} className="!text-base sm:!text-lg !font-bold !mb-0 !text-gray-900 flex items-center gap-2">
+                                <BookOutlined className="text-[#00B14F]" />
+                                <span>Học vấn</span>
+                            </Title>
+                            {!showAddEdu && (
+                                <Button size="small" icon={<PlusOutlined />} onClick={() => setShowAddEdu(true)} className="!rounded-lg">
+                                    Thêm
+                                </Button>
+                            )}
+                        </div>
+
+                        {showAddEdu && (
+                            <div className="border border-dashed border-green-400 rounded-xl p-4 mb-4 bg-green-50">
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-3">
+                                    <Input placeholder="Tên trường *" value={newEdu.schoolName} onChange={e => setNewEdu(p => ({ ...p, schoolName: e.target.value }))} className="!rounded-lg" />
+                                    <Input placeholder="Chuyên ngành *" value={newEdu.major} onChange={e => setNewEdu(p => ({ ...p, major: e.target.value }))} className="!rounded-lg" />
+                                    <DatePicker
+                                        placeholder="Ngày bắt đầu *"
+                                        className="w-full !rounded-lg"
+                                        value={newEdu.startDate ? dayjs(newEdu.startDate) : null}
+                                        onChange={d => setNewEdu(p => ({ ...p, startDate: d ? d.toISOString() : '' }))}
+                                    />
+                                    <DatePicker
+                                        placeholder="Ngày kết thúc"
+                                        className="w-full !rounded-lg"
+                                        value={newEdu.endDate ? dayjs(newEdu.endDate) : null}
+                                        onChange={d => setNewEdu(p => ({ ...p, endDate: d ? d.toISOString() : '' }))}
+                                    />
+                                </div>
+                                <div className="flex gap-2 justify-end">
+                                    <Button onClick={() => setShowAddEdu(false)} className="!rounded-lg" size="small">Hủy</Button>
+                                    <Button type="primary" loading={savingEdu} onClick={handleAddEducation} className="!bg-[#00B14F] !border-0 !rounded-lg" size="small" icon={<SaveOutlined />}>Lưu</Button>
+                                </div>
+                            </div>
+                        )}
+
+                        {pageEducations.length === 0 && !showAddEdu && (
+                            <Text type="secondary" className="text-xs">Chưa có thông tin học vấn</Text>
+                        )}
+                        {pageEducations.map(edu => (
+                            <div key={edu.id} className="border border-gray-200 rounded-xl p-4 mb-3 bg-white">
+                                {editingEduId === edu.id ? (
+                                    <>
+                                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-3">
+                                            <Input placeholder="Tên trường *" value={editEduData.schoolName} onChange={e => setEditEduData(p => ({ ...p, schoolName: e.target.value }))} className="!rounded-lg" />
+                                            <Input placeholder="Chuyên ngành *" value={editEduData.major} onChange={e => setEditEduData(p => ({ ...p, major: e.target.value }))} className="!rounded-lg" />
+                                            <DatePicker
+                                                placeholder="Ngày bắt đầu *"
+                                                className="w-full !rounded-lg"
+                                                value={editEduData.startDate ? dayjs(editEduData.startDate) : null}
+                                                onChange={d => setEditEduData(p => ({ ...p, startDate: d ? d.toISOString() : '' }))}
+                                            />
+                                            <DatePicker
+                                                placeholder="Ngày kết thúc"
+                                                className="w-full !rounded-lg"
+                                                value={editEduData.endDate ? dayjs(editEduData.endDate) : null}
+                                                onChange={d => setEditEduData(p => ({ ...p, endDate: d ? d.toISOString() : '' }))}
+                                            />
+                                        </div>
+                                        <div className="flex gap-2 justify-end">
+                                            <Button size="small" onClick={() => setEditingEduId(null)} className="!rounded-lg">Hủy</Button>
+                                            <Button size="small" type="primary" loading={updatingEduId === edu.id} onClick={() => handleUpdateEducation(edu.id)} className="!bg-[#00B14F] !border-0 !rounded-lg" icon={<SaveOutlined />}>Lưu</Button>
+                                        </div>
+                                    </>
+                                ) : (
+                                    <div className="flex justify-between items-start">
+                                        <div>
+                                            <Text strong className="block text-sm">{edu.schoolName}</Text>
+                                            <Text type="secondary" className="text-xs">{edu.major}</Text>
+                                            <Text type="secondary" className="block text-xs mt-1">
+                                                {dayjs(edu.startDate).format('MM/YYYY')} – {edu.endDate ? dayjs(edu.endDate).format('MM/YYYY') : 'Hiện tại'}
+                                            </Text>
+                                        </div>
+                                        <Space>
+                                            <Button size="small" icon={<EditOutlined />} onClick={() => { setEditingEduId(edu.id); setEditEduData({ schoolName: edu.schoolName, major: edu.major, startDate: edu.startDate, endDate: edu.endDate ?? '' }); }} className="!rounded-lg" />
+                                            <Popconfirm title="Xoá học vấn này?" okText="Xoá" cancelText="Hủy" onConfirm={() => handleDeleteEducation(edu.id)}>
+                                                <Button size="small" danger icon={deletingEduId === edu.id ? <Spin size="small" /> : <DeleteOutlined />} className="!rounded-lg" />
+                                            </Popconfirm>
+                                        </Space>
+                                    </div>
+                                )}
+                            </div>
+                        ))}
+                    </div>
+
+                    {/* ──────────── KINH NGHIỆM ──────────── */}
+                    <Divider className="!my-6 sm:!my-8" />
+                    <div className="mb-6 sm:mb-8">
+                        <div className="flex justify-between items-center mb-4">
+                            <Title level={5} className="!text-base sm:!text-lg !font-bold !mb-0 !text-gray-900 flex items-center gap-2">
+                                <TrophyOutlined className="text-[#00B14F]" />
+                                <span>Kinh nghiệm làm việc</span>
+                            </Title>
+                            {!showAddExp && (
+                                <Button size="small" icon={<PlusOutlined />} onClick={() => setShowAddExp(true)} className="!rounded-lg">
+                                    Thêm
+                                </Button>
+                            )}
+                        </div>
+
+                        {showAddExp && (
+                            <div className="border border-dashed border-green-400 rounded-xl p-4 mb-4 bg-green-50">
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-3">
+                                    <Input placeholder="Tên công ty *" value={newExp.companyName} onChange={e => setNewExp(p => ({ ...p, companyName: e.target.value }))} className="!rounded-lg" />
+                                    <Input placeholder="Vị trí *" value={newExp.position} onChange={e => setNewExp(p => ({ ...p, position: e.target.value }))} className="!rounded-lg" />
+                                    <DatePicker
+                                        placeholder="Ngày bắt đầu *"
+                                        className="w-full !rounded-lg"
+                                        value={newExp.startDate ? dayjs(newExp.startDate) : null}
+                                        onChange={d => setNewExp(p => ({ ...p, startDate: d ? d.toISOString() : '' }))}
+                                    />
+                                    <DatePicker
+                                        placeholder="Ngày kết thúc"
+                                        className="w-full !rounded-lg"
+                                        value={newExp.endDate ? dayjs(newExp.endDate) : null}
+                                        onChange={d => setNewExp(p => ({ ...p, endDate: d ? d.toISOString() : '' }))}
+                                    />
+                                </div>
+                                <Input.TextArea
+                                    rows={2}
+                                    placeholder="Mô tả công việc"
+                                    value={newExp.description}
+                                    onChange={e => setNewExp(p => ({ ...p, description: e.target.value }))}
+                                    className="!rounded-lg mb-3"
+                                />
+                                <div className="flex gap-2 justify-end">
+                                    <Button onClick={() => setShowAddExp(false)} className="!rounded-lg" size="small">Hủy</Button>
+                                    <Button type="primary" loading={savingExp} onClick={handleAddExperience} className="!bg-[#00B14F] !border-0 !rounded-lg" size="small" icon={<SaveOutlined />}>Lưu</Button>
+                                </div>
+                            </div>
+                        )}
+
+                        {pageExperiences.length === 0 && !showAddExp && (
+                            <Text type="secondary" className="text-xs">Chưa có thông tin kinh nghiệm</Text>
+                        )}
+                        {pageExperiences.map(exp => (
+                            <div key={exp.id} className="border border-gray-200 rounded-xl p-4 mb-3 bg-white">
+                                {editingExpId === exp.id ? (
+                                    <>
+                                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-3">
+                                            <Input placeholder="Tên công ty *" value={editExpData.companyName} onChange={e => setEditExpData(p => ({ ...p, companyName: e.target.value }))} className="!rounded-lg" />
+                                            <Input placeholder="Vị trí *" value={editExpData.position} onChange={e => setEditExpData(p => ({ ...p, position: e.target.value }))} className="!rounded-lg" />
+                                            <DatePicker
+                                                placeholder="Ngày bắt đầu *"
+                                                className="w-full !rounded-lg"
+                                                value={editExpData.startDate ? dayjs(editExpData.startDate) : null}
+                                                onChange={d => setEditExpData(p => ({ ...p, startDate: d ? d.toISOString() : '' }))}
+                                            />
+                                            <DatePicker
+                                                placeholder="Ngày kết thúc"
+                                                className="w-full !rounded-lg"
+                                                value={editExpData.endDate ? dayjs(editExpData.endDate) : null}
+                                                onChange={d => setEditExpData(p => ({ ...p, endDate: d ? d.toISOString() : '' }))}
+                                            />
+                                        </div>
+                                        <Input.TextArea
+                                            rows={2}
+                                            placeholder="Mô tả công việc"
+                                            value={editExpData.description}
+                                            onChange={e => setEditExpData(p => ({ ...p, description: e.target.value }))}
+                                            className="!rounded-lg mb-3"
+                                        />
+                                        <div className="flex gap-2 justify-end">
+                                            <Button size="small" onClick={() => setEditingExpId(null)} className="!rounded-lg">Hủy</Button>
+                                            <Button size="small" type="primary" loading={updatingExpId === exp.id} onClick={() => handleUpdateExperience(exp.id)} className="!bg-[#00B14F] !border-0 !rounded-lg" icon={<SaveOutlined />}>Lưu</Button>
+                                        </div>
+                                    </>
+                                ) : (
+                                    <div className="flex justify-between items-start">
+                                        <div>
+                                            <Text strong className="block text-sm">{exp.companyName}</Text>
+                                            <Text type="secondary" className="text-xs">{exp.position}</Text>
+                                            <Text type="secondary" className="block text-xs mt-1">
+                                                {dayjs(exp.startDate).format('MM/YYYY')} – {exp.endDate ? dayjs(exp.endDate).format('MM/YYYY') : 'Hiện tại'}
+                                            </Text>
+                                            {exp.description && <Text type="secondary" className="block text-xs mt-1 italic">{exp.description}</Text>}
+                                        </div>
+                                        <Space>
+                                            <Button size="small" icon={<EditOutlined />} onClick={() => { setEditingExpId(exp.id); setEditExpData({ companyName: exp.companyName, position: exp.position, description: exp.description ?? '', startDate: exp.startDate, endDate: exp.endDate ?? '' }); }} className="!rounded-lg" />
+                                            <Popconfirm title="Xoá kinh nghiệm này?" okText="Xoá" cancelText="Hủy" onConfirm={() => handleDeleteExperience(exp.id)}>
+                                                <Button size="small" danger icon={deletingExpId === exp.id ? <Spin size="small" /> : <DeleteOutlined />} className="!rounded-lg" />
+                                            </Popconfirm>
+                                        </Space>
+                                    </div>
+                                )}
+                            </div>
+                        ))}
+                    </div>
+
+                    {/* CV Upload */}
+                    <Divider className="!my-6 sm:!my-8" />
                     <Title level={5} className="!text-base sm:!text-lg !font-bold !mb-4 sm:!mb-6 !text-gray-900 flex items-center gap-2">
                         <span>📄</span>
                         <span>CV của bạn</span>
@@ -713,7 +1186,7 @@ const CandidateProfilePage = () => {
                     </Form.Item>
 
                     <Divider className="!border-dashed !my-6 sm:!my-8" />
-                    
+
                     <div className="flex justify-end gap-3 sm:gap-4 mt-2">
                         <Button
                             onClick={() => setIsEditModalOpen(false)}

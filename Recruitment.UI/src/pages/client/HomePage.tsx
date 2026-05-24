@@ -1,20 +1,58 @@
-import { useRef, useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import JobCard from "../../components/common/Clients/JobCard"
 import { Button, Empty, Pagination, Spin, Typography } from "antd"
 import useJobMasterData from "../../hooks/useJobMasterData"
 import { JobFilterForm } from "../../components/common/JobFilterForm"
 import { useJobFilter } from "../../hooks/useJobFilter"
-import { SearchOutlined, FilterOutlined } from "@ant-design/icons"
+import { SearchOutlined, FilterOutlined, ThunderboltOutlined } from "@ant-design/icons"
+import { useAppSelector } from "../../hooks/hook"
+import { Role } from "../../types/auth"
+import { JobSuggestionResponse } from "../../types/profile"
+import UserSkillService from "../../services/userSkillService"
+import { useNavigate } from "react-router-dom"
+import dayjs from "dayjs"
 
 const { Title, Text } = Typography
 
+const PLACEHOLDER = "https://via.placeholder.com/56x56?text=Logo"
+const PRIMARY_COLOR = "#00B14F"
+
 const HomePage = () => {
+    const navigate = useNavigate()
     const [currentPage, setCurrentPage] = useState(1)
     const pageSize = 10
     const { categories, locations, skills } = useJobMasterData()
     const { jobs, isLoading, filters, updateFilters, resetFilters } = useJobFilter();
     const [showMobileFilter, setShowMobileFilter] = useState(false)
     const jobListRef = useRef<HTMLDivElement>(null)
+    const { user } = useAppSelector((state) => state.auth)
+    const isCandidate = user?.role === Role.Candidate
+
+    // Job suggestions for Candidate
+    const [suggestions, setSuggestions] = useState<JobSuggestionResponse[]>([])
+    const [loadingSuggestions, setLoadingSuggestions] = useState(false)
+
+    useEffect(() => {
+        if (!isCandidate) return
+        setLoadingSuggestions(true)
+        UserSkillService.getJobSuggestions()
+            .then(res => setSuggestions(res.data))
+            .catch(() => setSuggestions([]))
+            .finally(() => setLoadingSuggestions(false))
+    }, [isCandidate])
+
+    const formatSalary = (min?: number, max?: number) => {
+        if (!min && !max) return "Thương lượng"
+        const fmt = (v: number) => (v / 1_000_000).toFixed(0) + " tr"
+        if (min && max) return `${fmt(min)} - ${fmt(max)}`
+        if (min) return `Từ ${fmt(min)}`
+        return `Tới ${fmt(max!)}`
+    }
+
+    const buildLogoUrl = (url?: string) => {
+        if (!url) return PLACEHOLDER
+        return url.startsWith("http") ? url : `https://localhost:7016${url}`
+    }
 
     const paginatedJobs = jobs.slice((currentPage - 1) * pageSize, currentPage * pageSize)
 
@@ -56,16 +94,84 @@ const HomePage = () => {
                 </div>
             </div>
 
+            {/* ── Job Suggestions for Candidates ─────────────────────────── */}
+            {isCandidate && (loadingSuggestions || suggestions.length > 0) && (
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6 sm:pt-8">
+                    <div className="bg-white rounded-2xl shadow-[0_4px_20px_rgba(0,0,0,0.06)] border border-gray-100 p-5 sm:p-6">
+                        {/* Header */}
+                        <div className="flex items-center gap-2 mb-4 sm:mb-5">
+                            <ThunderboltOutlined className="text-yellow-400 text-xl sm:text-2xl" />
+                            <Title level={4} className="!m-0 !text-base sm:!text-lg font-bold text-gray-900">
+                                Công việc gợi ý cho bạn
+                            </Title>
+                            {suggestions.length > 0 && (
+                                <span className="ml-1 px-2 py-0.5 text-xs font-semibold rounded-full text-white" style={{ backgroundColor: PRIMARY_COLOR }}>
+                                    {suggestions.length} việc làm
+                                </span>
+                            )}
+                        </div>
+
+                        {loadingSuggestions ? (
+                            <div className="flex gap-4 overflow-hidden">
+                                {[1, 2, 3].map(i => (
+                                    <div key={i} className="flex-shrink-0 w-72 h-28 bg-gray-100 rounded-xl animate-pulse" />
+                                ))}
+                            </div>
+                        ) : (
+                            <div className="flex gap-3 sm:gap-4 overflow-x-auto pb-2 scrollbar-thin scrollbar-thumb-gray-200">
+                                {suggestions.map(job => {
+                                    const left = dayjs(job.deadline).diff(dayjs(), "day")
+                                    return (
+                                        <div
+                                            key={job.id}
+                                            onClick={() => navigate(`/job/${job.id}`)}
+                                            className="group flex-shrink-0 w-72 sm:w-80 flex gap-3 p-4 bg-gray-50 hover:bg-green-50 rounded-xl border border-gray-100 hover:border-emerald-300 hover:shadow-md cursor-pointer transition-all duration-200"
+                                        >
+                                            <img
+                                                src={buildLogoUrl(job.companyLogoUrl)}
+                                                alt={job.companyName}
+                                                className="w-12 h-12 rounded-lg object-contain border border-gray-100 bg-white p-1 flex-shrink-0"
+                                                onError={e => { (e.target as HTMLImageElement).src = PLACEHOLDER }}
+                                            />
+                                            <div className="flex-1 min-w-0">
+                                                <p className="text-sm font-semibold text-gray-900 group-hover:text-[#00B14F] truncate transition-colors leading-snug">
+                                                    {job.title}
+                                                </p>
+                                                <p className="text-xs text-gray-500 truncate mt-0.5">{job.companyName}</p>
+                                                <div className="flex items-center gap-2 mt-2 flex-wrap">
+                                                    <span className="text-xs font-medium px-2 py-0.5 rounded-full text-white" style={{ backgroundColor: PRIMARY_COLOR }}>
+                                                        {formatSalary(job.salaryMin, job.salaryMax)}
+                                                    </span>
+                                                    <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${left < 3 ? "bg-red-100 text-red-600" : "bg-gray-100 text-gray-600"}`}>
+                                                        {left < 0 ? "Hết hạn" : `Còn ${left} ngày`}
+                                                    </span>
+                                                </div>
+                                                {job.matchedSkills.length > 0 && (
+                                                    <p className="text-[11px] text-emerald-600 mt-1.5 truncate font-medium">
+                                                        ✓ {job.matchedSkills.slice(0, 3).join(", ")}
+                                                        {job.matchedSkills.length > 3 && ` +${job.matchedSkills.length - 3}`}
+                                                    </p>
+                                                )}
+                                            </div>
+                                        </div>
+                                    )
+                                })}
+                            </div>
+                        )}
+                    </div>
+                </div>
+            )}
+
             {/* ── Main Content - Split Layout ─────────────────────────────────── */}
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 lg:py-10">
-                
+
                 {/* Mobile Filter Toggle */}
                 <div className="lg:hidden mb-4 sm:mb-6">
                     <button
                         onClick={() => setShowMobileFilter(!showMobileFilter)}
                         className={`w-full flex items-center justify-center gap-2 px-4 py-2.5 sm:py-3 rounded-xl shadow-sm border font-medium transition-all duration-200
-                            ${showMobileFilter 
-                                ? 'bg-green-50 border-green-200 text-[#00B14F]' 
+                            ${showMobileFilter
+                                ? 'bg-green-50 border-green-200 text-[#00B14F]'
                                 : 'bg-white border-gray-200 text-gray-700 hover:bg-gray-50'}`}
                     >
                         <FilterOutlined />
@@ -74,7 +180,7 @@ const HomePage = () => {
                 </div>
 
                 <div className="flex flex-col lg:flex-row gap-6 lg:gap-8">
-                    
+
                     {/* ====== LEFT: Filter Sidebar ====== */}
                     <div className={`lg:w-[300px] xl:w-[320px] flex-shrink-0 transition-all duration-300 ${showMobileFilter ? 'block' : 'hidden lg:block'}`}>
                         <div className="bg-white rounded-2xl shadow-[0_4px_20px_rgba(0,0,0,0.06)] border border-gray-100 p-4 sm:p-5 lg:sticky lg:top-[88px] z-10 transition-all">
@@ -96,7 +202,7 @@ const HomePage = () => {
 
                     {/* ====== RIGHT: Job Listings ====== */}
                     <div className="flex-1 min-w-0" ref={jobListRef}>
-                        
+
                         {/* Section Header */}
                         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-5 sm:mb-6 gap-3 sm:gap-4">
                             <div>
@@ -189,7 +295,7 @@ const HomePage = () => {
                     </div>
                 </div>
             </div>
-            
+
             {/* Custom CSS for Pagination active state to match theme */}
             <style>{`
                 .ant-pagination-item-active {

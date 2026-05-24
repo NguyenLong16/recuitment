@@ -47,5 +47,6 @@ namespace Recruitment.API.Models
         public virtual ICollection<Follow> following { get; set; } // Những người mình đang theo dõi (nếu mình là Candidate)
                                                                    // THÊM DÒNG NÀY: Trạng thái hoạt động của tài khoản
         public bool isActive { get; set; } = true;
+        public virtual ICollection<UserSkill> userSkills { get; set; } = new List<UserSkill>();
     }
 }

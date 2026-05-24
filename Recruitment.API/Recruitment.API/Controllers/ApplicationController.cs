@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Recruitment.API.DTOs;
 using Recruitment.API.Services.Interfaces;
@@ -117,6 +117,42 @@ namespace Recruitment.API.Controllers
 
                 var stats = await _applicationService.GetApplicationStatisticsAsync(employerId, period);
                 return Ok(stats);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+        }
+
+        [HttpPost("{id}/toggle-save")]
+        [Authorize(Roles = "Employer, Admin")]
+        public async Task<IActionResult> ToggleSaveApplication(int id)
+        {
+            try
+            {
+                var employerId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value!);
+                var isSaved = await _applicationService.ToggleSaveApplicationAsync(id, employerId);
+                return Ok(new
+                {
+                    saved = isSaved,
+                    message = isSaved ? "Đã lưu hồ sơ" : "Đã bỏ lưu hồ sơ"
+                });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+        }
+
+        [HttpGet("saved")]
+        [Authorize(Roles = "Employer, Admin")]
+        public async Task<IActionResult> GetSavedApplications()
+        {
+            try
+            {
+                var employerId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value!);
+                var result = await _applicationService.GetSavedApplicationsByEmployerAsync(employerId);
+                return Ok(result);
             }
             catch (Exception ex)
             {

@@ -44,7 +44,7 @@ const Sidebar = ({ onClose }: SidebarProps) => {
         {
             key: '/admin/categories',
             icon: <Layers size={20} />,
-            label: 'Ngành nghề',
+            label: 'Vị trí công việc',
         },
         {
             key: '/admin/locations',

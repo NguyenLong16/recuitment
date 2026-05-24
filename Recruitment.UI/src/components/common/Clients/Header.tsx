@@ -33,7 +33,7 @@ const Header = () => {
     // ── Ant Design dropdown menus ──────────────────────────────────────────────
     const jobsMenuItems: MenuProps['items'] = [
         { key: '1', label: 'Tìm việc làm', onClick: () => goTo('/') },
-        { key: '2', label: 'Việc làm đã lưu' },
+        { key: '2', label: 'Việc làm đã lưu', onClick: () => goTo('/saved-jobs') },
         { key: '3', label: 'Việc làm đã ứng tuyển', onClick: () => goTo('/my-applications') },
     ];
 
@@ -102,7 +102,7 @@ const Header = () => {
         <>
             <header className="bg-white border-b border-gray-200 sticky top-0 z-50 shadow-sm">
                 <div className="max-w-7xl mx-auto px-3 sm:px-5 lg:px-8">
-                    <div className="flex items-center justify-between h-14 sm:h-16">
+                    <div className={`flex items-center h-14 sm:h-16 ${isHR ? 'justify-between' : ''}`}>
 
                         {/* ── LEFT: Logo ─────────────────────────────────────── */}
                         <Link
@@ -119,7 +119,7 @@ const Header = () => {
                             </span>
                         </Link>
 
-                        {/* ── CENTER: Desktop nav (hidden < md) ──────────────── */}
+                        {/* ── Nav: ngay sau logo ──────────────────────────────── */}
                         <nav className="hidden md:flex items-center gap-1 lg:gap-4 ml-4 lg:ml-8">
                             {isHR ? (
                                 <>
@@ -133,7 +133,7 @@ const Header = () => {
                         </nav>
 
                         {/* ── RIGHT: Actions ─────────────────────────────────── */}
-                        <div className="flex items-center gap-1 sm:gap-2">
+                        <div className={`flex items-center gap-1 sm:gap-2 ${!isHR ? 'ml-auto' : ''}`}>
 
                             {/* Notification + Message: chỉ hiện lg khi đã login */}
                             {user && (
@@ -238,7 +238,7 @@ const Header = () => {
                     {!isHR && (
                         <>
                             <MobileNavItem icon={<Home size={18} />} label="Trang chủ" onClick={() => goTo('/')} />
-                            <MobileNavItem icon={<Bookmark size={18} />} label="Việc làm đã lưu" onClick={() => goTo('/')} />
+                            <MobileNavItem icon={<Bookmark size={18} />} label="Việc làm đã lưu" onClick={() => goTo('/saved-jobs')} />
                             <MobileNavItem icon={<FileText size={18} />} label="Việc làm đã ứng tuyển" onClick={() => goTo('/my-applications')} />
                         </>
                     )}

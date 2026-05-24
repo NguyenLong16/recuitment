@@ -4,10 +4,14 @@ import { JobResponse } from "../../types/job";
 import { useEffect, useState } from "react";
 import JobService from "../../services/jobService";
 import ApplicationService from "../../services/applicationService";
+import savedJobService from "../../services/savedJobService";
 import dayjs from "dayjs";
-import { ArrowLeftOutlined, ClockCircleOutlined, DollarOutlined, EnvironmentOutlined, UploadOutlined, UserOutlined } from "@ant-design/icons"
+import { ArrowLeftOutlined, BookFilled, BookOutlined, CalendarOutlined, ClockCircleOutlined, DollarOutlined, EnvironmentOutlined, LaptopOutlined, StarFilled, TagsOutlined, TeamOutlined, UploadOutlined, UserOutlined } from "@ant-design/icons"
 import CommentSection from "../../components/common/Clients/CommentSection";
 import RatingSection from "../../components/common/Clients/RatingSection";
+import { useDispatch, useSelector } from "react-redux";
+import { AppDispatch, RootState } from "../../redux/store";
+import { addSavedId, removeSavedId } from "../../redux/slices/savedJobSlice";
 
 const { Title, Text, Paragraph } = Typography;
 const { TextArea } = Input;
@@ -21,6 +25,11 @@ const JobDetailPage = () => {
     const [applying, setApplying] = useState(false);
     const [form] = Form.useForm();
     const [cvFile, setCvFile] = useState<File | null>(null);
+    const [saving, setSaving] = useState(false);
+    const dispatch = useDispatch<AppDispatch>();
+    const user = useSelector((state: RootState) => state.auth.user);
+    const savedIds = useSelector((state: RootState) => state.savedJobs.ids);
+    const isSaved = job ? savedIds.includes(job.id) : false;
 
     useEffect(() => {
         const fetchJob = async () => {
@@ -36,6 +45,45 @@ const JobDetailPage = () => {
         };
         fetchJob();
     }, [id]);
+
+    const handleToggleSave = async () => {
+        if (!user) { message.warning('Vui lòng đăng nhập để lưu công việc'); return; }
+        setSaving(true);
+        try {
+            const response = await savedJobService.toggleSavedJob(job!.id);
+            if (isSaved) {
+                dispatch(removeSavedId(job!.id));
+            } else {
+                dispatch(addSavedId(job!.id));
+            }
+            message.success(response.data.message);
+        } catch {
+            message.error('Có lỗi xảy ra');
+        } finally {
+            setSaving(false);
+        }
+    };
+
+    const jobTypeLabel = (type: string) => {
+        const map: Record<string, string> = {
+            FullTime: 'Toàn thời gian',
+            PartTime: 'Bán thời gian',
+            Remote: 'Làm từ xa',
+            Internship: 'Thực tập',
+            Contract: 'Hợp đồng',
+        };
+        return map[type] ?? type;
+    };
+
+    const statusLabel = (status: string) => {
+        const map: Record<string, { label: string; color: string }> = {
+            Active: { label: 'Đang tuyển', color: 'success' },
+            Closed: { label: 'Đã đóng', color: 'error' },
+            Expired: { label: 'Hết hạn', color: 'default' },
+            Draft: { label: 'Bản nháp', color: 'warning' },
+        };
+        return map[status] ?? { label: status, color: 'default' };
+    };
 
     // Format lương
     const formatSalary = (min?: number, max?: number): string => {
@@ -124,31 +172,73 @@ const JobDetailPage = () => {
                             />
                         </Col>
                         <Col flex="auto">
-                            <Title level={3} style={{ margin: 0 }}>{job.title}</Title>
+                            <Space align="center" style={{ marginBottom: 4 }}>
+                                <Title level={3} style={{ margin: 0 }}>{job.title}</Title>
+                                <Tag color={statusLabel(job.status).color} style={{ fontSize: 12, margin: 0 }}>
+                                    {statusLabel(job.status).label}
+                                </Tag>
+                            </Space>
                             <Text type="secondary" style={{ fontSize: 16 }}>
                                 {job.companyName || 'Công ty chưa cập nhật'}
                             </Text>
-                            <Space size={16} style={{ marginTop: 16 }} wrap>
+                            <Space size={8} style={{ marginTop: 12 }} wrap>
                                 <Tag icon={<DollarOutlined />} color="green" style={{ fontSize: 14, padding: '4px 12px' }}>
                                     {formatSalary(job.salaryMin, job.salaryMax)}
                                 </Tag>
                                 <Tag icon={<EnvironmentOutlined />} style={{ fontSize: 14, padding: '4px 12px' }}>
                                     {job.locationName}
                                 </Tag>
-                                <Tag icon={<ClockCircleOutlined />} style={{ fontSize: 14, padding: '4px 12px' }}>
+                                <Tag icon={<LaptopOutlined />} color="blue" style={{ fontSize: 14, padding: '4px 12px' }}>
+                                    {jobTypeLabel(job.jobType)}
+                                </Tag>
+                                <Tag icon={<TagsOutlined />} color="orange" style={{ fontSize: 14, padding: '4px 12px' }}>
+                                    {job.categoryName}
+                                </Tag>
+                                <Tag icon={<ClockCircleOutlined />} color={dayjs(job.deadline).diff(dayjs(), 'day') <= 3 ? 'red' : 'default'} style={{ fontSize: 14, padding: '4px 12px' }}>
                                     Hạn: {dayjs(job.deadline).format('DD/MM/YYYY')}
                                 </Tag>
+                                <Tag icon={<CalendarOutlined />} style={{ fontSize: 14, padding: '4px 12px' }}>
+                                    Đăng: {dayjs(job.createdDate).format('DD/MM/YYYY')}
+                                </Tag>
                             </Space>
+                            {job.skillNames && job.skillNames.length > 0 && (
+                                <Space wrap style={{ marginTop: 8 }}>
+                                    <Text type="secondary" style={{ fontSize: 13 }}>Kỹ năng:</Text>
+                                    {job.skillNames.map((skill, idx) => (
+                                        <Tag key={idx} color="cyan" style={{ fontSize: 13 }}>{skill}</Tag>
+                                    ))}
+                                </Space>
+                            )}
+                            {job.averageRating > 0 && (
+                                <Space style={{ marginTop: 8 }}>
+                                    <StarFilled style={{ color: '#faad14' }} />
+                                    <Text strong>{job.averageRating.toFixed(1)}</Text>
+                                    <Text type="secondary">({job.totalReviews} đánh giá)</Text>
+                                    <Text type="secondary">·</Text>
+                                    <Text type="secondary">{job.totalComments} bình luận</Text>
+                                </Space>
+                            )}
                         </Col>
                         <Col>
-                            <Button
-                                type="primary"
-                                size="large"
-                                style={{ height: 48, paddingInline: 32, borderRadius: 8 }}
-                                onClick={() => setApplyModalVisible(true)}
-                            >
-                                Ứng tuyển ngay
-                            </Button>
+                            <Space direction="vertical" size={8}>
+                                <Button
+                                    type="primary"
+                                    size="large"
+                                    style={{ height: 48, paddingInline: 32, borderRadius: 8 }}
+                                    onClick={() => setApplyModalVisible(true)}
+                                >
+                                    Ứng tuyển ngay
+                                </Button>
+                                <Button
+                                    size="large"
+                                    icon={isSaved ? <BookFilled style={{ color: '#00B14F' }} /> : <BookOutlined />}
+                                    loading={saving}
+                                    onClick={handleToggleSave}
+                                    style={{ height: 48, borderRadius: 8, width: '100%' }}
+                                >
+                                    {isSaved ? 'Đã lưu' : 'Lưu tin'}
+                                </Button>
+                            </Space>
                         </Col>
                     </Row>
                 </Card>
@@ -179,29 +269,50 @@ const JobDetailPage = () => {
                         <Card title="Thông tin chung" style={{ borderRadius: 12 }}>
                             <Space direction="vertical" style={{ width: '100%' }} size={12}>
                                 <div>
-                                    <Text type="secondary">Ngành nghề:</Text>
+                                    <Text type="secondary"><TagsOutlined /> Ngành nghề:</Text>
                                     <br />
                                     <Text strong>{job.categoryName}</Text>
                                 </div>
                                 <Divider style={{ margin: '8px 0' }} />
                                 <div>
-                                    <Text type="secondary">Hình thức:</Text>
+                                    <Text type="secondary"><LaptopOutlined /> Hình thức làm việc:</Text>
                                     <br />
-                                    <Text strong>{job.jobType}</Text>
+                                    <Tag color="blue">{jobTypeLabel(job.jobType)}</Tag>
+                                </div>
+                                <Divider style={{ margin: '8px 0' }} />
+                                <div>
+                                    <Text type="secondary"><EnvironmentOutlined /> Địa điểm:</Text>
+                                    <br />
+                                    <Text strong>{job.locationName}</Text>
+                                </div>
+                                <Divider style={{ margin: '8px 0' }} />
+                                <div>
+                                    <Text type="secondary"><DollarOutlined /> Mức lương:</Text>
+                                    <br />
+                                    <Text strong style={{ color: '#00B14F' }}>{formatSalary(job.salaryMin, job.salaryMax)}</Text>
                                 </div>
                                 <Divider style={{ margin: '8px 0' }} />
                                 <div>
                                     <Text type="secondary">Kỹ năng yêu cầu:</Text>
                                     <br />
                                     <Space wrap style={{ marginTop: 4 }}>
-                                        {job.skillNames?.map((skill, idx) => (
-                                            <Tag key={idx} color="blue">{skill}</Tag>
-                                        ))}
+                                        {job.skillNames?.length
+                                            ? job.skillNames.map((skill, idx) => <Tag key={idx} color="cyan">{skill}</Tag>)
+                                            : <Text type="secondary" style={{ fontSize: 12 }}>Không yêu cầu kỹ năng cụ thể</Text>
+                                        }
                                     </Space>
                                 </div>
                                 <Divider style={{ margin: '8px 0' }} />
                                 <div>
-                                    <Text type="secondary">Ngày đăng:</Text>
+                                    <Text type="secondary"><ClockCircleOutlined /> Hạn nộp hồ sơ:</Text>
+                                    <br />
+                                    <Text strong style={{ color: dayjs(job.deadline).diff(dayjs(), 'day') <= 3 ? '#ff4d4f' : undefined }}>
+                                        {dayjs(job.deadline).format('DD/MM/YYYY')}
+                                    </Text>
+                                </div>
+                                <Divider style={{ margin: '8px 0' }} />
+                                <div>
+                                    <Text type="secondary"><CalendarOutlined /> Ngày đăng:</Text>
                                     <br />
                                     <Text strong>{dayjs(job.createdDate).format('DD/MM/YYYY')}</Text>
                                 </div>
@@ -215,6 +326,16 @@ const JobDetailPage = () => {
                                         </div>
                                     </>
                                 )}
+                                <Divider style={{ margin: '8px 0' }} />
+                                <div>
+                                    <Text type="secondary"><TeamOutlined /> Đánh giá & Bình luận:</Text>
+                                    <br />
+                                    <Space>
+                                        <StarFilled style={{ color: '#faad14' }} />
+                                        <Text>{job.averageRating > 0 ? job.averageRating.toFixed(1) : 'Chưa có'}</Text>
+                                        <Text type="secondary">({job.totalReviews} đánh giá · {job.totalComments} bình luận)</Text>
+                                    </Space>
+                                </div>
                             </Space>
                         </Card>
                         {/* Rating Section */}

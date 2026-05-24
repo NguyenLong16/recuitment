@@ -1,14 +1,15 @@
 import { configureStore } from '@reduxjs/toolkit';
 import authReducer from './slices/authSlice';
-import jobReducer from './slices/jobSlice'
-import notificationReducer from './slices/notificationSlice'
+import jobReducer from './slices/jobSlice';
+import notificationReducer from './slices/notificationSlice';
+import savedJobReducer from './slices/savedJobSlice';
 
 export const store = configureStore({
     reducer: {
         auth: authReducer,
         jobs: jobReducer,
-        notifications: notificationReducer
-        // service: serviceReducer,
+        notifications: notificationReducer,
+        savedJobs: savedJobReducer,
     },
 });
 

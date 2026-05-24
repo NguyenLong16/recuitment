@@ -1,6 +1,6 @@
 <mxfile host="app.diagrams.net" agent="Antigravity">
   <diagram id="usecase-main" name="Use Case Diagram - He thong Tuyen Dung">
-    <mxGraphModel dx="1038" dy="376" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="5000" pageHeight="4000" math="0" shadow="1">
+    <mxGraphModel dx="1447" dy="644" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="5000" pageHeight="4000" math="0" shadow="1">
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
@@ -52,7 +52,7 @@
         <mxCell id="uc_apply_job" parent="1" style="ellipse;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=12;" value="Nộp hồ sơ&lt;br/&gt;ứng tuyển" vertex="1">
           <mxGeometry height="60" width="180" x="560" y="840" as="geometry" />
         </mxCell>
-        <mxCell id="uc_save_job" parent="1" style="ellipse;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=12;" value="Lưu việc làm&lt;br/&gt;yêu thích" vertex="1">
+        <mxCell id="uc_save_job" parent="1" style="ellipse;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=12;" value="Lưu việc làm" vertex="1">
           <mxGeometry height="60" width="180" x="560" y="950" as="geometry" />
         </mxCell>
         <mxCell id="uc_view_saved_job" parent="1" style="ellipse;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=12;" value="Xem danh sách&lt;br/&gt;việc đã lưu" vertex="1">
@@ -306,39 +306,6 @@
         </mxCell>
         <mxCell id="a_admin_reviews" edge="1" parent="1" source="actor_admin" style="endArrow=none;html=1;strokeColor=#d6b656;strokeWidth=2;" target="uc_admin_reviews">
           <mxGeometry relative="1" as="geometry" />
-        </mxCell>
-        <mxCell id="legend_box" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f9f9f9;strokeColor=#999999;" value="" vertex="1">
-          <mxGeometry height="180" width="400" x="520" y="3000" as="geometry" />
-        </mxCell>
-        <mxCell id="legend_title" parent="1" style="text;html=1;strokeColor=none;fillColor=none;align=center;fontStyle=1;fontSize=13;" value="&lt;b&gt;Chú thích&lt;/b&gt;" vertex="1">
-          <mxGeometry height="25" width="200" x="630" y="3010" as="geometry" />
-        </mxCell>
-        <mxCell id="leg_candidate" parent="1" style="ellipse;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;" value="Ứng viên (Candidate)" vertex="1">
-          <mxGeometry height="35" width="160" x="540" y="3045" as="geometry" />
-        </mxCell>
-        <mxCell id="leg_hr" parent="1" style="ellipse;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=11;" value="Nhà tuyển dụng (HR)" vertex="1">
-          <mxGeometry height="35" width="160" x="540" y="3095" as="geometry" />
-        </mxCell>
-        <mxCell id="leg_admin" parent="1" style="ellipse;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d6b656;fontSize=11;" value="Quản trị viên (Admin)" vertex="1">
-          <mxGeometry height="35" width="160" x="540" y="3145" as="geometry" />
-        </mxCell>
-        <mxCell id="leg_include" parent="1" style="text;html=1;strokeColor=none;fillColor=none;align=left;fontSize=11;" value="Quan hệ &lt;&lt;include&gt;&gt;" vertex="1">
-          <mxGeometry height="30" width="180" x="730" y="3045" as="geometry" />
-        </mxCell>
-        <mxCell id="leg_include_arrow" edge="1" parent="1" style="endArrow=open;endSize=8;html=1;dashed=1;strokeColor=#666666;" value="">
-          <mxGeometry relative="1" x="720" y="3060" as="geometry">
-            <mxPoint x="720" y="3060" as="sourcePoint" />
-            <mxPoint x="760" y="3060" as="targetPoint" />
-          </mxGeometry>
-        </mxCell>
-        <mxCell id="leg_assoc" parent="1" style="text;html=1;strokeColor=none;fillColor=none;align=left;fontSize=11;" value="Quan hệ sử dụng (association)" vertex="1">
-          <mxGeometry height="30" width="180" x="730" y="3095" as="geometry" />
-        </mxCell>
-        <mxCell id="leg_assoc_arrow" edge="1" parent="1" style="endArrow=none;html=1;strokeColor=#333333;strokeWidth=2;" value="">
-          <mxGeometry relative="1" x="720" y="3110" as="geometry">
-            <mxPoint x="720" y="3110" as="sourcePoint" />
-            <mxPoint x="760" y="3110" as="targetPoint" />
-          </mxGeometry>
         </mxCell>
       </root>
     </mxGraphModel>

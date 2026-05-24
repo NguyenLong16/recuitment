@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
+using BCrypt.Net;
 
 namespace Recruitment.API.Controllers
 {
@@ -44,6 +45,13 @@ namespace Recruitment.API.Controllers
         public IActionResult EmployerCheck()
         {
             return Ok(new { status = "You are authorized as Employer" });
+        }
+
+        [HttpGet("5-hash-password")]
+        public IActionResult HashPassword([FromQuery] string password)
+        {
+            var hash = BCrypt.Net.BCrypt.HashPassword(password);
+            return Ok(new { password, hash });
         }
     }
 }
